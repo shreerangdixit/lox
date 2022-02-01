@@ -1,0 +1,143 @@
+package lexer
+
+import (
+	"github.com/stretchr/testify/assert"
+	"lox/token"
+	"testing"
+)
+
+func TestLexer_NextToken(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  []token.Token
+	}{
+		{
+			name:  "operators_paren",
+			input: "= / + - * , ; ( ) { } == ! != < <= > >=",
+			want: []token.Token{
+				token.Token{Type: token.TT_ASSIGN, Literal: "="},
+				token.Token{Type: token.TT_DIVIDE, Literal: "/"},
+				token.Token{Type: token.TT_PLUS, Literal: "+"},
+				token.Token{Type: token.TT_MINUS, Literal: "-"},
+				token.Token{Type: token.TT_MULTIPLY, Literal: "*"},
+				token.Token{Type: token.TT_COMMA, Literal: ","},
+				token.Token{Type: token.TT_SEMICOLON, Literal: ";"},
+				token.Token{Type: token.TT_LPAREN, Literal: "("},
+				token.Token{Type: token.TT_RPAREN, Literal: ")"},
+				token.Token{Type: token.TT_LBRACE, Literal: "{"},
+				token.Token{Type: token.TT_RBRACE, Literal: "}"},
+				token.Token{Type: token.TT_EQUALITY, Literal: "=="},
+				token.Token{Type: token.TT_NOT, Literal: "!"},
+				token.Token{Type: token.TT_NOT_EQUAL, Literal: "!="},
+				token.Token{Type: token.TT_LESS_THAN, Literal: "<"},
+				token.Token{Type: token.TT_LESS_THAN_EQ, Literal: "<="},
+				token.Token{Type: token.TT_GREATER_THAN, Literal: ">"},
+				token.Token{Type: token.TT_GREATER_THAN_EQ, Literal: ">="},
+				token.Token{Type: token.TT_EOF, Literal: "0"},
+			},
+		},
+		{
+			name:  "integers",
+			input: "123 456 7890",
+			want: []token.Token{
+				token.Token{Type: token.TT_INTEGER, Literal: "123"},
+				token.Token{Type: token.TT_INTEGER, Literal: "456"},
+				token.Token{Type: token.TT_INTEGER, Literal: "7890"},
+				token.Token{Type: token.TT_EOF, Literal: "0"},
+			},
+		},
+		{
+			name:  "floats",
+			input: "0.123 1.23",
+			want: []token.Token{
+				token.Token{Type: token.TT_FLOAT, Literal: "0.123"},
+				token.Token{Type: token.TT_FLOAT, Literal: "1.23"},
+				token.Token{Type: token.TT_EOF, Literal: "0"},
+			},
+		},
+		{
+			name:  "bad_floats",
+			input: ".123 1.23",
+			want: []token.Token{
+				token.Token{Type: token.TT_ILLEGAL, Literal: "."},
+				token.Token{Type: token.TT_INTEGER, Literal: "123"},
+				token.Token{Type: token.TT_FLOAT, Literal: "1.23"},
+				token.Token{Type: token.TT_EOF, Literal: "0"},
+			},
+		},
+		{
+			name:  "identifiers",
+			input: "X Y Z aa bb cc_c d",
+			want: []token.Token{
+				token.Token{Type: token.TT_IDENTIFIER, Literal: "X"},
+				token.Token{Type: token.TT_IDENTIFIER, Literal: "Y"},
+				token.Token{Type: token.TT_IDENTIFIER, Literal: "Z"},
+				token.Token{Type: token.TT_IDENTIFIER, Literal: "aa"},
+				token.Token{Type: token.TT_IDENTIFIER, Literal: "bb"},
+				token.Token{Type: token.TT_IDENTIFIER, Literal: "cc_c"},
+				token.Token{Type: token.TT_IDENTIFIER, Literal: "d"},
+				token.Token{Type: token.TT_EOF, Literal: "0"},
+			},
+		},
+		{
+			name:  "mixed",
+			input: " {(a = b * 5); (c = 10.5 / z);} ",
+			want: []token.Token{
+				token.Token{Type: token.TT_LBRACE, Literal: "{"},
+				token.Token{Type: token.TT_LPAREN, Literal: "("},
+				token.Token{Type: token.TT_IDENTIFIER, Literal: "a"},
+				token.Token{Type: token.TT_ASSIGN, Literal: "="},
+				token.Token{Type: token.TT_IDENTIFIER, Literal: "b"},
+				token.Token{Type: token.TT_MULTIPLY, Literal: "*"},
+				token.Token{Type: token.TT_INTEGER, Literal: "5"},
+				token.Token{Type: token.TT_RPAREN, Literal: ")"},
+				token.Token{Type: token.TT_SEMICOLON, Literal: ";"},
+				token.Token{Type: token.TT_LPAREN, Literal: "("},
+				token.Token{Type: token.TT_IDENTIFIER, Literal: "c"},
+				token.Token{Type: token.TT_ASSIGN, Literal: "="},
+				token.Token{Type: token.TT_FLOAT, Literal: "10.5"},
+				token.Token{Type: token.TT_DIVIDE, Literal: "/"},
+				token.Token{Type: token.TT_IDENTIFIER, Literal: "z"},
+				token.Token{Type: token.TT_RPAREN, Literal: ")"},
+				token.Token{Type: token.TT_SEMICOLON, Literal: ";"},
+				token.Token{Type: token.TT_RBRACE, Literal: "}"},
+				token.Token{Type: token.TT_EOF, Literal: "0"},
+			},
+		},
+		{
+			name:  "keywords",
+			input: "let x = 10; y = fun foo(){} if else true false return",
+			want: []token.Token{
+				token.Token{Type: token.TT_LET, Literal: "let"},
+				token.Token{Type: token.TT_IDENTIFIER, Literal: "x"},
+				token.Token{Type: token.TT_ASSIGN, Literal: "="},
+				token.Token{Type: token.TT_INTEGER, Literal: "10"},
+				token.Token{Type: token.TT_SEMICOLON, Literal: ";"},
+				token.Token{Type: token.TT_IDENTIFIER, Literal: "y"},
+				token.Token{Type: token.TT_ASSIGN, Literal: "="},
+				token.Token{Type: token.TT_FUNCTION, Literal: "fun"},
+				token.Token{Type: token.TT_IDENTIFIER, Literal: "foo"},
+				token.Token{Type: token.TT_LPAREN, Literal: "("},
+				token.Token{Type: token.TT_RPAREN, Literal: ")"},
+				token.Token{Type: token.TT_LBRACE, Literal: "{"},
+				token.Token{Type: token.TT_RBRACE, Literal: "}"},
+				token.Token{Type: token.TT_IF, Literal: "if"},
+				token.Token{Type: token.TT_ELSE, Literal: "else"},
+				token.Token{Type: token.TT_TRUE, Literal: "true"},
+				token.Token{Type: token.TT_FALSE, Literal: "false"},
+				token.Token{Type: token.TT_RETURN, Literal: "return"},
+				token.Token{Type: token.TT_EOF, Literal: "0"},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			l := New(tt.input)
+			for _, want_tok := range tt.want {
+				got_tok := l.NextToken()
+				assert.Equal(t, want_tok, got_tok)
+			}
+		})
+	}
+}
