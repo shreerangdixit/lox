@@ -59,59 +59,19 @@ func (p *Parser) Expression() Node {
 }
 
 func (p *Parser) equality() Node {
-	left := p.comparison()
-	for p.next.Type == token.TT_EQ || p.next.Type == token.TT_NEQ {
-		p.advance()
-		tok := p.curr
-		left = BinaryOpNode{
-			Left:  left,
-			Token: tok,
-			Right: p.comparison(),
-		}
-	}
-	return left
+	return p.binaryOp([]token.TokenType{token.TT_EQ, token.TT_NEQ}, p.comparison)
 }
 
 func (p *Parser) comparison() Node {
-	left := p.term()
-	for p.next.Type == token.TT_LT || p.next.Type == token.TT_LTE || p.next.Type == token.TT_GT || p.next.Type == token.TT_GTE {
-		p.advance()
-		tok := p.curr
-		left = BinaryOpNode{
-			Left:  left,
-			Token: tok,
-			Right: p.term(),
-		}
-	}
-	return left
+	return p.binaryOp([]token.TokenType{token.TT_LT, token.TT_LTE, token.TT_GT, token.TT_GTE}, p.term)
 }
 
 func (p *Parser) term() Node {
-	left := p.factor()
-	for p.next.Type == token.TT_PLUS || p.next.Type == token.TT_MINUS {
-		p.advance()
-		tok := p.curr
-		left = BinaryOpNode{
-			Left:  left,
-			Token: tok,
-			Right: p.factor(),
-		}
-	}
-	return left
+	return p.binaryOp([]token.TokenType{token.TT_PLUS, token.TT_MINUS}, p.factor)
 }
 
 func (p *Parser) factor() Node {
-	left := p.unary()
-	for p.next.Type == token.TT_DIVIDE || p.next.Type == token.TT_MULTIPLY {
-		p.advance()
-		tok := p.curr
-		left = BinaryOpNode{
-			Left:  left,
-			Token: tok,
-			Right: p.unary(),
-		}
-	}
-	return left
+	return p.binaryOp([]token.TokenType{token.TT_DIVIDE, token.TT_MULTIPLY}, p.unary)
 }
 
 func (p *Parser) unary() Node {
@@ -146,4 +106,29 @@ func (p *Parser) advance() {
 		p.curr = p.next
 		p.next = p.lex.NextToken()
 	}
+}
+
+type RuleFunc func() Node
+
+func (p *Parser) binaryOp(tokenTypes []token.TokenType, fun RuleFunc) Node {
+	left := fun()
+	for checkTokenType(p.next, tokenTypes) {
+		p.advance()
+		tok := p.curr
+		left = BinaryOpNode{
+			Left:  left,
+			Token: tok,
+			Right: fun(),
+		}
+	}
+	return left
+}
+
+func checkTokenType(needle token.Token, haystack []token.TokenType) bool {
+	for _, straw := range haystack {
+		if needle.Type == straw {
+			return true
+		}
+	}
+	return false
 }
