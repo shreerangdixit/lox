@@ -12,7 +12,7 @@ type Token struct {
 }
 
 func (t Token) String() string {
-	return fmt.Sprintf("[Type:%s Literal:%s]", t.Type, t.Literal)
+	return fmt.Sprintf("[%s:%s]", t.Type, t.Literal)
 }
 
 var keywords = map[string]TokenType{
@@ -38,22 +38,21 @@ const (
 
 	// Identifier + Literals
 	TT_IDENTIFIER = "TT_IDENTIFIER"
-	TT_INTEGER    = "TT_INTEGER"
-	TT_FLOAT      = "TT_FLOAT"
+	TT_NUMBER     = "TT_NUMBER"
 
 	// Operators
-	TT_ASSIGN          = "TT_ASSIGN"
-	TT_PLUS            = "TT_PLUS"
-	TT_MINUS           = "TT_MINUS"
-	TT_DIVIDE          = "TT_DIVIDE"
-	TT_MULTIPLY        = "TT_MULTIPLY"
-	TT_EQUALITY        = "TT_EQUALITY"
-	TT_NOT             = "TT_NOT"
-	TT_NOT_EQUAL       = "TT_NOT_EQUAL"
-	TT_LESS_THAN       = "TT_LESS_THAN"
-	TT_LESS_THAN_EQ    = "TT_LESS_THAN_EQ"
-	TT_GREATER_THAN    = "TT_GREATER_THAN"
-	TT_GREATER_THAN_EQ = "TT_GREATER_THAN_EQ"
+	TT_ASSIGN   = "TT_ASSIGN"
+	TT_PLUS     = "TT_PLUS"
+	TT_MINUS    = "TT_MINUS"
+	TT_DIVIDE   = "TT_DIVIDE"
+	TT_MULTIPLY = "TT_MULTIPLY"
+	TT_NOT      = "TT_NOT"
+	TT_EQ       = "TT_EQ"
+	TT_NEQ      = "TT_NEQ"
+	TT_LT       = "TT_LT"
+	TT_LTE      = "TT_LTE"
+	TT_GT       = "TT_GT"
+	TT_GTE      = "TT_GTE"
 
 	// Delimiters
 	TT_COMMA     = "TT_COMMA"

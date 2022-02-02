@@ -15,11 +15,12 @@ func New(input string) *Lexer {
 	lexer := Lexer{
 		input: input,
 	}
+	lexer.advance()
 	return &lexer
 }
 
 func (l *Lexer) NextToken() token.Token {
-	l.advance()
+	// l.advance()
 	l.skipWhitespace()
 	var tok token.Token
 	switch l.ch {
@@ -28,7 +29,7 @@ func (l *Lexer) NextToken() token.Token {
 			ch := l.ch
 			l.advance()
 			literal := string(ch) + string(l.ch)
-			tok = newToken(token.TT_EQUALITY, literal)
+			tok = newToken(token.TT_EQ, literal)
 		} else {
 			tok = newToken(token.TT_ASSIGN, string(l.ch))
 		}
@@ -37,7 +38,7 @@ func (l *Lexer) NextToken() token.Token {
 			ch := l.ch
 			l.advance()
 			literal := string(ch) + string(l.ch)
-			tok = newToken(token.TT_NOT_EQUAL, literal)
+			tok = newToken(token.TT_NEQ, literal)
 		} else {
 			tok = newToken(token.TT_NOT, string(l.ch))
 		}
@@ -46,18 +47,18 @@ func (l *Lexer) NextToken() token.Token {
 			ch := l.ch
 			l.advance()
 			literal := string(ch) + string(l.ch)
-			tok = newToken(token.TT_LESS_THAN_EQ, literal)
+			tok = newToken(token.TT_LTE, literal)
 		} else {
-			tok = newToken(token.TT_LESS_THAN, string(l.ch))
+			tok = newToken(token.TT_LT, string(l.ch))
 		}
 	case '>':
 		if l.peek() == '=' {
 			ch := l.ch
 			l.advance()
 			literal := string(ch) + string(l.ch)
-			tok = newToken(token.TT_GREATER_THAN_EQ, literal)
+			tok = newToken(token.TT_GTE, literal)
 		} else {
-			tok = newToken(token.TT_GREATER_THAN, string(l.ch))
+			tok = newToken(token.TT_GT, string(l.ch))
 		}
 	case '+':
 		tok = newToken(token.TT_PLUS, string(l.ch))
@@ -90,6 +91,7 @@ func (l *Lexer) NextToken() token.Token {
 			tok = newToken(token.TT_ILLEGAL, string(l.ch))
 		}
 	}
+	l.advance()
 	return tok
 }
 
@@ -129,10 +131,7 @@ func (l *Lexer) readNumberToken() token.Token {
 		l.advance()
 	}
 	numStr := l.input[startPos:l.currentPos]
-	if decimalCount == 1 {
-		return newToken(token.TT_FLOAT, numStr)
-	}
-	return newToken(token.TT_INTEGER, numStr)
+	return newToken(token.TT_NUMBER, numStr)
 }
 
 func (l *Lexer) readIdentifierToken() token.Token {
