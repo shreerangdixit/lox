@@ -34,7 +34,7 @@ type BinaryOpNode struct {
 }
 
 func (n BinaryOpNode) String() string {
-	return fmt.Sprintf("BinaryOp[Left:%s Token:%s Right:%s]", n.Left, n.Token, n.Right)
+	return fmt.Sprintf("[%s %s %s]", n.Left, n.Token, n.Right)
 }
 
 type UnaryOpNode struct {
@@ -43,7 +43,7 @@ type UnaryOpNode struct {
 }
 
 func (n UnaryOpNode) String() string {
-	return fmt.Sprintf("UnaryOp[Token: %s Node:%s]", n.Token, n.Node)
+	return fmt.Sprintf("[%s%s]", n.Token, n.Node)
 }
 
 type NumberNode struct {
@@ -51,7 +51,7 @@ type NumberNode struct {
 }
 
 func (n NumberNode) String() string {
-	return fmt.Sprintf("Number[%s]", n.Token)
+	return fmt.Sprintf("%s", n.Token)
 }
 
 func (p *Parser) Expression() Node {

@@ -20,7 +20,6 @@ func New(input string) *Lexer {
 }
 
 func (l *Lexer) NextToken() token.Token {
-	// l.advance()
 	l.skipWhitespace()
 	var tok token.Token
 	switch l.ch {
