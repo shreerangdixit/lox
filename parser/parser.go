@@ -115,14 +115,14 @@ func (p *Parser) unary() (Node, error) {
 		p.advance()
 		tok := p.curr
 
-		unaryNode, err := p.unary()
+		n, err := p.unary()
 		if err != nil {
 			return nil, err
 		}
 
 		node = UnaryOpNode{
 			Token: tok,
-			Node:  unaryNode,
+			Node:  n,
 		}
 	}
 	if node == nil {
@@ -139,6 +139,7 @@ func (p *Parser) atom() (Node, error) {
 		}, nil
 	} else if p.next.Type == token.TT_LPAREN {
 		p.advance()
+
 		exp, err := p.expression()
 		if err != nil {
 			return nil, err
