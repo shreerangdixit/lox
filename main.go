@@ -25,7 +25,7 @@ func startREPL(in io.Reader, out io.Writer) {
 		}
 
 		p := parser.New(lexer.New(txt))
-		fmt.Fprintf(out, "%s\n", p.Expression())
+		fmt.Fprintf(out, "%s\n", p.Parse())
 	}
 }
 

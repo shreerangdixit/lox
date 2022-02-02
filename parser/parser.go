@@ -6,23 +6,11 @@ import (
 	"lox/token"
 )
 
-type Parser struct {
-	lex  *lexer.Lexer
-	curr token.Token
-	prev token.Token
-	next token.Token
-}
+type GrammarRuleFunc func() Node
 
-func New(lex *lexer.Lexer) *Parser {
-	p := Parser{
-		lex:  lex,
-		curr: token.Token{Type: token.TT_ILLEGAL, Literal: "0"},
-		prev: token.Token{Type: token.TT_ILLEGAL, Literal: "0"},
-		next: token.Token{Type: token.TT_ILLEGAL, Literal: "0"},
-	}
-	p.advance()
-	return &p
-}
+// ------------------------------------
+// Nodes
+// ------------------------------------
 
 type Node interface {
 }
@@ -46,15 +34,45 @@ func (n UnaryOpNode) String() string {
 	return fmt.Sprintf("[%s%s]", n.Token, n.Node)
 }
 
-type NumberNode struct {
+type LiteralNode struct {
 	Token token.Token
 }
 
-func (n NumberNode) String() string {
+func (n LiteralNode) String() string {
 	return fmt.Sprintf("%s", n.Token)
 }
 
-func (p *Parser) Expression() Node {
+// ------------------------------------
+// Parser
+// ------------------------------------
+
+type Parser struct {
+	lex  *lexer.Lexer
+	curr token.Token
+	prev token.Token
+	next token.Token
+}
+
+func New(lex *lexer.Lexer) *Parser {
+	p := Parser{
+		lex:  lex,
+		curr: token.Token{Type: token.TT_ILLEGAL, Literal: "0"},
+		prev: token.Token{Type: token.TT_ILLEGAL, Literal: "0"},
+		next: token.Token{Type: token.TT_ILLEGAL, Literal: "0"},
+	}
+	p.advance()
+	return &p
+}
+
+func (p *Parser) Parse() Node {
+	return p.expression()
+}
+
+// ------------------------------------
+// Grammar rule functions
+// ------------------------------------
+
+func (p *Parser) expression() Node {
 	return p.equality()
 }
 
@@ -85,20 +103,33 @@ func (p *Parser) unary() Node {
 		}
 	}
 	if node == nil {
-		return p.primary()
+		return p.atom()
 	}
 	return node
 }
 
-func (p *Parser) primary() Node {
-	if p.next.Type == token.TT_NUMBER {
+func (p *Parser) atom() Node {
+	if checkTokenType(p.next, []token.TokenType{token.TT_NUMBER, token.TT_TRUE, token.TT_FALSE}) {
 		p.advance()
-		return NumberNode{
+		return LiteralNode{
 			Token: p.curr,
 		}
+	} else if p.next.Type == token.TT_LPAREN {
+		p.advance()
+		exp := p.expression()
+		if p.next.Type == token.TT_RPAREN {
+			p.advance()
+			return exp
+		}
+		// Syntax error
+		return nil
 	}
 	return nil
 }
+
+// ------------------------------------
+// Helpers
+// ------------------------------------
 
 func (p *Parser) advance() {
 	if p.curr.Type != token.TT_EOF {
@@ -108,9 +139,7 @@ func (p *Parser) advance() {
 	}
 }
 
-type RuleFunc func() Node
-
-func (p *Parser) binaryOp(tokenTypes []token.TokenType, fun RuleFunc) Node {
+func (p *Parser) binaryOp(tokenTypes []token.TokenType, fun GrammarRuleFunc) Node {
 	left := fun()
 	for checkTokenType(p.next, tokenTypes) {
 		p.advance()
