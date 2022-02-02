@@ -50,11 +50,19 @@ func (n UnaryOpNode) String() string {
 	return fmt.Sprintf("[%s%s]", n.Token, n.Node)
 }
 
-type LiteralNode struct {
+type NumberNode struct {
 	Token token.Token
 }
 
-func (n LiteralNode) String() string {
+func (n NumberNode) String() string {
+	return fmt.Sprintf("%s", n.Token)
+}
+
+type BooleanNode struct {
+	Token token.Token
+}
+
+func (n BooleanNode) String() string {
 	return fmt.Sprintf("%s", n.Token)
 }
 
@@ -132,9 +140,14 @@ func (p *Parser) unary() (Node, error) {
 }
 
 func (p *Parser) atom() (Node, error) {
-	if checkTokenType(p.next, []token.TokenType{token.TT_NUMBER, token.TT_TRUE, token.TT_FALSE}) {
+	if p.next.Type == token.TT_NUMBER {
 		p.advance()
-		return LiteralNode{
+		return NumberNode{
+			Token: p.curr,
+		}, nil
+	} else if p.nextTokenMatches([]token.TokenType{token.TT_TRUE, token.TT_FALSE}) {
+		p.advance()
+		return BooleanNode{
 			Token: p.curr,
 		}, nil
 	} else if p.next.Type == token.TT_LPAREN {
@@ -172,7 +185,7 @@ func (p *Parser) binaryOp(tokenTypes []token.TokenType, fun GrammarRuleFunc) (No
 		return nil, err
 	}
 
-	for checkTokenType(p.next, tokenTypes) {
+	for p.nextTokenMatches(tokenTypes) {
 		p.advance()
 		tok := p.curr
 
@@ -190,9 +203,9 @@ func (p *Parser) binaryOp(tokenTypes []token.TokenType, fun GrammarRuleFunc) (No
 	return left, nil
 }
 
-func checkTokenType(needle token.Token, haystack []token.TokenType) bool {
+func (p *Parser) nextTokenMatches(haystack []token.TokenType) bool {
 	for _, straw := range haystack {
-		if needle.Type == straw {
+		if p.next.Type == straw {
 			return true
 		}
 	}

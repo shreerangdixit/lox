@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"lox/interpreter"
 	"lox/lexer"
 	"lox/parser"
 	"os"
@@ -24,13 +25,12 @@ func startREPL(in io.Reader, out io.Writer) {
 			break
 		}
 
-		p := parser.New(lexer.New(txt))
-		node, err := p.Parse()
+		interpreter, err := interpreter.New(parser.New(lexer.New(txt)))
 		if err != nil {
 			fmt.Fprintf(out, "%s\n", err)
-		} else {
-			fmt.Fprintf(out, "%s\n", node)
+			continue
 		}
+		fmt.Fprintf(out, "%v\n", interpreter.Run().Value)
 	}
 }
 
