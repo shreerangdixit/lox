@@ -6,7 +6,23 @@ import (
 	"lox/token"
 )
 
-type GrammarRuleFunc func() Node
+type GrammarRuleFunc func() (Node, error)
+
+type SyntaxError struct {
+	err string
+	tok token.Token
+}
+
+func newSyntaxError(err string, tok token.Token) SyntaxError {
+	return SyntaxError{
+		err: err,
+		tok: tok,
+	}
+}
+
+func (e SyntaxError) Error() string {
+	return fmt.Sprintf("%s: %s", e.err, e.tok)
+}
 
 // ------------------------------------
 // Nodes
@@ -64,7 +80,7 @@ func New(lex *lexer.Lexer) *Parser {
 	return &p
 }
 
-func (p *Parser) Parse() Node {
+func (p *Parser) Parse() (Node, error) {
 	return p.expression()
 }
 
@@ -72,59 +88,69 @@ func (p *Parser) Parse() Node {
 // Grammar rule functions
 // ------------------------------------
 
-func (p *Parser) expression() Node {
+func (p *Parser) expression() (Node, error) {
 	return p.equality()
 }
 
-func (p *Parser) equality() Node {
+func (p *Parser) equality() (Node, error) {
 	return p.binaryOp([]token.TokenType{token.TT_EQ, token.TT_NEQ}, p.comparison)
 }
 
-func (p *Parser) comparison() Node {
+func (p *Parser) comparison() (Node, error) {
 	return p.binaryOp([]token.TokenType{token.TT_LT, token.TT_LTE, token.TT_GT, token.TT_GTE}, p.term)
 }
 
-func (p *Parser) term() Node {
+func (p *Parser) term() (Node, error) {
 	return p.binaryOp([]token.TokenType{token.TT_PLUS, token.TT_MINUS}, p.factor)
 }
 
-func (p *Parser) factor() Node {
+func (p *Parser) factor() (Node, error) {
 	return p.binaryOp([]token.TokenType{token.TT_DIVIDE, token.TT_MULTIPLY}, p.unary)
 }
 
-func (p *Parser) unary() Node {
+func (p *Parser) unary() (Node, error) {
 	var node Node = nil
+
 	for p.next.Type == token.TT_NOT || p.next.Type == token.TT_MINUS {
 		p.advance()
 		tok := p.curr
+
+		unaryNode, err := p.unary()
+		if err != nil {
+			return nil, err
+		}
+
 		node = UnaryOpNode{
 			Token: tok,
-			Node:  p.unary(),
+			Node:  unaryNode,
 		}
 	}
 	if node == nil {
 		return p.atom()
 	}
-	return node
+	return node, nil
 }
 
-func (p *Parser) atom() Node {
+func (p *Parser) atom() (Node, error) {
 	if checkTokenType(p.next, []token.TokenType{token.TT_NUMBER, token.TT_TRUE, token.TT_FALSE}) {
 		p.advance()
 		return LiteralNode{
 			Token: p.curr,
-		}
+		}, nil
 	} else if p.next.Type == token.TT_LPAREN {
 		p.advance()
-		exp := p.expression()
+		exp, err := p.expression()
+		if err != nil {
+			return nil, err
+		}
+
 		if p.next.Type == token.TT_RPAREN {
 			p.advance()
-			return exp
+			return exp, nil
 		}
-		// Syntax error
-		return nil
+		return nil, newSyntaxError("expected closing ')' after expression", p.curr)
 	}
-	return nil
+	return nil, newSyntaxError("expected a literal or an expression", p.curr)
 }
 
 // ------------------------------------
@@ -139,18 +165,28 @@ func (p *Parser) advance() {
 	}
 }
 
-func (p *Parser) binaryOp(tokenTypes []token.TokenType, fun GrammarRuleFunc) Node {
-	left := fun()
+func (p *Parser) binaryOp(tokenTypes []token.TokenType, fun GrammarRuleFunc) (Node, error) {
+	left, err := fun()
+	if err != nil {
+		return nil, err
+	}
+
 	for checkTokenType(p.next, tokenTypes) {
 		p.advance()
 		tok := p.curr
+
+		right, err := fun()
+		if err != nil {
+			return nil, err
+		}
+
 		left = BinaryOpNode{
 			Left:  left,
 			Token: tok,
-			Right: fun(),
+			Right: right,
 		}
 	}
-	return left
+	return left, nil
 }
 
 func checkTokenType(needle token.Token, haystack []token.TokenType) bool {

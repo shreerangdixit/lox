@@ -25,7 +25,12 @@ func startREPL(in io.Reader, out io.Writer) {
 		}
 
 		p := parser.New(lexer.New(txt))
-		fmt.Fprintf(out, "%s\n", p.Parse())
+		node, err := p.Parse()
+		if err != nil {
+			fmt.Fprintf(out, "%s\n", err)
+		} else {
+			fmt.Fprintf(out, "%s\n", node)
+		}
 	}
 }
 
