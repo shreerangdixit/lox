@@ -23,11 +23,11 @@ func New(parser *parser.Parser) (*Interpreter, error) {
 	}, nil
 }
 
-func (i *Interpreter) Run() (types.ExpressionValue, error) {
+func (i *Interpreter) Run() (types.TypeValue, error) {
 	return i.visit(i.ast)
 }
 
-func (i *Interpreter) visit(node parser.Node) (types.ExpressionValue, error) {
+func (i *Interpreter) visit(node parser.Node) (types.TypeValue, error) {
 	switch node.(type) {
 	case parser.NumberNode:
 		return i.visitNumberNode(node.(parser.NumberNode))
@@ -37,37 +37,39 @@ func (i *Interpreter) visit(node parser.Node) (types.ExpressionValue, error) {
 		return i.visitBinaryOpNode(node.(parser.BinaryOpNode))
 	case parser.UnaryOpNode:
 		return i.visitUnaryOpNode(node.(parser.UnaryOpNode))
+	case parser.ExpressionNode:
+		return i.visit(node.(parser.ExpressionNode).Node)
 	}
-	return types.ExpressionValue{}, fmt.Errorf("invalid node")
+	return types.TypeValue{}, fmt.Errorf("invalid node")
 }
 
-func (i *Interpreter) visitNumberNode(node parser.NumberNode) (types.ExpressionValue, error) {
+func (i *Interpreter) visitNumberNode(node parser.NumberNode) (types.TypeValue, error) {
 	val, err := strconv.ParseFloat(node.Token.Literal, 10)
 	if err != nil {
-		return types.ExpressionValue{}, err
+		return types.TypeValue{}, err
 	}
 
-	return types.ExpressionValue{Type: types.TYPE_NUMBER, Value: val}, nil
+	return types.TypeValue{Type: types.NUMBER, Value: val}, nil
 }
 
-func (i *Interpreter) visitBooleanNode(node parser.BooleanNode) (types.ExpressionValue, error) {
+func (i *Interpreter) visitBooleanNode(node parser.BooleanNode) (types.TypeValue, error) {
 	val, err := strconv.ParseBool(node.Token.Literal)
 	if err != nil {
-		return types.ExpressionValue{}, err
+		return types.TypeValue{}, err
 	}
 
-	return types.ExpressionValue{Type: types.TYPE_BOOLEAN, Value: val}, nil
+	return types.TypeValue{Type: types.BOOL, Value: val}, nil
 }
 
-func (i *Interpreter) visitBinaryOpNode(node parser.BinaryOpNode) (types.ExpressionValue, error) {
+func (i *Interpreter) visitBinaryOpNode(node parser.BinaryOpNode) (types.TypeValue, error) {
 	left, err := i.visit(node.Left)
 	if err != nil {
-		return types.ExpressionValue{}, err
+		return types.TypeValue{}, err
 	}
 
 	right, err := i.visit(node.Right)
 	if err != nil {
-		return types.ExpressionValue{}, err
+		return types.TypeValue{}, err
 	}
 
 	switch node.Token.Type {
@@ -92,18 +94,18 @@ func (i *Interpreter) visitBinaryOpNode(node parser.BinaryOpNode) (types.Express
 	case token.TT_GTE:
 		return left.GreaterThanEq(right)
 	}
-	return types.ExpressionValue{}, fmt.Errorf("invalid binary op: %s", node.Token.Type)
+	return types.TypeValue{}, fmt.Errorf("invalid binary op: %s", node.Token.Type)
 }
 
-func (i *Interpreter) visitUnaryOpNode(node parser.UnaryOpNode) (types.ExpressionValue, error) {
+func (i *Interpreter) visitUnaryOpNode(node parser.UnaryOpNode) (types.TypeValue, error) {
 	val, err := i.visit(node.Node)
 	if err != nil {
-		return types.ExpressionValue{}, err
+		return types.TypeValue{}, err
 	}
 
 	if node.Token.Type == token.TT_MINUS || node.Token.Type == token.TT_NOT {
 		return val.Negate()
 	}
 
-	return types.ExpressionValue{}, fmt.Errorf("invalid unary op: %s", node.Token.Type)
+	return types.TypeValue{}, fmt.Errorf("invalid unary op: %s", node.Token.Type)
 }

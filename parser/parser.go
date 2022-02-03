@@ -66,6 +66,15 @@ func (n BooleanNode) String() string {
 	return fmt.Sprintf("%s", n.Token)
 }
 
+type ExpressionNode struct {
+	Token token.Token
+	Node  Node
+}
+
+func (n ExpressionNode) String() string {
+	return fmt.Sprintf("[%s%s]", n.Token, n.Node)
+}
+
 // ------------------------------------
 // Parser
 // ------------------------------------
@@ -156,7 +165,7 @@ func (p *Parser) atom() (Node, error) {
 
 		if p.next.Type == token.TT_RPAREN {
 			p.advance()
-			return exp, nil
+			return ExpressionNode{Token: p.curr, Node: exp}, nil
 		}
 		return nil, newSyntaxError("expected closing ')' after expression", p.curr)
 	}
