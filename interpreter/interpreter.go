@@ -47,7 +47,7 @@ func (i *Interpreter) visitNumberNode(node parser.NumberNode) (types.ExpressionV
 		return types.ExpressionValue{}, err
 	}
 
-	return types.ExpressionValue{Type: types.TYPE_NUMBER, Float64Value: val}, nil
+	return types.ExpressionValue{Type: types.TYPE_NUMBER, Value: val}, nil
 }
 
 func (i *Interpreter) visitBooleanNode(node parser.BooleanNode) (types.ExpressionValue, error) {
@@ -56,7 +56,7 @@ func (i *Interpreter) visitBooleanNode(node parser.BooleanNode) (types.Expressio
 		return types.ExpressionValue{}, err
 	}
 
-	return types.ExpressionValue{Type: types.TYPE_BOOLEAN, BooleanValue: val}, nil
+	return types.ExpressionValue{Type: types.TYPE_BOOLEAN, Value: val}, nil
 }
 
 func (i *Interpreter) visitBinaryOpNode(node parser.BinaryOpNode) (types.ExpressionValue, error) {

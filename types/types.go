@@ -35,9 +35,8 @@ func (e ExpressionType) String() string {
 }
 
 type ExpressionValue struct {
-	Type         ExpressionType
-	Float64Value float64
-	BooleanValue bool
+	Type  ExpressionType
+	Value interface{}
 }
 
 func (v ExpressionValue) Add(right ExpressionValue) (ExpressionValue, error) {
@@ -45,7 +44,7 @@ func (v ExpressionValue) Add(right ExpressionValue) (ExpressionValue, error) {
 		return ExpressionValue{}, newTypeError(fmt.Sprintf("Cannot add types %s and %s", v.Type, right.Type))
 	}
 
-	return ExpressionValue{Type: TYPE_NUMBER, Float64Value: v.Float64Value + right.Float64Value}, nil
+	return ExpressionValue{Type: TYPE_NUMBER, Value: v.Value.(float64) + right.Value.(float64)}, nil
 }
 
 func (v ExpressionValue) Subtract(right ExpressionValue) (ExpressionValue, error) {
@@ -53,7 +52,7 @@ func (v ExpressionValue) Subtract(right ExpressionValue) (ExpressionValue, error
 		return ExpressionValue{}, newTypeError(fmt.Sprintf("Cannot subtract types %s and %s", v.Type, right.Type))
 	}
 
-	return ExpressionValue{Type: TYPE_NUMBER, Float64Value: v.Float64Value - right.Float64Value}, nil
+	return ExpressionValue{Type: TYPE_NUMBER, Value: v.Value.(float64) - right.Value.(float64)}, nil
 }
 
 func (v ExpressionValue) Divide(right ExpressionValue) (ExpressionValue, error) {
@@ -61,7 +60,7 @@ func (v ExpressionValue) Divide(right ExpressionValue) (ExpressionValue, error) 
 		return ExpressionValue{}, newTypeError(fmt.Sprintf("Cannot divide types %s and %s", v.Type, right.Type))
 	}
 
-	return ExpressionValue{Type: TYPE_NUMBER, Float64Value: v.Float64Value / right.Float64Value}, nil
+	return ExpressionValue{Type: TYPE_NUMBER, Value: v.Value.(float64) / right.Value.(float64)}, nil
 }
 
 func (v ExpressionValue) Multiply(right ExpressionValue) (ExpressionValue, error) {
@@ -69,14 +68,14 @@ func (v ExpressionValue) Multiply(right ExpressionValue) (ExpressionValue, error
 		return ExpressionValue{}, newTypeError(fmt.Sprintf("Cannot multiply types %s and %s", v.Type, right.Type))
 	}
 
-	return ExpressionValue{Type: TYPE_NUMBER, Float64Value: v.Float64Value * right.Float64Value}, nil
+	return ExpressionValue{Type: TYPE_NUMBER, Value: v.Value.(float64) * right.Value.(float64)}, nil
 }
 
 func (v ExpressionValue) Negate() (ExpressionValue, error) {
 	if v.Type == TYPE_NUMBER {
-		return ExpressionValue{Type: TYPE_NUMBER, Float64Value: v.Float64Value * -1}, nil
+		return ExpressionValue{Type: TYPE_NUMBER, Value: v.Value.(float64) * -1}, nil
 	} else if v.Type == TYPE_BOOLEAN {
-		return ExpressionValue{Type: TYPE_BOOLEAN, BooleanValue: !v.BooleanValue}, nil
+		return ExpressionValue{Type: TYPE_BOOLEAN, Value: !v.Value.(bool)}, nil
 	}
 	return ExpressionValue{}, newTypeError(fmt.Sprintf("Cannot negate type %s", v.Type))
 }
@@ -87,9 +86,9 @@ func (v ExpressionValue) Equals(right ExpressionValue) (ExpressionValue, error) 
 	}
 
 	if v.Type == TYPE_NUMBER {
-		return ExpressionValue{Type: TYPE_BOOLEAN, BooleanValue: v.Float64Value == right.Float64Value}, nil
+		return ExpressionValue{Type: TYPE_BOOLEAN, Value: v.Value.(float64) == right.Value.(float64)}, nil
 	} else if v.Type == TYPE_BOOLEAN {
-		return ExpressionValue{Type: TYPE_BOOLEAN, BooleanValue: v.BooleanValue == right.BooleanValue}, nil
+		return ExpressionValue{Type: TYPE_BOOLEAN, Value: v.Value.(bool) == right.Value.(bool)}, nil
 	}
 
 	return ExpressionValue{}, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
@@ -101,9 +100,9 @@ func (v ExpressionValue) NotEquals(right ExpressionValue) (ExpressionValue, erro
 	}
 
 	if v.Type == TYPE_NUMBER {
-		return ExpressionValue{Type: TYPE_BOOLEAN, BooleanValue: v.Float64Value != right.Float64Value}, nil
+		return ExpressionValue{Type: TYPE_BOOLEAN, Value: v.Value.(float64) != right.Value.(float64)}, nil
 	} else if v.Type == TYPE_BOOLEAN {
-		return ExpressionValue{Type: TYPE_BOOLEAN, BooleanValue: v.BooleanValue != right.BooleanValue}, nil
+		return ExpressionValue{Type: TYPE_BOOLEAN, Value: v.Value.(bool) != right.Value.(bool)}, nil
 	}
 
 	return ExpressionValue{}, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
@@ -115,7 +114,7 @@ func (v ExpressionValue) LessThan(right ExpressionValue) (ExpressionValue, error
 	}
 
 	if v.Type == TYPE_NUMBER {
-		return ExpressionValue{Type: TYPE_BOOLEAN, BooleanValue: v.Float64Value < right.Float64Value}, nil
+		return ExpressionValue{Type: TYPE_BOOLEAN, Value: v.Value.(float64) < right.Value.(float64)}, nil
 	}
 
 	return ExpressionValue{}, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
@@ -127,7 +126,7 @@ func (v ExpressionValue) LessThanEq(right ExpressionValue) (ExpressionValue, err
 	}
 
 	if v.Type == TYPE_NUMBER {
-		return ExpressionValue{Type: TYPE_BOOLEAN, BooleanValue: v.Float64Value <= right.Float64Value}, nil
+		return ExpressionValue{Type: TYPE_BOOLEAN, Value: v.Value.(float64) <= right.Value.(float64)}, nil
 	}
 
 	return ExpressionValue{}, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
@@ -139,7 +138,7 @@ func (v ExpressionValue) GreaterThan(right ExpressionValue) (ExpressionValue, er
 	}
 
 	if v.Type == TYPE_NUMBER {
-		return ExpressionValue{Type: TYPE_BOOLEAN, BooleanValue: v.Float64Value > right.Float64Value}, nil
+		return ExpressionValue{Type: TYPE_BOOLEAN, Value: v.Value.(float64) > right.Value.(float64)}, nil
 	}
 
 	return ExpressionValue{}, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
@@ -151,7 +150,7 @@ func (v ExpressionValue) GreaterThanEq(right ExpressionValue) (ExpressionValue, 
 	}
 
 	if v.Type == TYPE_NUMBER {
-		return ExpressionValue{Type: TYPE_BOOLEAN, BooleanValue: v.Float64Value >= right.Float64Value}, nil
+		return ExpressionValue{Type: TYPE_BOOLEAN, Value: v.Value.(float64) >= right.Value.(float64)}, nil
 	}
 
 	return ExpressionValue{}, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))

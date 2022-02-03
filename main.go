@@ -7,7 +7,6 @@ import (
 	"lox/interpreter"
 	"lox/lexer"
 	"lox/parser"
-	"lox/types"
 	"os"
 )
 
@@ -37,14 +36,7 @@ func startREPL(in io.Reader, out io.Writer) {
 			fmt.Fprintf(out, "%s\n", err)
 			continue
 		}
-
-		if val.Type == types.TYPE_NUMBER {
-			fmt.Fprintf(out, "%v\n", val.Float64Value)
-		} else if val.Type == types.TYPE_BOOLEAN {
-			fmt.Fprintf(out, "%v\n", val.BooleanValue)
-		} else {
-			fmt.Fprintf(out, "%v\n", val)
-		}
+		fmt.Fprintf(out, "%v\n", val.Value)
 	}
 }
 
