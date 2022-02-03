@@ -31,12 +31,11 @@ func startREPL(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		val, err := ip.Run()
+		_, err = ip.Run()
 		if err != nil {
 			fmt.Fprintf(out, "%s\n", err)
 			continue
 		}
-		fmt.Fprintf(out, "%v\n", val.Value)
 	}
 }
 

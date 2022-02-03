@@ -39,8 +39,33 @@ func (i *Interpreter) visit(node parser.Node) (types.TypeValue, error) {
 		return i.visitUnaryOpNode(node.(parser.UnaryOpNode))
 	case parser.ExpressionNode:
 		return i.visit(node.(parser.ExpressionNode).Node)
+	case parser.ExpressionStatementNode:
+		return i.visitExpressionStatementNode(node.(parser.ExpressionStatementNode))
+	case parser.PrintStatementNode:
+		return i.visitPrintStatementNode(node.(parser.PrintStatementNode))
 	}
-	return types.TypeValue{}, fmt.Errorf("invalid node")
+	return types.TypeValue{}, fmt.Errorf("invalid node: %T", node)
+}
+
+func (i *Interpreter) visitPrintStatementNode(node parser.PrintStatementNode) (types.TypeValue, error) {
+	result, err := i.visit(node.Node)
+	if err != nil {
+		return types.TypeValue{}, err
+	}
+
+	fmt.Printf("%v\n", result.Value)
+
+	return types.TypeValue{}, nil
+}
+
+func (i *Interpreter) visitExpressionStatementNode(node parser.ExpressionStatementNode) (types.TypeValue, error) {
+	// Evaluate the expression and discard the result (for now)
+	_, err := i.visit(node.Node)
+	if err != nil {
+		return types.TypeValue{}, err
+	}
+
+	return types.TypeValue{}, nil
 }
 
 func (i *Interpreter) visitNumberNode(node parser.NumberNode) (types.TypeValue, error) {

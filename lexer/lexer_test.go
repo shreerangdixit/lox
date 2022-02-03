@@ -107,7 +107,7 @@ func TestLexer_NextToken(t *testing.T) {
 		},
 		{
 			name:  "keywords",
-			input: "let x = 10; y = fun foo(){} if else true false return",
+			input: "let x = 10; y = fun foo(){} if else true false return print",
 			want: []token.Token{
 				token.Token{Type: token.TT_LET, Literal: "let"},
 				token.Token{Type: token.TT_IDENTIFIER, Literal: "x"},
@@ -127,6 +127,7 @@ func TestLexer_NextToken(t *testing.T) {
 				token.Token{Type: token.TT_TRUE, Literal: "true"},
 				token.Token{Type: token.TT_FALSE, Literal: "false"},
 				token.Token{Type: token.TT_RETURN, Literal: "return"},
+				token.Token{Type: token.TT_PRINT, Literal: "print"},
 				token.Token{Type: token.TT_EOF, Literal: "0"},
 			},
 		},

@@ -75,6 +75,22 @@ func (n ExpressionNode) String() string {
 	return fmt.Sprintf("[%s%s]", n.Token, n.Node)
 }
 
+type ExpressionStatementNode struct {
+	Node Node
+}
+
+func (n ExpressionStatementNode) String() string {
+	return fmt.Sprintf("[%s]", n.Node)
+}
+
+type PrintStatementNode struct {
+	Node Node
+}
+
+func (n PrintStatementNode) String() string {
+	return fmt.Sprintf("[%s]", n.Node)
+}
+
 // ------------------------------------
 // Parser
 // ------------------------------------
@@ -98,12 +114,49 @@ func New(lex *lexer.Lexer) *Parser {
 }
 
 func (p *Parser) Parse() (Node, error) {
-	return p.expression()
+	return p.program()
 }
 
 // ------------------------------------
 // Grammar rule functions
 // ------------------------------------
+func (p *Parser) program() (Node, error) {
+	return p.statement()
+}
+
+func (p *Parser) statement() (Node, error) {
+	if p.next.Type == token.TT_PRINT {
+		p.advance()
+		return p.printStatement()
+	}
+	return p.exprStatement()
+}
+
+func (p *Parser) exprStatement() (Node, error) {
+	expr, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	if p.next.Type == token.TT_SEMICOLON {
+		p.advance()
+		return ExpressionStatementNode{Node: expr}, nil
+	}
+	return nil, newSyntaxError("expected a ; at the end of an expression statement", p.curr)
+}
+
+func (p *Parser) printStatement() (Node, error) {
+	expr, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	if p.next.Type == token.TT_SEMICOLON {
+		p.advance()
+		return PrintStatementNode{Node: expr}, nil
+	}
+	return nil, newSyntaxError("expected a ; at the end of a print statement", p.curr)
+}
 
 func (p *Parser) expression() (Node, error) {
 	return p.equality()
