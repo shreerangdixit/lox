@@ -29,22 +29,34 @@ func (i *Interpreter) Run() (types.TypeValue, error) {
 
 func (i *Interpreter) visit(node parser.Node) (types.TypeValue, error) {
 	switch node.(type) {
-	case parser.NumberNode:
-		return i.visitNumberNode(node.(parser.NumberNode))
-	case parser.BooleanNode:
-		return i.visitBooleanNode(node.(parser.BooleanNode))
-	case parser.BinaryOpNode:
-		return i.visitBinaryOpNode(node.(parser.BinaryOpNode))
-	case parser.UnaryOpNode:
-		return i.visitUnaryOpNode(node.(parser.UnaryOpNode))
-	case parser.ExpressionNode:
-		return i.visit(node.(parser.ExpressionNode).Node)
+	case parser.ProgramNode:
+		return i.visitProgramNode(node.(parser.ProgramNode))
 	case parser.ExpressionStatementNode:
 		return i.visitExpressionStatementNode(node.(parser.ExpressionStatementNode))
 	case parser.PrintStatementNode:
 		return i.visitPrintStatementNode(node.(parser.PrintStatementNode))
+	case parser.ExpressionNode:
+		return i.visit(node.(parser.ExpressionNode).Node)
+	case parser.BinaryOpNode:
+		return i.visitBinaryOpNode(node.(parser.BinaryOpNode))
+	case parser.UnaryOpNode:
+		return i.visitUnaryOpNode(node.(parser.UnaryOpNode))
+	case parser.NumberNode:
+		return i.visitNumberNode(node.(parser.NumberNode))
+	case parser.BooleanNode:
+		return i.visitBooleanNode(node.(parser.BooleanNode))
 	}
 	return types.TypeValue{}, fmt.Errorf("invalid node: %T", node)
+}
+
+func (i *Interpreter) visitProgramNode(node parser.ProgramNode) (types.TypeValue, error) {
+	for _, node := range node.Nodes {
+		_, err := i.visit(node)
+		if err != nil {
+			return types.TypeValue{}, err
+		}
+	}
+	return types.TypeValue{}, nil
 }
 
 func (i *Interpreter) visitPrintStatementNode(node parser.PrintStatementNode) (types.TypeValue, error) {

@@ -91,6 +91,14 @@ func (n PrintStatementNode) String() string {
 	return fmt.Sprintf("[%s]", n.Node)
 }
 
+type ProgramNode struct {
+	Nodes []Node
+}
+
+func (n ProgramNode) String() string {
+	return fmt.Sprintf("+%s", n.Nodes)
+}
+
 // ------------------------------------
 // Parser
 // ------------------------------------
@@ -121,7 +129,18 @@ func (p *Parser) Parse() (Node, error) {
 // Grammar rule functions
 // ------------------------------------
 func (p *Parser) program() (Node, error) {
-	return p.statement()
+	statements := make([]Node, 0, 100)
+	for p.next.Type != token.TT_EOF {
+		stat, err := p.statement()
+		if err != nil {
+			return nil, err
+		}
+
+		statements = append(statements, stat)
+	}
+	return ProgramNode{
+		Nodes: statements,
+	}, nil
 }
 
 func (p *Parser) statement() (Node, error) {
