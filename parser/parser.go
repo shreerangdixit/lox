@@ -66,6 +66,14 @@ func (n BooleanNode) String() string {
 	return fmt.Sprintf("%s", n.Token)
 }
 
+type IdentifierNode struct {
+	Token token.Token
+}
+
+func (n IdentifierNode) String() string {
+	return fmt.Sprintf("%s", n.Token)
+}
+
 type NilNode struct {
 	Token token.Token
 }
@@ -83,6 +91,23 @@ func (n ExpressionNode) String() string {
 	return fmt.Sprintf("[%s%s]", n.Token, n.Node)
 }
 
+type ProgramNode struct {
+	Nodes []Node
+}
+
+func (n ProgramNode) String() string {
+	return fmt.Sprintf("+%s", n.Nodes)
+}
+
+type LetDeclarationNode struct {
+	IdentifierNode IdentifierNode
+	ValueNode      Node
+}
+
+func (n LetDeclarationNode) String() string {
+	return fmt.Sprintf("let %s=%s", n.IdentifierNode, n.ValueNode)
+}
+
 type ExpressionStatementNode struct {
 	Node Node
 }
@@ -97,14 +122,6 @@ type PrintStatementNode struct {
 
 func (n PrintStatementNode) String() string {
 	return fmt.Sprintf("[%s]", n.Node)
-}
-
-type ProgramNode struct {
-	Nodes []Node
-}
-
-func (n ProgramNode) String() string {
-	return fmt.Sprintf("+%s", n.Nodes)
 }
 
 // ------------------------------------
@@ -137,17 +154,63 @@ func (p *Parser) Parse() (Node, error) {
 // Grammar rule functions
 // ------------------------------------
 func (p *Parser) program() (Node, error) {
-	statements := make([]Node, 0, 100)
+	declarations := make([]Node, 0, 100)
 	for p.next.Type != token.TT_EOF {
-		stat, err := p.statement()
+		decl, err := p.declaration()
 		if err != nil {
 			return nil, err
 		}
 
-		statements = append(statements, stat)
+		declarations = append(declarations, decl)
 	}
 	return ProgramNode{
-		Nodes: statements,
+		Nodes: declarations,
+	}, nil
+}
+
+func (p *Parser) declaration() (Node, error) {
+	if p.next.Type == token.TT_LET {
+		p.advance()
+		return p.letDeclaration()
+	}
+	return p.statement()
+}
+
+func (p *Parser) letDeclaration() (Node, error) {
+	atom, err := p.atom()
+	if err != nil {
+		return nil, err
+	}
+
+	identifier, ok := atom.(IdentifierNode)
+	if !ok {
+		return nil, newSyntaxError("Expected identifier after let", p.curr)
+
+	}
+
+	if p.next.Type != token.TT_ASSIGN {
+		return LetDeclarationNode{
+			IdentifierNode: identifier,
+			ValueNode:      NilNode{Token: p.curr},
+		}, nil
+	}
+
+	p.advance()
+
+	identifierValue, err := p.expression()
+
+	if err != nil {
+		return nil, err
+	}
+
+	if p.next.Type != token.TT_SEMICOLON {
+		return nil, newSyntaxError("expected a ; at the end of a declaration", p.curr)
+	}
+
+	p.advance()
+	return LetDeclarationNode{
+		IdentifierNode: identifier,
+		ValueNode:      identifierValue,
 	}, nil
 }
 
@@ -235,6 +298,9 @@ func (p *Parser) atom() (Node, error) {
 	} else if p.nextTokenMatches([]token.TokenType{token.TT_TRUE, token.TT_FALSE}) {
 		p.advance()
 		return BooleanNode{Token: p.curr}, nil
+	} else if p.nextTokenMatches([]token.TokenType{token.TT_IDENTIFIER}) {
+		p.advance()
+		return IdentifierNode{Token: p.curr}, nil
 	} else if p.nextTokenMatches([]token.TokenType{token.TT_NIL}) {
 		p.advance()
 		return NilNode{Token: p.curr}, nil

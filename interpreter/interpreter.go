@@ -9,7 +9,8 @@ import (
 )
 
 type Interpreter struct {
-	ast parser.Node
+	ast     parser.Node
+	globals map[string]types.TypeValue
 }
 
 func New(parser *parser.Parser) (*Interpreter, error) {
@@ -19,7 +20,8 @@ func New(parser *parser.Parser) (*Interpreter, error) {
 	}
 
 	return &Interpreter{
-		ast: ast,
+		ast:     ast,
+		globals: make(map[string]types.TypeValue),
 	}, nil
 }
 
@@ -31,6 +33,8 @@ func (i *Interpreter) visit(node parser.Node) (types.TypeValue, error) {
 	switch node.(type) {
 	case parser.ProgramNode:
 		return i.visitProgramNode(node.(parser.ProgramNode))
+	case parser.LetDeclarationNode:
+		return i.visitLetDeclarationNode(node.(parser.LetDeclarationNode))
 	case parser.ExpressionStatementNode:
 		return i.visitExpressionStatementNode(node.(parser.ExpressionStatementNode))
 	case parser.PrintStatementNode:
@@ -45,6 +49,8 @@ func (i *Interpreter) visit(node parser.Node) (types.TypeValue, error) {
 		return i.visitNumberNode(node.(parser.NumberNode))
 	case parser.BooleanNode:
 		return i.visitBooleanNode(node.(parser.BooleanNode))
+	case parser.IdentifierNode:
+		return i.visitIdentifierNode(node.(parser.IdentifierNode))
 	case parser.NilNode:
 		return i.visitNilNode(node.(parser.NilNode))
 	}
@@ -58,6 +64,16 @@ func (i *Interpreter) visitProgramNode(node parser.ProgramNode) (types.TypeValue
 			return types.TypeValue{}, err
 		}
 	}
+	return types.TypeValue{}, nil
+}
+
+func (i *Interpreter) visitLetDeclarationNode(node parser.LetDeclarationNode) (types.TypeValue, error) {
+	expression, err := i.visit(node.ValueNode)
+	if err != nil {
+		return types.TypeValue{}, err
+	}
+
+	i.globals[node.IdentifierNode.Token.Literal] = expression
 	return types.TypeValue{}, nil
 }
 
@@ -147,6 +163,15 @@ func (i *Interpreter) visitBooleanNode(node parser.BooleanNode) (types.TypeValue
 	}
 
 	return types.TypeValue{Type: types.BOOL, Value: val}, nil
+}
+
+func (i *Interpreter) visitIdentifierNode(node parser.IdentifierNode) (types.TypeValue, error) {
+	val, ok := i.globals[node.Token.Literal]
+
+	if !ok {
+		return types.TypeValue{}, fmt.Errorf("undeclared identifier: %s", node.Token.Literal)
+	}
+	return val, nil
 }
 
 func (i *Interpreter) visitNilNode(node parser.NilNode) (types.TypeValue, error) {
