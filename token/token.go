@@ -86,7 +86,7 @@ func (t TokenType) String() string {
 	case TT_IDENTIFIER:
 		return "IDENT"
 	case TT_NUMBER:
-		return "NUMBER"
+		return "NUM"
 	case TT_ASSIGN:
 		return "="
 	case TT_PLUS:
@@ -114,7 +114,7 @@ func (t TokenType) String() string {
 	case TT_COMMA:
 		return ","
 	case TT_SEMICOLON:
-		return ","
+		return ";"
 	case TT_LPAREN:
 		return "("
 	case TT_RPAREN:
