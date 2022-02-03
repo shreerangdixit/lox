@@ -142,14 +142,10 @@ func (p *Parser) unary() (Node, error) {
 func (p *Parser) atom() (Node, error) {
 	if p.next.Type == token.TT_NUMBER {
 		p.advance()
-		return NumberNode{
-			Token: p.curr,
-		}, nil
+		return NumberNode{Token: p.curr}, nil
 	} else if p.nextTokenMatches([]token.TokenType{token.TT_TRUE, token.TT_FALSE}) {
 		p.advance()
-		return BooleanNode{
-			Token: p.curr,
-		}, nil
+		return BooleanNode{Token: p.curr}, nil
 	} else if p.next.Type == token.TT_LPAREN {
 		p.advance()
 
