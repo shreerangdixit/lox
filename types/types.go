@@ -21,6 +21,7 @@ type Type int
 const (
 	NUMBER Type = iota
 	BOOL
+	NIL
 )
 
 func (e Type) String() string {
@@ -29,6 +30,8 @@ func (e Type) String() string {
 		return "NUMBER"
 	case BOOL:
 		return "BOOL"
+	case NIL:
+		return "NIL"
 	default:
 		return "<UNKNOWN>"
 	}

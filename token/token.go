@@ -27,6 +27,7 @@ var keywords = map[string]TokenType{
 	"true":   TT_TRUE,
 	"false":  TT_FALSE,
 	"return": TT_RETURN,
+	"nil":    TT_NIL,
 }
 
 func LookupIdentifierType(v string) TokenType {
@@ -77,6 +78,7 @@ const (
 	TT_TRUE
 	TT_FALSE
 	TT_RETURN
+	TT_NIL
 )
 
 func (t TokenType) String() string {
@@ -141,6 +143,8 @@ func (t TokenType) String() string {
 		return "false"
 	case TT_RETURN:
 		return "return"
+	case TT_NIL:
+		return "nil"
 	default:
 		return "<UNKNOWN>"
 	}

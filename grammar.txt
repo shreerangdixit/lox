@@ -1,4 +1,7 @@
-program        -> statement* EOF ;
+program        -> declaration* EOF ;
+declaration    -> letDecl
+               |  statement ;
+letDecl        -> "let" IDENTIFIER ( "=" expression )? ";" ;
 statement      -> exprStatement
                | printStatement ;
 exprStatement  -> expression ";" ;
@@ -12,3 +15,4 @@ unary          -> ( "!" | "-" ) unary
                | atom ;
 atom           -> NUMBER | STRING | "true" | "false" | "nil"
                | "(" expression ")"
+               | IDENTIFIER ;

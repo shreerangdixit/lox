@@ -66,6 +66,14 @@ func (n BooleanNode) String() string {
 	return fmt.Sprintf("%s", n.Token)
 }
 
+type NilNode struct {
+	Token token.Token
+}
+
+func (n NilNode) String() string {
+	return "nil"
+}
+
 type ExpressionNode struct {
 	Token token.Token
 	Node  Node
@@ -227,6 +235,9 @@ func (p *Parser) atom() (Node, error) {
 	} else if p.nextTokenMatches([]token.TokenType{token.TT_TRUE, token.TT_FALSE}) {
 		p.advance()
 		return BooleanNode{Token: p.curr}, nil
+	} else if p.nextTokenMatches([]token.TokenType{token.TT_NIL}) {
+		p.advance()
+		return NilNode{Token: p.curr}, nil
 	} else if p.next.Type == token.TT_LPAREN {
 		p.advance()
 

@@ -45,6 +45,8 @@ func (i *Interpreter) visit(node parser.Node) (types.TypeValue, error) {
 		return i.visitNumberNode(node.(parser.NumberNode))
 	case parser.BooleanNode:
 		return i.visitBooleanNode(node.(parser.BooleanNode))
+	case parser.NilNode:
+		return i.visitNilNode(node.(parser.NilNode))
 	}
 	return types.TypeValue{}, fmt.Errorf("invalid node: %T", node)
 }
@@ -59,17 +61,6 @@ func (i *Interpreter) visitProgramNode(node parser.ProgramNode) (types.TypeValue
 	return types.TypeValue{}, nil
 }
 
-func (i *Interpreter) visitPrintStatementNode(node parser.PrintStatementNode) (types.TypeValue, error) {
-	result, err := i.visit(node.Node)
-	if err != nil {
-		return types.TypeValue{}, err
-	}
-
-	fmt.Printf("%v\n", result.Value)
-
-	return types.TypeValue{}, nil
-}
-
 func (i *Interpreter) visitExpressionStatementNode(node parser.ExpressionStatementNode) (types.TypeValue, error) {
 	// Evaluate the expression and discard the result (for now)
 	_, err := i.visit(node.Node)
@@ -80,22 +71,15 @@ func (i *Interpreter) visitExpressionStatementNode(node parser.ExpressionStateme
 	return types.TypeValue{}, nil
 }
 
-func (i *Interpreter) visitNumberNode(node parser.NumberNode) (types.TypeValue, error) {
-	val, err := strconv.ParseFloat(node.Token.Literal, 10)
+func (i *Interpreter) visitPrintStatementNode(node parser.PrintStatementNode) (types.TypeValue, error) {
+	result, err := i.visit(node.Node)
 	if err != nil {
 		return types.TypeValue{}, err
 	}
 
-	return types.TypeValue{Type: types.NUMBER, Value: val}, nil
-}
+	fmt.Printf("%v\n", result.Value)
 
-func (i *Interpreter) visitBooleanNode(node parser.BooleanNode) (types.TypeValue, error) {
-	val, err := strconv.ParseBool(node.Token.Literal)
-	if err != nil {
-		return types.TypeValue{}, err
-	}
-
-	return types.TypeValue{Type: types.BOOL, Value: val}, nil
+	return types.TypeValue{}, nil
 }
 
 func (i *Interpreter) visitBinaryOpNode(node parser.BinaryOpNode) (types.TypeValue, error) {
@@ -145,4 +129,26 @@ func (i *Interpreter) visitUnaryOpNode(node parser.UnaryOpNode) (types.TypeValue
 	}
 
 	return types.TypeValue{}, fmt.Errorf("invalid unary op: %s", node.Token.Type)
+}
+
+func (i *Interpreter) visitNumberNode(node parser.NumberNode) (types.TypeValue, error) {
+	val, err := strconv.ParseFloat(node.Token.Literal, 10)
+	if err != nil {
+		return types.TypeValue{}, err
+	}
+
+	return types.TypeValue{Type: types.NUMBER, Value: val}, nil
+}
+
+func (i *Interpreter) visitBooleanNode(node parser.BooleanNode) (types.TypeValue, error) {
+	val, err := strconv.ParseBool(node.Token.Literal)
+	if err != nil {
+		return types.TypeValue{}, err
+	}
+
+	return types.TypeValue{Type: types.BOOL, Value: val}, nil
+}
+
+func (i *Interpreter) visitNilNode(node parser.NilNode) (types.TypeValue, error) {
+	return types.TypeValue{Type: types.NIL, Value: nil}, nil
 }
