@@ -74,11 +74,11 @@ type UnaryOpNode struct {
 	Operand Node
 }
 
-type NumberNode struct {
+type BooleanNode struct {
 	Token token.Token
 }
 
-type BooleanNode struct {
+type NumberNode struct {
 	Token token.Token
 }
 
@@ -92,8 +92,8 @@ func (n PrintStatementNode) String() string      { return fmt.Sprintf("%s", n.Ex
 func (n ExpressionNode) String() string          { return fmt.Sprintf("%s", n.Exp) }
 func (n BinaryOpNode) String() string            { return fmt.Sprintf("%s %s %s", n.LHS, n.Op, n.RHS) }
 func (n UnaryOpNode) String() string             { return fmt.Sprintf("%s%s", n.Op, n.Operand) }
-func (n NumberNode) String() string              { return fmt.Sprintf("%s", n.Token) }
 func (n BooleanNode) String() string             { return fmt.Sprintf("%s", n.Token) }
+func (n NumberNode) String() string              { return fmt.Sprintf("%s", n.Token) }
 
 // ------------------------------------
 // Parser
@@ -285,9 +285,9 @@ func (p *Parser) atom() (Node, error) {
 		return NumberNode{Token: p.curr}, nil
 	} else if p.consumeAny([]token.TokenType{token.TT_TRUE, token.TT_FALSE}) {
 		return BooleanNode{Token: p.curr}, nil
-	} else if p.consumeAny([]token.TokenType{token.TT_IDENTIFIER}) {
+	} else if p.consume(token.TT_IDENTIFIER) {
 		return IdentifierNode{Token: p.curr}, nil
-	} else if p.consumeAny([]token.TokenType{token.TT_NIL}) {
+	} else if p.consume(token.TT_NIL) {
 		return NilNode{}, nil
 	} else if p.consume(token.TT_LPAREN) {
 		exp, err := p.expression()

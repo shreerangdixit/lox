@@ -6,6 +6,7 @@ import (
 	"github.com/shreerangdixit/lox/interpreter"
 	"github.com/shreerangdixit/lox/lexer"
 	"github.com/shreerangdixit/lox/parser"
+	"github.com/shreerangdixit/lox/types"
 	"io"
 	"os"
 )
@@ -44,11 +45,41 @@ func startREPL(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		_, err = ipt.Run(root)
-		if err != nil {
-			fmt.Fprintf(out, "%s\n", err)
+		// If the input is a single expression, evaluate and print the result
+		// Otherwise run statements
+		exp, ok := isSingleExpression(root)
+		if !ok {
+			_, err = ipt.Run(root)
+			if err != nil {
+				fmt.Fprintf(out, "%s\n", err)
+			}
+		} else {
+			val, err := ipt.Run(exp)
+			if err != nil {
+				fmt.Fprintf(out, "%s\n", err)
+			} else if val != types.NO_VALUE {
+				fmt.Fprintf(out, "%v\n", val.Value)
+			}
 		}
 	}
+}
+
+func isSingleExpression(node parser.Node) (parser.Node, bool) {
+	programNode, ok := node.(parser.ProgramNode)
+	if !ok {
+		return nil, false
+	}
+
+	if len(programNode.Declarations) > 1 {
+		return nil, false
+	}
+
+	expStat, ok := programNode.Declarations[0].(parser.ExpressionStatementNode)
+	if !ok {
+		return nil, false
+	}
+
+	return expStat.Exp, true
 }
 
 func main() {
