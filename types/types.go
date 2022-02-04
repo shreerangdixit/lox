@@ -46,7 +46,7 @@ type TypeValue struct {
 
 func (v TypeValue) Add(right TypeValue) (TypeValue, error) {
 	if v.Type != NUMBER || right.Type != NUMBER {
-		return TypeValue{}, newTypeError(fmt.Sprintf("Cannot add types %s and %s", v.Type, right.Type))
+		return NO_VALUE, newTypeError(fmt.Sprintf("Cannot add types %s and %s", v.Type, right.Type))
 	}
 
 	return TypeValue{Type: NUMBER, Value: v.Value.(float64) + right.Value.(float64)}, nil
@@ -54,7 +54,7 @@ func (v TypeValue) Add(right TypeValue) (TypeValue, error) {
 
 func (v TypeValue) Subtract(right TypeValue) (TypeValue, error) {
 	if v.Type != NUMBER || right.Type != NUMBER {
-		return TypeValue{}, newTypeError(fmt.Sprintf("Cannot subtract types %s and %s", v.Type, right.Type))
+		return NO_VALUE, newTypeError(fmt.Sprintf("Cannot subtract types %s and %s", v.Type, right.Type))
 	}
 
 	return TypeValue{Type: NUMBER, Value: v.Value.(float64) - right.Value.(float64)}, nil
@@ -62,7 +62,11 @@ func (v TypeValue) Subtract(right TypeValue) (TypeValue, error) {
 
 func (v TypeValue) Divide(right TypeValue) (TypeValue, error) {
 	if v.Type != NUMBER || right.Type != NUMBER {
-		return TypeValue{}, newTypeError(fmt.Sprintf("Cannot divide types %s and %s", v.Type, right.Type))
+		return NO_VALUE, newTypeError(fmt.Sprintf("Cannot divide types %s and %s", v.Type, right.Type))
+	}
+
+	if right.Value.(float64) == 0 {
+		return NO_VALUE, newTypeError("cannot divide by zero")
 	}
 
 	return TypeValue{Type: NUMBER, Value: v.Value.(float64) / right.Value.(float64)}, nil
@@ -70,7 +74,7 @@ func (v TypeValue) Divide(right TypeValue) (TypeValue, error) {
 
 func (v TypeValue) Multiply(right TypeValue) (TypeValue, error) {
 	if v.Type != NUMBER || right.Type != NUMBER {
-		return TypeValue{}, newTypeError(fmt.Sprintf("Cannot multiply types %s and %s", v.Type, right.Type))
+		return NO_VALUE, newTypeError(fmt.Sprintf("Cannot multiply types %s and %s", v.Type, right.Type))
 	}
 
 	return TypeValue{Type: NUMBER, Value: v.Value.(float64) * right.Value.(float64)}, nil
@@ -82,12 +86,12 @@ func (v TypeValue) Negate() (TypeValue, error) {
 	} else if v.Type == BOOL {
 		return TypeValue{Type: BOOL, Value: !v.Value.(bool)}, nil
 	}
-	return TypeValue{}, newTypeError(fmt.Sprintf("Cannot negate type %s", v.Type))
+	return NO_VALUE, newTypeError(fmt.Sprintf("Cannot negate type %s", v.Type))
 }
 
 func (v TypeValue) Equals(right TypeValue) (TypeValue, error) {
 	if v.Type != right.Type {
-		return TypeValue{}, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
+		return NO_VALUE, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
 	}
 
 	if v.Type == NUMBER {
@@ -96,12 +100,12 @@ func (v TypeValue) Equals(right TypeValue) (TypeValue, error) {
 		return TypeValue{Type: BOOL, Value: v.Value.(bool) == right.Value.(bool)}, nil
 	}
 
-	return TypeValue{}, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
+	return NO_VALUE, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
 }
 
 func (v TypeValue) NotEquals(right TypeValue) (TypeValue, error) {
 	if v.Type != right.Type {
-		return TypeValue{}, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
+		return NO_VALUE, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
 	}
 
 	if v.Type == NUMBER {
@@ -110,53 +114,53 @@ func (v TypeValue) NotEquals(right TypeValue) (TypeValue, error) {
 		return TypeValue{Type: BOOL, Value: v.Value.(bool) != right.Value.(bool)}, nil
 	}
 
-	return TypeValue{}, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
+	return NO_VALUE, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
 }
 
 func (v TypeValue) LessThan(right TypeValue) (TypeValue, error) {
 	if v.Type != right.Type {
-		return TypeValue{}, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
+		return NO_VALUE, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
 	}
 
 	if v.Type == NUMBER {
 		return TypeValue{Type: BOOL, Value: v.Value.(float64) < right.Value.(float64)}, nil
 	}
 
-	return TypeValue{}, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
+	return NO_VALUE, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
 }
 
 func (v TypeValue) LessThanEq(right TypeValue) (TypeValue, error) {
 	if v.Type != right.Type {
-		return TypeValue{}, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
+		return NO_VALUE, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
 	}
 
 	if v.Type == NUMBER {
 		return TypeValue{Type: BOOL, Value: v.Value.(float64) <= right.Value.(float64)}, nil
 	}
 
-	return TypeValue{}, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
+	return NO_VALUE, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
 }
 
 func (v TypeValue) GreaterThan(right TypeValue) (TypeValue, error) {
 	if v.Type != right.Type {
-		return TypeValue{}, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
+		return NO_VALUE, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
 	}
 
 	if v.Type == NUMBER {
 		return TypeValue{Type: BOOL, Value: v.Value.(float64) > right.Value.(float64)}, nil
 	}
 
-	return TypeValue{}, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
+	return NO_VALUE, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
 }
 
 func (v TypeValue) GreaterThanEq(right TypeValue) (TypeValue, error) {
 	if v.Type != right.Type {
-		return TypeValue{}, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
+		return NO_VALUE, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
 	}
 
 	if v.Type == NUMBER {
 		return TypeValue{Type: BOOL, Value: v.Value.(float64) >= right.Value.(float64)}, nil
 	}
 
-	return TypeValue{}, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
+	return NO_VALUE, newTypeError(fmt.Sprintf("Cannot compare types %s and %s", v.Type, right.Type))
 }
