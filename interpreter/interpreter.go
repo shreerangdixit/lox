@@ -38,12 +38,14 @@ func (i *Interpreter) eval(node parser.Node) (types.TypeValue, error) {
 		return i.evalBinaryOpNode(node.(parser.BinaryOpNode))
 	case parser.UnaryOpNode:
 		return i.evalUnaryOpNode(node.(parser.UnaryOpNode))
+	case parser.IdentifierNode:
+		return i.evalIdentifierNode(node.(parser.IdentifierNode))
 	case parser.NumberNode:
 		return i.evalNumberNode(node.(parser.NumberNode))
 	case parser.BooleanNode:
 		return i.evalBooleanNode(node.(parser.BooleanNode))
-	case parser.IdentifierNode:
-		return i.evalIdentifierNode(node.(parser.IdentifierNode))
+	case parser.StringNode:
+		return i.evalStringNode(node.(parser.StringNode))
 	case parser.NilNode:
 		return i.evalNilNode(node.(parser.NilNode))
 	}
@@ -144,6 +146,10 @@ func (i *Interpreter) evalUnaryOpNode(node parser.UnaryOpNode) (types.TypeValue,
 	return types.NO_VALUE, fmt.Errorf("invalid unary op: %s", node.Op.Type)
 }
 
+func (i *Interpreter) evalIdentifierNode(node parser.IdentifierNode) (types.TypeValue, error) {
+	return i.env.Get(node.Token.Literal)
+}
+
 func (i *Interpreter) evalNumberNode(node parser.NumberNode) (types.TypeValue, error) {
 	val, err := strconv.ParseFloat(node.Token.Literal, 10)
 	if err != nil {
@@ -162,8 +168,8 @@ func (i *Interpreter) evalBooleanNode(node parser.BooleanNode) (types.TypeValue,
 	return types.TypeValue{Type: types.BOOL, Value: val}, nil
 }
 
-func (i *Interpreter) evalIdentifierNode(node parser.IdentifierNode) (types.TypeValue, error) {
-	return i.env.Get(node.Token.Literal)
+func (i *Interpreter) evalStringNode(node parser.StringNode) (types.TypeValue, error) {
+	return types.TypeValue{Type: types.STRING, Value: node.Token.Literal}, nil
 }
 
 func (i *Interpreter) evalNilNode(node parser.NilNode) (types.TypeValue, error) {

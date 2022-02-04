@@ -86,6 +86,8 @@ func (l *Lexer) NextToken() token.Token {
 			tok = l.readNumberToken()
 		} else if isLetter(l.ch) {
 			tok = l.readIdentifierToken()
+		} else if l.ch == '"' {
+			tok = l.readStringToken()
 		} else {
 			tok = newToken(token.TT_ILLEGAL, string(l.ch))
 		}
@@ -141,6 +143,16 @@ func (l *Lexer) readIdentifierToken() token.Token {
 	}
 	value := l.input[startPos:l.currentPos]
 	return newToken(token.LookupIdentifierType(value), value)
+}
+
+func (l *Lexer) readStringToken() token.Token {
+	l.advance()
+	startPos := l.currentPos
+	for l.ch != '"' {
+		l.advance()
+	}
+	value := l.input[startPos:l.currentPos]
+	return newToken(token.TT_STRING, value)
 }
 
 func (l *Lexer) skipWhitespace() {

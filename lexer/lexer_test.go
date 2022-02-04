@@ -131,6 +131,16 @@ func TestLexer_NextToken(t *testing.T) {
 				token.Token{Type: token.TT_EOF, Literal: "0"},
 			},
 		},
+		{
+			name:  "strings",
+			input: "\"foo\" \"bar\" \"foo bar\"",
+			want: []token.Token{
+				token.Token{Type: token.TT_STRING, Literal: "foo"},
+				token.Token{Type: token.TT_STRING, Literal: "bar"},
+				token.Token{Type: token.TT_STRING, Literal: "foo bar"},
+				token.Token{Type: token.TT_EOF, Literal: "0"},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

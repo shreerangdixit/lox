@@ -82,6 +82,10 @@ type NumberNode struct {
 	Token token.Token
 }
 
+type StringNode struct {
+	Token token.Token
+}
+
 func (n NilNode) String() string                 { return "nil" }
 func (n ProgramNode) String() string             { return fmt.Sprintf("+%s", n.Declarations) }
 func (n IdentifierNode) String() string          { return fmt.Sprintf("%s", n.Token) }
@@ -94,6 +98,7 @@ func (n BinaryOpNode) String() string            { return fmt.Sprintf("%s %s %s"
 func (n UnaryOpNode) String() string             { return fmt.Sprintf("%s%s", n.Op, n.Operand) }
 func (n BooleanNode) String() string             { return fmt.Sprintf("%s", n.Token) }
 func (n NumberNode) String() string              { return fmt.Sprintf("%s", n.Token) }
+func (n StringNode) String() string              { return fmt.Sprintf("%s", n.Token) }
 
 // ------------------------------------
 // Parser
@@ -283,6 +288,8 @@ func (p *Parser) unary() (Node, error) {
 func (p *Parser) atom() (Node, error) {
 	if p.consume(token.TT_NUMBER) {
 		return NumberNode{Token: p.curr}, nil
+	} else if p.consume(token.TT_STRING) {
+		return StringNode{Token: p.curr}, nil
 	} else if p.consumeAny([]token.TokenType{token.TT_TRUE, token.TT_FALSE}) {
 		return BooleanNode{Token: p.curr}, nil
 	} else if p.consume(token.TT_IDENTIFIER) {

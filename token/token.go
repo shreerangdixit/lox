@@ -44,6 +44,7 @@ const (
 	// Identifier + Literals
 	TT_IDENTIFIER
 	TT_NUMBER
+	TT_STRING
 
 	// Operators
 	TT_ASSIGN
@@ -91,6 +92,8 @@ func (t TokenType) String() string {
 		return "IDENT"
 	case TT_NUMBER:
 		return "NUM"
+	case TT_STRING:
+		return "STR"
 	case TT_ASSIGN:
 		return "="
 	case TT_PLUS:
