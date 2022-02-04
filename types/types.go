@@ -37,6 +37,8 @@ func (e Type) String() string {
 	}
 }
 
+var NO_VALUE = TypeValue{Type: NIL}
+
 type TypeValue struct {
 	Type  Type
 	Value interface{}

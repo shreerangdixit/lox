@@ -9,8 +9,8 @@ import (
 )
 
 type Interpreter struct {
-	ast     parser.Node
-	globals map[string]types.TypeValue
+	ast parser.Node
+	env *Env
 }
 
 func New(parser *parser.Parser) (*Interpreter, error) {
@@ -20,8 +20,8 @@ func New(parser *parser.Parser) (*Interpreter, error) {
 	}
 
 	return &Interpreter{
-		ast:     ast,
-		globals: make(map[string]types.TypeValue),
+		ast: ast,
+		env: NewEnv(),
 	}, nil
 }
 
@@ -54,59 +54,55 @@ func (i *Interpreter) visit(node parser.Node) (types.TypeValue, error) {
 	case parser.NilNode:
 		return i.visitNilNode(node.(parser.NilNode))
 	}
-	return types.TypeValue{}, fmt.Errorf("invalid node: %T", node)
+	return types.NO_VALUE, fmt.Errorf("invalid node: %T", node)
 }
 
 func (i *Interpreter) visitProgramNode(node parser.ProgramNode) (types.TypeValue, error) {
 	for _, node := range node.Declarations {
 		_, err := i.visit(node)
 		if err != nil {
-			return types.TypeValue{}, err
+			return types.NO_VALUE, err
 		}
 	}
-	return types.TypeValue{}, nil
+	return types.NO_VALUE, nil
 }
 
 func (i *Interpreter) visitLetStatementNode(node parser.LetStatementNode) (types.TypeValue, error) {
 	expression, err := i.visit(node.Value)
 	if err != nil {
-		return types.TypeValue{}, err
+		return types.NO_VALUE, err
 	}
 
-	i.globals[node.Identifier.Token.Literal] = expression
-	return types.TypeValue{}, nil
+	if err := i.env.Declare(node.Identifier.Token.Literal, expression); err != nil {
+		return types.NO_VALUE, err
+	}
+	return types.NO_VALUE, nil
 }
 
 func (i *Interpreter) visitExpressionStatementNode(node parser.ExpressionStatementNode) (types.TypeValue, error) {
-	// Evaluate the expression and discard the result (for now)
-	_, err := i.visit(node.Exp)
-	if err != nil {
-		return types.TypeValue{}, err
-	}
-
-	return types.TypeValue{}, nil
+	return i.visit(node.Exp)
 }
 
 func (i *Interpreter) visitPrintStatementNode(node parser.PrintStatementNode) (types.TypeValue, error) {
 	result, err := i.visit(node.Exp)
 	if err != nil {
-		return types.TypeValue{}, err
+		return types.NO_VALUE, err
 	}
 
 	fmt.Printf("%v\n", result.Value)
 
-	return types.TypeValue{}, nil
+	return types.NO_VALUE, nil
 }
 
 func (i *Interpreter) visitBinaryOpNode(node parser.BinaryOpNode) (types.TypeValue, error) {
 	left, err := i.visit(node.LHS)
 	if err != nil {
-		return types.TypeValue{}, err
+		return types.NO_VALUE, err
 	}
 
 	right, err := i.visit(node.RHS)
 	if err != nil {
-		return types.TypeValue{}, err
+		return types.NO_VALUE, err
 	}
 
 	switch node.Op.Type {
@@ -131,26 +127,26 @@ func (i *Interpreter) visitBinaryOpNode(node parser.BinaryOpNode) (types.TypeVal
 	case token.TT_GTE:
 		return left.GreaterThanEq(right)
 	}
-	return types.TypeValue{}, fmt.Errorf("invalid binary op: %s", node.Op.Type)
+	return types.NO_VALUE, fmt.Errorf("invalid binary op: %s", node.Op.Type)
 }
 
 func (i *Interpreter) visitUnaryOpNode(node parser.UnaryOpNode) (types.TypeValue, error) {
 	val, err := i.visit(node.Operand)
 	if err != nil {
-		return types.TypeValue{}, err
+		return types.NO_VALUE, err
 	}
 
 	if node.Op.Type == token.TT_MINUS || node.Op.Type == token.TT_NOT {
 		return val.Negate()
 	}
 
-	return types.TypeValue{}, fmt.Errorf("invalid unary op: %s", node.Op.Type)
+	return types.NO_VALUE, fmt.Errorf("invalid unary op: %s", node.Op.Type)
 }
 
 func (i *Interpreter) visitNumberNode(node parser.NumberNode) (types.TypeValue, error) {
 	val, err := strconv.ParseFloat(node.Token.Literal, 10)
 	if err != nil {
-		return types.TypeValue{}, err
+		return types.NO_VALUE, err
 	}
 
 	return types.TypeValue{Type: types.NUMBER, Value: val}, nil
@@ -159,16 +155,16 @@ func (i *Interpreter) visitNumberNode(node parser.NumberNode) (types.TypeValue, 
 func (i *Interpreter) visitBooleanNode(node parser.BooleanNode) (types.TypeValue, error) {
 	val, err := strconv.ParseBool(node.Token.Literal)
 	if err != nil {
-		return types.TypeValue{}, err
+		return types.NO_VALUE, err
 	}
 
 	return types.TypeValue{Type: types.BOOL, Value: val}, nil
 }
 
 func (i *Interpreter) visitIdentifierNode(node parser.IdentifierNode) (types.TypeValue, error) {
-	val, ok := i.globals[node.Token.Literal]
-	if !ok {
-		return types.TypeValue{}, fmt.Errorf("undeclared identifier: %s", node.Token.Literal)
+	val, err := i.env.Get(node.Token.Literal)
+	if err != nil {
+		return types.NO_VALUE, err
 	}
 
 	return val, nil
