@@ -277,14 +277,6 @@ func (p *Parser) atom() (Node, error) {
 // Helpers
 // ------------------------------------
 
-func (p *Parser) advance() {
-	if p.curr.Type != token.TT_EOF {
-		p.prev = p.curr
-		p.curr = p.next
-		p.next = p.lex.NextToken()
-	}
-}
-
 func (p *Parser) binaryOp(tokenTypes []token.TokenType, fun GrammarRuleFunc) (Node, error) {
 	left, err := fun()
 	if err != nil {
@@ -322,4 +314,12 @@ func (p *Parser) consumeAny(tokTypes []token.TokenType) bool {
 		}
 	}
 	return false
+}
+
+func (p *Parser) advance() {
+	if p.curr.Type != token.TT_EOF {
+		p.prev = p.curr
+		p.curr = p.next
+		p.next = p.lex.NextToken()
+	}
 }
