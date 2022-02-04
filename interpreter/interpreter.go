@@ -9,24 +9,15 @@ import (
 )
 
 type Interpreter struct {
-	ast parser.Node
 	env *Env
 }
 
-func New(parser *parser.Parser) (*Interpreter, error) {
-	ast, err := parser.Parse()
-	if err != nil {
-		return nil, err
-	}
-
-	return &Interpreter{
-		ast: ast,
-		env: NewEnv(),
-	}, nil
+func New() *Interpreter {
+	return &Interpreter{env: NewEnv()}
 }
 
-func (i *Interpreter) Run() (types.TypeValue, error) {
-	return i.visit(i.ast)
+func (i *Interpreter) Run(root parser.Node) (types.TypeValue, error) {
+	return i.visit(root)
 }
 
 func (i *Interpreter) visit(node parser.Node) (types.TypeValue, error) {

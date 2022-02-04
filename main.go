@@ -12,6 +12,7 @@ import (
 
 func startREPL(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
+	ipt := interpreter.New()
 	for {
 		fmt.Printf("lox >>> ")
 
@@ -25,16 +26,16 @@ func startREPL(in io.Reader, out io.Writer) {
 			break
 		}
 
-		ip, err := interpreter.New(parser.New(lexer.New(txt)))
+		p := parser.New(lexer.New(txt))
+		root, err := p.Parse()
 		if err != nil {
 			fmt.Fprintf(out, "%s\n", err)
 			continue
 		}
 
-		_, err = ip.Run()
+		_, err = ipt.Run(root)
 		if err != nil {
 			fmt.Fprintf(out, "%s\n", err)
-			continue
 		}
 	}
 }
