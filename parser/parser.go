@@ -41,6 +41,11 @@ type IdentifierNode struct {
 	Token token.Token
 }
 
+type AssignmentNode struct {
+	Identifier IdentifierNode
+	Value      Node
+}
+
 type LetStatementNode struct {
 	Identifier IdentifierNode
 	Value      Node
@@ -80,6 +85,7 @@ type BooleanNode struct {
 func (n NilNode) String() string                 { return "nil" }
 func (n ProgramNode) String() string             { return fmt.Sprintf("+%s", n.Declarations) }
 func (n IdentifierNode) String() string          { return fmt.Sprintf("%s", n.Token) }
+func (n AssignmentNode) String() string          { return fmt.Sprintf("%s=%s", n.Identifier, n.Value) }
 func (n LetStatementNode) String() string        { return fmt.Sprintf("let %s=%s", n.Identifier, n.Value) }
 func (n ExpressionStatementNode) String() string { return fmt.Sprintf("%s", n.Exp) }
 func (n PrintStatementNode) String() string      { return fmt.Sprintf("%s", n.Exp) }
@@ -209,7 +215,31 @@ func (p *Parser) exprStatement() (Node, error) {
 }
 
 func (p *Parser) expression() (Node, error) {
-	return p.equality()
+	return p.assignment()
+}
+
+func (p *Parser) assignment() (Node, error) {
+	expr, err := p.equality()
+	if err != nil {
+		return nil, err
+	}
+
+	if p.consume(token.TT_ASSIGN) {
+		if _, ok := expr.(IdentifierNode); !ok {
+			return nil, newSyntaxError("expected an identifier for assignment", p.curr)
+		}
+
+		assign, err := p.assignment()
+		if err != nil {
+			return nil, err
+		}
+
+		return AssignmentNode{
+			Identifier: expr.(IdentifierNode),
+			Value:      assign,
+		}, nil
+	}
+	return expr, nil
 }
 
 func (p *Parser) equality() (Node, error) {

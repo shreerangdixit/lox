@@ -39,6 +39,8 @@ func (i *Interpreter) visit(node parser.Node) (types.TypeValue, error) {
 		return i.visitExpressionStatementNode(node.(parser.ExpressionStatementNode))
 	case parser.PrintStatementNode:
 		return i.visitPrintStatementNode(node.(parser.PrintStatementNode))
+	case parser.AssignmentNode:
+		return i.visitAssignmentNode(node.(parser.AssignmentNode))
 	case parser.ExpressionNode:
 		return i.visit(node.(parser.ExpressionNode).Exp)
 	case parser.BinaryOpNode:
@@ -68,12 +70,12 @@ func (i *Interpreter) visitProgramNode(node parser.ProgramNode) (types.TypeValue
 }
 
 func (i *Interpreter) visitLetStatementNode(node parser.LetStatementNode) (types.TypeValue, error) {
-	expression, err := i.visit(node.Value)
+	value, err := i.visit(node.Value)
 	if err != nil {
 		return types.NO_VALUE, err
 	}
 
-	if err := i.env.Declare(node.Identifier.Token.Literal, expression); err != nil {
+	if err := i.env.Declare(node.Identifier.Token.Literal, value); err != nil {
 		return types.NO_VALUE, err
 	}
 	return types.NO_VALUE, nil
@@ -91,6 +93,18 @@ func (i *Interpreter) visitPrintStatementNode(node parser.PrintStatementNode) (t
 
 	fmt.Printf("%v\n", result.Value)
 
+	return types.NO_VALUE, nil
+}
+
+func (i *Interpreter) visitAssignmentNode(node parser.AssignmentNode) (types.TypeValue, error) {
+	value, err := i.visit(node.Value)
+	if err != nil {
+		return types.NO_VALUE, err
+	}
+
+	if err := i.env.Assign(node.Identifier.Token.Literal, value); err != nil {
+		return types.NO_VALUE, err
+	}
 	return types.NO_VALUE, nil
 }
 
