@@ -28,101 +28,66 @@ func (e SyntaxError) Error() string {
 // Nodes
 // ------------------------------------
 
-type Node interface {
+type Node interface{}
+
+type NilNode struct {
 }
 
-type BinaryOpNode struct {
-	Left  Node
-	Token token.Token
-	Right Node
-}
-
-func (n BinaryOpNode) String() string {
-	return fmt.Sprintf("[%s %s %s]", n.Left, n.Token, n.Right)
-}
-
-type UnaryOpNode struct {
-	Token token.Token
-	Node  Node
-}
-
-func (n UnaryOpNode) String() string {
-	return fmt.Sprintf("[%s%s]", n.Token, n.Node)
-}
-
-type NumberNode struct {
-	Token token.Token
-}
-
-func (n NumberNode) String() string {
-	return fmt.Sprintf("%s", n.Token)
-}
-
-type BooleanNode struct {
-	Token token.Token
-}
-
-func (n BooleanNode) String() string {
-	return fmt.Sprintf("%s", n.Token)
+type ProgramNode struct {
+	Declarations []Node
 }
 
 type IdentifierNode struct {
 	Token token.Token
 }
 
-func (n IdentifierNode) String() string {
-	return fmt.Sprintf("%s", n.Token)
-}
-
-type NilNode struct {
-	Token token.Token
-}
-
-func (n NilNode) String() string {
-	return "nil"
-}
-
-type ExpressionNode struct {
-	Token token.Token
-	Node  Node
-}
-
-func (n ExpressionNode) String() string {
-	return fmt.Sprintf("[%s%s]", n.Token, n.Node)
-}
-
-type ProgramNode struct {
-	Nodes []Node
-}
-
-func (n ProgramNode) String() string {
-	return fmt.Sprintf("+%s", n.Nodes)
-}
-
-type LetDeclarationNode struct {
-	IdentifierNode IdentifierNode
-	ValueNode      Node
-}
-
-func (n LetDeclarationNode) String() string {
-	return fmt.Sprintf("let %s=%s", n.IdentifierNode, n.ValueNode)
+type LetStatementNode struct {
+	Identifier IdentifierNode
+	Value      Node
 }
 
 type ExpressionStatementNode struct {
-	Node Node
-}
-
-func (n ExpressionStatementNode) String() string {
-	return fmt.Sprintf("[%s]", n.Node)
+	Exp Node
 }
 
 type PrintStatementNode struct {
-	Node Node
+	Exp Node
 }
 
-func (n PrintStatementNode) String() string {
-	return fmt.Sprintf("[%s]", n.Node)
+type ExpressionNode struct {
+	Exp Node
 }
+
+type BinaryOpNode struct {
+	LHS Node
+	Op  token.Token
+	RHS Node
+}
+
+type UnaryOpNode struct {
+	Op      token.Token
+	Operand Node
+}
+
+type NumberNode struct {
+	Token token.Token
+}
+
+type BooleanNode struct {
+	Token token.Token
+}
+
+func (n NilNode) String() string                 { return "nil" }
+func (n ProgramNode) String() string             { return fmt.Sprintf("+%s", n.Declarations) }
+func (n IdentifierNode) String() string          { return fmt.Sprintf("%s", n.Token) }
+func (n LetStatementNode) String() string        { return fmt.Sprintf("let %s=%s", n.Identifier, n.Value) }
+func (n ExpressionStatementNode) String() string { return fmt.Sprintf("%s", n.Exp) }
+func (n PrintStatementNode) String() string      { return fmt.Sprintf("%s", n.Exp) }
+func (n ExpressionNode) String() string          { return fmt.Sprintf("%s", n.Exp) }
+func (n BinaryOpNode) String() string            { return fmt.Sprintf("%s %s %s", n.LHS, n.Op, n.RHS) }
+func (n UnaryOpNode) String() string             { return fmt.Sprintf("%s%s", n.Op, n.Operand) }
+func (n NumberNode) String() string              { return fmt.Sprintf("%s", n.Token) }
+func (n BooleanNode) String() string             { return fmt.Sprintf("%s", n.Token) }
 
 // ------------------------------------
 // Parser
@@ -155,7 +120,7 @@ func (p *Parser) Parse() (Node, error) {
 // ------------------------------------
 func (p *Parser) program() (Node, error) {
 	declarations := make([]Node, 0, 100)
-	for p.next.Type != token.TT_EOF {
+	for !p.consume(token.TT_EOF) {
 		decl, err := p.declaration()
 		if err != nil {
 			return nil, err
@@ -164,13 +129,12 @@ func (p *Parser) program() (Node, error) {
 		declarations = append(declarations, decl)
 	}
 	return ProgramNode{
-		Nodes: declarations,
+		Declarations: declarations,
 	}, nil
 }
 
 func (p *Parser) declaration() (Node, error) {
-	if p.next.Type == token.TT_LET {
-		p.advance()
+	if p.consume(token.TT_LET) {
 		return p.letDeclaration()
 	}
 	return p.statement()
@@ -185,54 +149,39 @@ func (p *Parser) letDeclaration() (Node, error) {
 	identifier, ok := atom.(IdentifierNode)
 	if !ok {
 		return nil, newSyntaxError("Expected identifier after let", p.curr)
-
 	}
 
-	if p.next.Type != token.TT_ASSIGN {
-		return LetDeclarationNode{
-			IdentifierNode: identifier,
-			ValueNode:      NilNode{Token: p.curr},
+	if !p.consume(token.TT_ASSIGN) {
+		if !p.consume(token.TT_SEMICOLON) {
+			return nil, newSyntaxError("expected a ; at the end of a declaration", p.curr)
+		}
+
+		return LetStatementNode{
+			Identifier: identifier,
+			Value:      NilNode{},
 		}, nil
 	}
 
-	p.advance()
-
-	identifierValue, err := p.expression()
-
+	value, err := p.expression()
 	if err != nil {
 		return nil, err
 	}
 
-	if p.next.Type != token.TT_SEMICOLON {
+	if !p.consume(token.TT_SEMICOLON) {
 		return nil, newSyntaxError("expected a ; at the end of a declaration", p.curr)
 	}
 
-	p.advance()
-	return LetDeclarationNode{
-		IdentifierNode: identifier,
-		ValueNode:      identifierValue,
+	return LetStatementNode{
+		Identifier: identifier,
+		Value:      value,
 	}, nil
 }
 
 func (p *Parser) statement() (Node, error) {
-	if p.next.Type == token.TT_PRINT {
-		p.advance()
+	if p.consume(token.TT_PRINT) {
 		return p.printStatement()
 	}
 	return p.exprStatement()
-}
-
-func (p *Parser) exprStatement() (Node, error) {
-	expr, err := p.expression()
-	if err != nil {
-		return nil, err
-	}
-
-	if p.next.Type == token.TT_SEMICOLON {
-		p.advance()
-		return ExpressionStatementNode{Node: expr}, nil
-	}
-	return nil, newSyntaxError("expected a ; at the end of an expression statement", p.curr)
 }
 
 func (p *Parser) printStatement() (Node, error) {
@@ -241,11 +190,22 @@ func (p *Parser) printStatement() (Node, error) {
 		return nil, err
 	}
 
-	if p.next.Type == token.TT_SEMICOLON {
-		p.advance()
-		return PrintStatementNode{Node: expr}, nil
+	if p.consume(token.TT_SEMICOLON) {
+		return PrintStatementNode{Exp: expr}, nil
 	}
 	return nil, newSyntaxError("expected a ; at the end of a print statement", p.curr)
+}
+
+func (p *Parser) exprStatement() (Node, error) {
+	expr, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	if p.consume(token.TT_SEMICOLON) {
+		return ExpressionStatementNode{Exp: expr}, nil
+	}
+	return nil, newSyntaxError("expected a ; at the end of an expression statement", p.curr)
 }
 
 func (p *Parser) expression() (Node, error) {
@@ -271,8 +231,7 @@ func (p *Parser) factor() (Node, error) {
 func (p *Parser) unary() (Node, error) {
 	var node Node = nil
 
-	for p.next.Type == token.TT_NOT || p.next.Type == token.TT_MINUS {
-		p.advance()
+	for p.consumeAny([]token.TokenType{token.TT_NOT, token.TT_MINUS}) {
 		tok := p.curr
 
 		n, err := p.unary()
@@ -281,8 +240,8 @@ func (p *Parser) unary() (Node, error) {
 		}
 
 		node = UnaryOpNode{
-			Token: tok,
-			Node:  n,
+			Op:      tok,
+			Operand: n,
 		}
 	}
 	if node == nil {
@@ -292,29 +251,22 @@ func (p *Parser) unary() (Node, error) {
 }
 
 func (p *Parser) atom() (Node, error) {
-	if p.next.Type == token.TT_NUMBER {
-		p.advance()
+	if p.consume(token.TT_NUMBER) {
 		return NumberNode{Token: p.curr}, nil
-	} else if p.nextTokenMatches([]token.TokenType{token.TT_TRUE, token.TT_FALSE}) {
-		p.advance()
+	} else if p.consumeAny([]token.TokenType{token.TT_TRUE, token.TT_FALSE}) {
 		return BooleanNode{Token: p.curr}, nil
-	} else if p.nextTokenMatches([]token.TokenType{token.TT_IDENTIFIER}) {
-		p.advance()
+	} else if p.consumeAny([]token.TokenType{token.TT_IDENTIFIER}) {
 		return IdentifierNode{Token: p.curr}, nil
-	} else if p.nextTokenMatches([]token.TokenType{token.TT_NIL}) {
-		p.advance()
-		return NilNode{Token: p.curr}, nil
-	} else if p.next.Type == token.TT_LPAREN {
-		p.advance()
-
+	} else if p.consumeAny([]token.TokenType{token.TT_NIL}) {
+		return NilNode{}, nil
+	} else if p.consume(token.TT_LPAREN) {
 		exp, err := p.expression()
 		if err != nil {
 			return nil, err
 		}
 
-		if p.next.Type == token.TT_RPAREN {
-			p.advance()
-			return ExpressionNode{Token: p.curr, Node: exp}, nil
+		if p.consume(token.TT_RPAREN) {
+			return ExpressionNode{Exp: exp}, nil
 		}
 		return nil, newSyntaxError("expected closing ')' after expression", p.curr)
 	}
@@ -339,8 +291,7 @@ func (p *Parser) binaryOp(tokenTypes []token.TokenType, fun GrammarRuleFunc) (No
 		return nil, err
 	}
 
-	for p.nextTokenMatches(tokenTypes) {
-		p.advance()
+	for p.consumeAny(tokenTypes) {
 		tok := p.curr
 
 		right, err := fun()
@@ -349,17 +300,24 @@ func (p *Parser) binaryOp(tokenTypes []token.TokenType, fun GrammarRuleFunc) (No
 		}
 
 		left = BinaryOpNode{
-			Left:  left,
-			Token: tok,
-			Right: right,
+			LHS: left,
+			Op:  tok,
+			RHS: right,
 		}
 	}
 	return left, nil
 }
 
-func (p *Parser) nextTokenMatches(haystack []token.TokenType) bool {
-	for _, straw := range haystack {
+// consume consumes the next token if it matches the given type and returns true, otherwise it returns false
+func (p *Parser) consume(tokType token.TokenType) bool {
+	return p.consumeAny([]token.TokenType{tokType})
+}
+
+// consumeAny consumes the next token if it matches any of the given types and returns true, otherwise it returns false
+func (p *Parser) consumeAny(tokTypes []token.TokenType) bool {
+	for _, straw := range tokTypes {
 		if p.next.Type == straw {
+			p.advance()
 			return true
 		}
 	}

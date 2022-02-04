@@ -33,14 +33,14 @@ func (i *Interpreter) visit(node parser.Node) (types.TypeValue, error) {
 	switch node.(type) {
 	case parser.ProgramNode:
 		return i.visitProgramNode(node.(parser.ProgramNode))
-	case parser.LetDeclarationNode:
-		return i.visitLetDeclarationNode(node.(parser.LetDeclarationNode))
+	case parser.LetStatementNode:
+		return i.visitLetStatementNode(node.(parser.LetStatementNode))
 	case parser.ExpressionStatementNode:
 		return i.visitExpressionStatementNode(node.(parser.ExpressionStatementNode))
 	case parser.PrintStatementNode:
 		return i.visitPrintStatementNode(node.(parser.PrintStatementNode))
 	case parser.ExpressionNode:
-		return i.visit(node.(parser.ExpressionNode).Node)
+		return i.visit(node.(parser.ExpressionNode).Exp)
 	case parser.BinaryOpNode:
 		return i.visitBinaryOpNode(node.(parser.BinaryOpNode))
 	case parser.UnaryOpNode:
@@ -58,7 +58,7 @@ func (i *Interpreter) visit(node parser.Node) (types.TypeValue, error) {
 }
 
 func (i *Interpreter) visitProgramNode(node parser.ProgramNode) (types.TypeValue, error) {
-	for _, node := range node.Nodes {
+	for _, node := range node.Declarations {
 		_, err := i.visit(node)
 		if err != nil {
 			return types.TypeValue{}, err
@@ -67,19 +67,19 @@ func (i *Interpreter) visitProgramNode(node parser.ProgramNode) (types.TypeValue
 	return types.TypeValue{}, nil
 }
 
-func (i *Interpreter) visitLetDeclarationNode(node parser.LetDeclarationNode) (types.TypeValue, error) {
-	expression, err := i.visit(node.ValueNode)
+func (i *Interpreter) visitLetStatementNode(node parser.LetStatementNode) (types.TypeValue, error) {
+	expression, err := i.visit(node.Value)
 	if err != nil {
 		return types.TypeValue{}, err
 	}
 
-	i.globals[node.IdentifierNode.Token.Literal] = expression
+	i.globals[node.Identifier.Token.Literal] = expression
 	return types.TypeValue{}, nil
 }
 
 func (i *Interpreter) visitExpressionStatementNode(node parser.ExpressionStatementNode) (types.TypeValue, error) {
 	// Evaluate the expression and discard the result (for now)
-	_, err := i.visit(node.Node)
+	_, err := i.visit(node.Exp)
 	if err != nil {
 		return types.TypeValue{}, err
 	}
@@ -88,7 +88,7 @@ func (i *Interpreter) visitExpressionStatementNode(node parser.ExpressionStateme
 }
 
 func (i *Interpreter) visitPrintStatementNode(node parser.PrintStatementNode) (types.TypeValue, error) {
-	result, err := i.visit(node.Node)
+	result, err := i.visit(node.Exp)
 	if err != nil {
 		return types.TypeValue{}, err
 	}
@@ -99,17 +99,17 @@ func (i *Interpreter) visitPrintStatementNode(node parser.PrintStatementNode) (t
 }
 
 func (i *Interpreter) visitBinaryOpNode(node parser.BinaryOpNode) (types.TypeValue, error) {
-	left, err := i.visit(node.Left)
+	left, err := i.visit(node.LHS)
 	if err != nil {
 		return types.TypeValue{}, err
 	}
 
-	right, err := i.visit(node.Right)
+	right, err := i.visit(node.RHS)
 	if err != nil {
 		return types.TypeValue{}, err
 	}
 
-	switch node.Token.Type {
+	switch node.Op.Type {
 	case token.TT_PLUS:
 		return left.Add(right)
 	case token.TT_MINUS:
@@ -131,20 +131,20 @@ func (i *Interpreter) visitBinaryOpNode(node parser.BinaryOpNode) (types.TypeVal
 	case token.TT_GTE:
 		return left.GreaterThanEq(right)
 	}
-	return types.TypeValue{}, fmt.Errorf("invalid binary op: %s", node.Token.Type)
+	return types.TypeValue{}, fmt.Errorf("invalid binary op: %s", node.Op.Type)
 }
 
 func (i *Interpreter) visitUnaryOpNode(node parser.UnaryOpNode) (types.TypeValue, error) {
-	val, err := i.visit(node.Node)
+	val, err := i.visit(node.Operand)
 	if err != nil {
 		return types.TypeValue{}, err
 	}
 
-	if node.Token.Type == token.TT_MINUS || node.Token.Type == token.TT_NOT {
+	if node.Op.Type == token.TT_MINUS || node.Op.Type == token.TT_NOT {
 		return val.Negate()
 	}
 
-	return types.TypeValue{}, fmt.Errorf("invalid unary op: %s", node.Token.Type)
+	return types.TypeValue{}, fmt.Errorf("invalid unary op: %s", node.Op.Type)
 }
 
 func (i *Interpreter) visitNumberNode(node parser.NumberNode) (types.TypeValue, error) {
