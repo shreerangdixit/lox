@@ -2,7 +2,7 @@ package interpreter
 
 import (
 	"fmt"
-	"lox/types"
+	"github.com/shreerangdixit/lox/types"
 )
 
 type EnvError struct {

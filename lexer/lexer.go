@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"lox/token"
+	"github.com/shreerangdixit/lox/token"
 )
 
 type Lexer struct {

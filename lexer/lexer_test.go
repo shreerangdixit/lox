@@ -1,8 +1,8 @@
 package lexer
 
 import (
+	"github.com/shreerangdixit/lox/token"
 	"github.com/stretchr/testify/assert"
-	"lox/token"
 	"testing"
 )
 

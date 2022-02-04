@@ -2,8 +2,8 @@ package parser
 
 import (
 	"fmt"
-	"lox/lexer"
-	"lox/token"
+	"github.com/shreerangdixit/lox/lexer"
+	"github.com/shreerangdixit/lox/token"
 )
 
 type GrammarRuleFunc func() (Node, error)

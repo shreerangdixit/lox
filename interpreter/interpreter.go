@@ -2,9 +2,9 @@ package interpreter
 
 import (
 	"fmt"
-	"lox/parser"
-	"lox/token"
-	"lox/types"
+	"github.com/shreerangdixit/lox/parser"
+	"github.com/shreerangdixit/lox/token"
+	"github.com/shreerangdixit/lox/types"
 	"strconv"
 )
 

@@ -1,4 +1,4 @@
-module lox
+module github.com/shreerangdixit/lox
 
 go 1.16
 

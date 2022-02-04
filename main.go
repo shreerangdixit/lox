@@ -3,10 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/shreerangdixit/lox/interpreter"
+	"github.com/shreerangdixit/lox/lexer"
+	"github.com/shreerangdixit/lox/parser"
 	"io"
-	"lox/interpreter"
-	"lox/lexer"
-	"lox/parser"
 	"os"
 )
 
