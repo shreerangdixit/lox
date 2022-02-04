@@ -167,10 +167,10 @@ func (i *Interpreter) visitBooleanNode(node parser.BooleanNode) (types.TypeValue
 
 func (i *Interpreter) visitIdentifierNode(node parser.IdentifierNode) (types.TypeValue, error) {
 	val, ok := i.globals[node.Token.Literal]
-
 	if !ok {
 		return types.TypeValue{}, fmt.Errorf("undeclared identifier: %s", node.Token.Literal)
 	}
+
 	return val, nil
 }
 
