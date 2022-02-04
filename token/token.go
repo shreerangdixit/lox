@@ -4,20 +4,6 @@ import (
 	"fmt"
 )
 
-type TokenType int
-
-type Token struct {
-	Type    TokenType
-	Literal string
-}
-
-func (t Token) String() string {
-	if t.Type == TT_IDENTIFIER || t.Type == TT_NUMBER {
-		return fmt.Sprintf("%s:%s", t.Type, t.Literal)
-	}
-	return t.Literal
-}
-
 var keywords = map[string]TokenType{
 	"print":  TT_PRINT,
 	"let":    TT_LET,
@@ -35,6 +21,20 @@ func LookupIdentifierType(v string) TokenType {
 		return val
 	}
 	return TT_IDENTIFIER
+}
+
+type TokenType int
+
+type Token struct {
+	Type    TokenType
+	Literal string
+}
+
+func (t Token) String() string {
+	if t.Type == TT_IDENTIFIER || t.Type == TT_NUMBER {
+		return fmt.Sprintf("%s:%s", t.Type, t.Literal)
+	}
+	return t.Literal
 }
 
 const (
