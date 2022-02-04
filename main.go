@@ -10,7 +10,18 @@ import (
 	"os"
 )
 
+const Logo = `
+.____    ________  ____  ___
+|    |   \_____  \ \   \/  /
+|    |    /   |   \ \     / 
+|    |___/    |    \/     \ 
+|_______ \_______  /___/\  \
+        \/       \/      \_/
+`
+
 func startREPL(in io.Reader, out io.Writer) {
+	fmt.Fprintf(out, "%s\n", Logo)
+
 	scanner := bufio.NewScanner(in)
 	ipt := interpreter.New()
 	for {
