@@ -70,7 +70,7 @@ func isSingleExpression(node parser.Node) (parser.Node, bool) {
 		return nil, false
 	}
 
-	if len(programNode.Declarations) > 1 {
+	if len(programNode.Declarations) == 0 || len(programNode.Declarations) > 1 {
 		return nil, false
 	}
 
