@@ -59,6 +59,10 @@ type PrintStatementNode struct {
 	Exp Node
 }
 
+type BlockNode struct {
+	Declarations []Node
+}
+
 type ExpressionNode struct {
 	Exp Node
 }
@@ -97,6 +101,7 @@ func (n ProgramNode) String() string             { return fmt.Sprintf("+%s", n.D
 func (n IdentifierNode) String() string          { return fmt.Sprintf("%s", n.Token) }
 func (n AssignmentNode) String() string          { return fmt.Sprintf("%s=%s", n.Identifier, n.Value) }
 func (n LetStatementNode) String() string        { return fmt.Sprintf("let %s=%s", n.Identifier, n.Value) }
+func (n BlockNode) String() string               { return fmt.Sprintf("%+s", n.Declarations) }
 func (n ExpressionStatementNode) String() string { return fmt.Sprintf("%s", n.Exp) }
 func (n PrintStatementNode) String() string      { return fmt.Sprintf("%s", n.Exp) }
 func (n ExpressionNode) String() string          { return fmt.Sprintf("%s", n.Exp) }
@@ -201,9 +206,12 @@ func (p *Parser) letDeclaration() (Node, error) {
 }
 
 // statement -> exprStatement
-//           | printStatement ;
+//           | printStatement
+//           | block ;
 func (p *Parser) statement() (Node, error) {
-	if p.consume(token.TT_PRINT) {
+	if p.consume(token.TT_LBRACE) {
+		return p.block()
+	} else if p.consume(token.TT_PRINT) {
 		return p.printStatement()
 	}
 	return p.exprStatement()
@@ -233,6 +241,28 @@ func (p *Parser) exprStatement() (Node, error) {
 		return ExpressionStatementNode{Exp: expr}, nil
 	}
 	return nil, newSyntaxError("expected a ; at the end of an expression statement", p.curr)
+}
+
+// block -> "{" declaration* "}" ;
+func (p *Parser) block() (Node, error) {
+	declarations := make([]Node, 0, 100)
+
+	for !p.check(token.TT_RBRACE) && !p.check(token.TT_EOF) {
+		decl, err := p.declaration()
+		if err != nil {
+			return nil, err
+		}
+
+		declarations = append(declarations, decl)
+	}
+
+	if !p.consume(token.TT_RBRACE) {
+		return nil, newSyntaxError("expected closing '}'", p.curr)
+	}
+
+	return BlockNode{
+		Declarations: declarations,
+	}, nil
 }
 
 // expression -> assignment ( "?" assignment ":" assignment )? ;
@@ -391,6 +421,21 @@ func (p *Parser) binaryOp(tokenTypes []token.TokenType, fun GrammarRuleFunc) (No
 		}
 	}
 	return left, nil
+}
+
+// check checks the next token if it matches the given type and returns true, otherwise it returns false
+func (p *Parser) check(tokType token.TokenType) bool {
+	return p.checkAny([]token.TokenType{tokType})
+}
+
+// checkAny checks the next token if it matches any of the given types and returns true, otherwise it returns false
+func (p *Parser) checkAny(tokTypes []token.TokenType) bool {
+	for _, straw := range tokTypes {
+		if p.next.Type == straw {
+			return true
+		}
+	}
+	return false
 }
 
 // consume consumes the next token if it matches the given type and returns true, otherwise it returns false

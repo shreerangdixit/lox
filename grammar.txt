@@ -3,7 +3,9 @@ declaration    -> letDecl
                |  statement ;
 letDecl        -> "let" IDENTIFIER ( "=" expression )? ";" ;
 statement      -> exprStatement
-               | printStatement ;
+               | printStatement
+               | block ;
+block          -> "{" declaration* "}" ;
 exprStatement  -> expression ";" ;
 printStatement -> "print" expression ";" ;
 expression     -> assignment ( "?" assignment ":" assignment )? ;

@@ -24,6 +24,8 @@ func (i *Interpreter) eval(node parser.Node) (types.TypeValue, error) {
 	switch node.(type) {
 	case parser.ProgramNode:
 		return i.evalProgramNode(node.(parser.ProgramNode))
+	case parser.BlockNode:
+		return i.evalBlockNode(node.(parser.BlockNode))
 	case parser.LetStatementNode:
 		return i.evalLetStatementNode(node.(parser.LetStatementNode))
 	case parser.ExpressionStatementNode:
@@ -55,6 +57,24 @@ func (i *Interpreter) eval(node parser.Node) (types.TypeValue, error) {
 }
 
 func (i *Interpreter) evalProgramNode(node parser.ProgramNode) (types.TypeValue, error) {
+	for _, node := range node.Declarations {
+		_, err := i.eval(node)
+		if err != nil {
+			return types.NO_VALUE, err
+		}
+	}
+	return types.NO_VALUE, nil
+}
+
+func (i *Interpreter) evalBlockNode(node parser.BlockNode) (types.TypeValue, error) {
+	// Reset environment at the end of block scope
+	prev := i.env
+	defer func() {
+		i.env = prev
+	}()
+
+	// New environment at the beginning of block scope
+	i.env = NewEnvWithEnclosing(i.env)
 	for _, node := range node.Declarations {
 		_, err := i.eval(node)
 		if err != nil {
