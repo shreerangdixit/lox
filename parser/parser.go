@@ -136,6 +136,8 @@ func (p *Parser) Parse() (Node, error) {
 // ------------------------------------
 // Grammar rule functions
 // ------------------------------------
+
+// program -> declaration* EOF ;
 func (p *Parser) program() (Node, error) {
 	declarations := make([]Node, 0, 100)
 	for !p.consume(token.TT_EOF) {
@@ -151,6 +153,8 @@ func (p *Parser) program() (Node, error) {
 	}, nil
 }
 
+// declaration -> letDecl
+//             | statement ;
 func (p *Parser) declaration() (Node, error) {
 	if p.consume(token.TT_LET) {
 		return p.letDeclaration()
@@ -158,6 +162,7 @@ func (p *Parser) declaration() (Node, error) {
 	return p.statement()
 }
 
+// letDecl -> "let" IDENTIFIER ( "=" expression )? ";" ;
 func (p *Parser) letDeclaration() (Node, error) {
 	atom, err := p.atom()
 	if err != nil {
@@ -195,6 +200,8 @@ func (p *Parser) letDeclaration() (Node, error) {
 	}, nil
 }
 
+// statement -> exprStatement
+//           | printStatement ;
 func (p *Parser) statement() (Node, error) {
 	if p.consume(token.TT_PRINT) {
 		return p.printStatement()
@@ -202,6 +209,7 @@ func (p *Parser) statement() (Node, error) {
 	return p.exprStatement()
 }
 
+// printStatement -> "print" expression ";" ;
 func (p *Parser) printStatement() (Node, error) {
 	expr, err := p.expression()
 	if err != nil {
@@ -214,6 +222,7 @@ func (p *Parser) printStatement() (Node, error) {
 	return nil, newSyntaxError("expected a ; at the end of a print statement", p.curr)
 }
 
+// exprStatement -> expression ";" ;
 func (p *Parser) exprStatement() (Node, error) {
 	expr, err := p.expression()
 	if err != nil {
@@ -226,6 +235,7 @@ func (p *Parser) exprStatement() (Node, error) {
 	return nil, newSyntaxError("expected a ; at the end of an expression statement", p.curr)
 }
 
+// expression -> assignment ( "?" assignment ":" assignment )? ;
 func (p *Parser) expression() (Node, error) {
 	exp, err := p.assignment()
 	if err != nil {
@@ -258,6 +268,8 @@ func (p *Parser) expression() (Node, error) {
 	return exp, nil
 }
 
+// assignment -> IDENTIFIER "=" assignment
+//            | equality ;
 func (p *Parser) assignment() (Node, error) {
 	expr, err := p.equality()
 	if err != nil {
@@ -282,22 +294,28 @@ func (p *Parser) assignment() (Node, error) {
 	return expr, nil
 }
 
+// equality -> comparison ( ( "!=" | "==" ) comparison )* ;
 func (p *Parser) equality() (Node, error) {
 	return p.binaryOp([]token.TokenType{token.TT_EQ, token.TT_NEQ}, p.comparison)
 }
 
+// comparison -> term ( ( "<" | "<=" | ">" | ">=" ) term )* ;
 func (p *Parser) comparison() (Node, error) {
 	return p.binaryOp([]token.TokenType{token.TT_LT, token.TT_LTE, token.TT_GT, token.TT_GTE}, p.term)
 }
 
+// term -> factor ( ( "+" | "-" ) factor )* ;
 func (p *Parser) term() (Node, error) {
 	return p.binaryOp([]token.TokenType{token.TT_PLUS, token.TT_MINUS}, p.factor)
 }
 
+// factor -> unary ( ( "/" | "*" ) unary )* ;
 func (p *Parser) factor() (Node, error) {
 	return p.binaryOp([]token.TokenType{token.TT_DIVIDE, token.TT_MULTIPLY}, p.unary)
 }
 
+// unary -> ( "!" | "-" ) unary
+//       | atom ;
 func (p *Parser) unary() (Node, error) {
 	var node Node = nil
 
@@ -320,6 +338,9 @@ func (p *Parser) unary() (Node, error) {
 	return node, nil
 }
 
+// atom -> NUMBER | STRING | "true" | "false" | "nil"
+//      | "(" expression ")"
+//      | IDENTIFIER ;
 func (p *Parser) atom() (Node, error) {
 	if p.consume(token.TT_NUMBER) {
 		return NumberNode{Token: p.curr}, nil
