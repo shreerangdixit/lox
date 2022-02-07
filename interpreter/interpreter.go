@@ -34,6 +34,8 @@ func (i *Interpreter) eval(node parser.Node) (types.TypeValue, error) {
 		return i.evalAssignmentNode(node.(parser.AssignmentNode))
 	case parser.ExpressionNode:
 		return i.eval(node.(parser.ExpressionNode).Exp)
+	case parser.TernaryOpNode:
+		return i.evalTernaryOpNode(node.(parser.TernaryOpNode))
 	case parser.BinaryOpNode:
 		return i.evalBinaryOpNode(node.(parser.BinaryOpNode))
 	case parser.UnaryOpNode:
@@ -95,6 +97,23 @@ func (i *Interpreter) evalAssignmentNode(node parser.AssignmentNode) (types.Type
 		return types.NO_VALUE, err
 	}
 	return types.NO_VALUE, i.env.Assign(node.Identifier.Token.Literal, value)
+}
+
+func (i *Interpreter) evalTernaryOpNode(node parser.TernaryOpNode) (types.TypeValue, error) {
+	value, err := i.eval(node.Exp)
+	if err != nil {
+		return types.NO_VALUE, err
+	}
+
+	if value.Type != types.BOOL {
+		return types.NO_VALUE, fmt.Errorf("expected ternary condition to evaluate to boolean")
+	}
+
+	if value.Value.(bool) {
+		return i.eval(node.TrueExp)
+	} else {
+		return i.eval(node.FalseExp)
+	}
 }
 
 func (i *Interpreter) evalBinaryOpNode(node parser.BinaryOpNode) (types.TypeValue, error) {

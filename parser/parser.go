@@ -63,6 +63,12 @@ type ExpressionNode struct {
 	Exp Node
 }
 
+type TernaryOpNode struct {
+	Exp      Node
+	TrueExp  Node
+	FalseExp Node
+}
+
 type BinaryOpNode struct {
 	LHS Node
 	Op  token.Token
@@ -94,6 +100,7 @@ func (n LetStatementNode) String() string        { return fmt.Sprintf("let %s=%s
 func (n ExpressionStatementNode) String() string { return fmt.Sprintf("%s", n.Exp) }
 func (n PrintStatementNode) String() string      { return fmt.Sprintf("%s", n.Exp) }
 func (n ExpressionNode) String() string          { return fmt.Sprintf("%s", n.Exp) }
+func (n TernaryOpNode) String() string           { return fmt.Sprintf("%s?%s:%s", n.Exp, n.TrueExp, n.FalseExp) }
 func (n BinaryOpNode) String() string            { return fmt.Sprintf("%s %s %s", n.LHS, n.Op, n.RHS) }
 func (n UnaryOpNode) String() string             { return fmt.Sprintf("%s%s", n.Op, n.Operand) }
 func (n BooleanNode) String() string             { return fmt.Sprintf("%s", n.Token) }
@@ -220,7 +227,35 @@ func (p *Parser) exprStatement() (Node, error) {
 }
 
 func (p *Parser) expression() (Node, error) {
-	return p.assignment()
+	exp, err := p.assignment()
+	if err != nil {
+		return nil, err
+	}
+
+	// Check ternary operator: <assignment> ? <assignment> : <assignment>
+	if p.consume(token.TT_QUESTION) {
+		trueExp, err := p.assignment()
+		if err != nil {
+			return nil, err
+		}
+
+		if !p.consume(token.TT_COLON) {
+			return nil, newSyntaxError("expected ':'", p.curr)
+		}
+
+		falseExp, err := p.assignment()
+		if err != nil {
+			return nil, err
+		}
+
+		return TernaryOpNode{
+			Exp:      exp,
+			TrueExp:  trueExp,
+			FalseExp: falseExp,
+		}, nil
+	}
+
+	return exp, nil
 }
 
 func (p *Parser) assignment() (Node, error) {

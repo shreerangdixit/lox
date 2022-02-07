@@ -79,6 +79,10 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.TT_LBRACE, string(l.ch))
 	case '}':
 		tok = newToken(token.TT_RBRACE, string(l.ch))
+	case '?':
+		tok = newToken(token.TT_QUESTION, string(l.ch))
+	case ':':
+		tok = newToken(token.TT_COLON, string(l.ch))
 	case 0:
 		tok = newToken(token.TT_EOF, "0")
 	default:

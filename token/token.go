@@ -63,6 +63,8 @@ const (
 	// Delimiters
 	TT_COMMA
 	TT_SEMICOLON
+	TT_COLON
+	TT_QUESTION
 
 	// Parens + Braces
 	TT_LPAREN
@@ -122,6 +124,10 @@ func (t TokenType) String() string {
 		return ","
 	case TT_SEMICOLON:
 		return ";"
+	case TT_QUESTION:
+		return "?"
+	case TT_COLON:
+		return ":"
 	case TT_LPAREN:
 		return "("
 	case TT_RPAREN:
