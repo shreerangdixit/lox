@@ -7,7 +7,7 @@ statement      -> exprStatement
 exprStatement  -> expression ";" ;
 printStatement -> "print" expression ";" ;
 expression     -> assignment ( "?" assignment ":" assignment )? ;
-assignment     -> IDENTIFIER "=" assignment ;
+assignment     -> IDENTIFIER "=" assignment
                | equality ;
 equality       -> comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     -> term ( ( "<" | "<=" | ">" | ">=" ) term )* ;
