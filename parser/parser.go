@@ -227,7 +227,7 @@ func (p *Parser) statement() (Node, error) {
 	return p.exprStatement()
 }
 
-// ifStatement    -> "if" "(" expression ")" statement ( "else" statement )? ;
+// ifStatement -> "if" "(" expression ")" statement ( "else" statement )? ;
 func (p *Parser) ifStatement() (Node, error) {
 	if !p.consume(token.TT_LPAREN) {
 		return nil, newSyntaxError("expected opening '(' for if condition", p.curr)
