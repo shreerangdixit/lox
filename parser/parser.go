@@ -55,6 +55,12 @@ type ExpressionStatementNode struct {
 	Exp Node
 }
 
+type IfStatementNode struct {
+	Exp   Node
+	True  Node
+	False Node
+}
+
 type PrintStatementNode struct {
 	Exp Node
 }
@@ -101,8 +107,9 @@ func (n ProgramNode) String() string             { return fmt.Sprintf("+%s", n.D
 func (n IdentifierNode) String() string          { return fmt.Sprintf("%s", n.Token) }
 func (n AssignmentNode) String() string          { return fmt.Sprintf("%s=%s", n.Identifier, n.Value) }
 func (n LetStatementNode) String() string        { return fmt.Sprintf("let %s=%s", n.Identifier, n.Value) }
-func (n BlockNode) String() string               { return fmt.Sprintf("%+s", n.Declarations) }
+func (n BlockNode) String() string               { return fmt.Sprintf("{%+s}", n.Declarations) }
 func (n ExpressionStatementNode) String() string { return fmt.Sprintf("%s", n.Exp) }
+func (n IfStatementNode) String() string         { return fmt.Sprintf("(%s)(%s)(%s)", n.Exp, n.True, n.False) }
 func (n PrintStatementNode) String() string      { return fmt.Sprintf("%s", n.Exp) }
 func (n ExpressionNode) String() string          { return fmt.Sprintf("%s", n.Exp) }
 func (n TernaryOpNode) String() string           { return fmt.Sprintf("%s?%s:%s", n.Exp, n.TrueExp, n.FalseExp) }
@@ -206,15 +213,76 @@ func (p *Parser) letDeclaration() (Node, error) {
 }
 
 // statement -> exprStatement
+//           | ifStatement
 //           | printStatement
 //           | block ;
 func (p *Parser) statement() (Node, error) {
+	if p.consume(token.TT_IF) {
+		return p.ifStatement()
+	}
 	if p.consume(token.TT_LBRACE) {
 		return p.block()
 	} else if p.consume(token.TT_PRINT) {
 		return p.printStatement()
 	}
 	return p.exprStatement()
+}
+
+// ifStatement    -> "if" "(" expression ")" statement ( "else" statement )? ;
+func (p *Parser) ifStatement() (Node, error) {
+	if !p.consume(token.TT_LPAREN) {
+		return nil, newSyntaxError("expected opening '(' for if condition", p.curr)
+	}
+
+	condExp, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	if !p.consume(token.TT_RPAREN) {
+		return nil, newSyntaxError("expected closing ')' for if condition", p.curr)
+	}
+
+	trueStatement, err := p.statement()
+	var falseStatement Node = nil
+	if err != nil {
+		return nil, err
+	}
+
+	if p.consume(token.TT_ELSE) {
+		falseStatement, err = p.statement()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return IfStatementNode{
+		Exp:   condExp,
+		True:  trueStatement,
+		False: falseStatement,
+	}, nil
+}
+
+// block -> "{" declaration* "}" ;
+func (p *Parser) block() (Node, error) {
+	declarations := make([]Node, 0, 100)
+
+	for !p.check(token.TT_RBRACE) && !p.check(token.TT_EOF) {
+		decl, err := p.declaration()
+		if err != nil {
+			return nil, err
+		}
+
+		declarations = append(declarations, decl)
+	}
+
+	if !p.consume(token.TT_RBRACE) {
+		return nil, newSyntaxError("expected closing '}'", p.curr)
+	}
+
+	return BlockNode{
+		Declarations: declarations,
+	}, nil
 }
 
 // printStatement -> "print" expression ";" ;
@@ -241,28 +309,6 @@ func (p *Parser) exprStatement() (Node, error) {
 		return ExpressionStatementNode{Exp: expr}, nil
 	}
 	return nil, newSyntaxError("expected a ; at the end of an expression statement", p.curr)
-}
-
-// block -> "{" declaration* "}" ;
-func (p *Parser) block() (Node, error) {
-	declarations := make([]Node, 0, 100)
-
-	for !p.check(token.TT_RBRACE) && !p.check(token.TT_EOF) {
-		decl, err := p.declaration()
-		if err != nil {
-			return nil, err
-		}
-
-		declarations = append(declarations, decl)
-	}
-
-	if !p.consume(token.TT_RBRACE) {
-		return nil, newSyntaxError("expected closing '}'", p.curr)
-	}
-
-	return BlockNode{
-		Declarations: declarations,
-	}, nil
 }
 
 // expression -> assignment ( "?" assignment ":" assignment )? ;

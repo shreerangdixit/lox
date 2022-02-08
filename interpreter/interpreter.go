@@ -30,6 +30,8 @@ func (i *Interpreter) eval(node parser.Node) (types.TypeValue, error) {
 		return i.evalLetStatementNode(node.(parser.LetStatementNode))
 	case parser.ExpressionStatementNode:
 		return i.evalExpressionStatementNode(node.(parser.ExpressionStatementNode))
+	case parser.IfStatementNode:
+		return i.evalIfStatementNode(node.(parser.IfStatementNode))
 	case parser.PrintStatementNode:
 		return i.evalPrintStatementNode(node.(parser.PrintStatementNode))
 	case parser.AssignmentNode:
@@ -98,6 +100,23 @@ func (i *Interpreter) evalLetStatementNode(node parser.LetStatementNode) (types.
 
 func (i *Interpreter) evalExpressionStatementNode(node parser.ExpressionStatementNode) (types.TypeValue, error) {
 	return i.eval(node.Exp)
+}
+
+func (i *Interpreter) evalIfStatementNode(node parser.IfStatementNode) (types.TypeValue, error) {
+	value, err := i.eval(node.Exp)
+	if err != nil {
+		return types.NO_VALUE, err
+	}
+
+	if value.Type != types.BOOL {
+		return types.NO_VALUE, fmt.Errorf("expected if condition to evaluate to boolean")
+	}
+
+	if value.Value.(bool) {
+		return i.eval(node.True)
+	} else {
+		return i.eval(node.False)
+	}
 }
 
 func (i *Interpreter) evalPrintStatementNode(node parser.PrintStatementNode) (types.TypeValue, error) {

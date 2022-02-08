@@ -3,11 +3,13 @@ declaration    -> letDecl
                |  statement ;
 letDecl        -> "let" IDENTIFIER ( "=" expression )? ";" ;
 statement      -> exprStatement
+               | ifStatement
                | printStatement
                | block ;
-block          -> "{" declaration* "}" ;
 exprStatement  -> expression ";" ;
+ifStatement    -> "if" "(" expression ")" statement ( "else" statement )? ;
 printStatement -> "print" expression ";" ;
+block          -> "{" declaration* "}" ;
 expression     -> assignment ( "?" assignment ":" assignment )? ;
 assignment     -> IDENTIFIER "=" assignment
                | equality ;
