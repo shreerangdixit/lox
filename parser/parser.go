@@ -219,8 +219,7 @@ func (p *Parser) letDeclaration() (Node, error) {
 func (p *Parser) statement() (Node, error) {
 	if p.consume(token.TT_IF) {
 		return p.ifStatement()
-	}
-	if p.consume(token.TT_LBRACE) {
+	} else if p.consume(token.TT_LBRACE) {
 		return p.block()
 	} else if p.consume(token.TT_PRINT) {
 		return p.printStatement()
