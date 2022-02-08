@@ -243,11 +243,11 @@ func (p *Parser) ifStatement() (Node, error) {
 	}
 
 	trueStatement, err := p.statement()
-	var falseStatement Node = nil
 	if err != nil {
 		return nil, err
 	}
 
+	var falseStatement Node = nil
 	if p.consume(token.TT_ELSE) {
 		falseStatement, err = p.statement()
 		if err != nil {
