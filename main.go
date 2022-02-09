@@ -57,7 +57,7 @@ func startREPL(in io.Reader, out io.Writer) {
 			if err != nil {
 				fmt.Fprintf(out, "%s\n", err)
 			} else if val != interpreter.NULL {
-				fmt.Fprintf(out, "%v\n", val.Inspect())
+				fmt.Fprintf(out, "%s\n", val)
 			}
 		}
 	}

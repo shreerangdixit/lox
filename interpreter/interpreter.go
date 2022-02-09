@@ -124,7 +124,7 @@ func (i *Interpreter) evalPrintStatementNode(node parser.PrintStatementNode) (Ob
 		return NULL, err
 	}
 
-	fmt.Printf("%v\n", result.Inspect())
+	fmt.Printf("%s\n", result)
 
 	return NULL, nil
 }

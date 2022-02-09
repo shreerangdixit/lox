@@ -17,7 +17,7 @@ const (
 
 type Object interface {
 	Type() ObjectType
-	Inspect() string
+	String() string
 }
 
 type Float64 struct{ Value float64 }
@@ -25,32 +25,18 @@ type Bool struct{ Value bool }
 type String struct{ Value string }
 type Null struct{}
 
-func NewFloat64(value float64) Float64 {
-	return Float64{
-		Value: value,
-	}
-}
-
-func NewBool(value bool) Bool {
-	return Bool{
-		Value: value,
-	}
-}
-
-func NewString(value string) String {
-	return String{
-		Value: value,
-	}
-}
+func NewFloat64(value float64) Float64 { return Float64{Value: value} }
+func NewBool(value bool) Bool          { return Bool{Value: value} }
+func NewString(value string) String    { return String{Value: value} }
 
 func (f Float64) Type() ObjectType { return FLOAT64_OBJ }
-func (f Float64) Inspect() string  { return fmt.Sprintf("%v", f.Value) }
+func (f Float64) String() string   { return fmt.Sprintf("%v", f.Value) }
 func (f Bool) Type() ObjectType    { return BOOL_OBJ }
-func (f Bool) Inspect() string     { return fmt.Sprintf("%v", f.Value) }
+func (f Bool) String() string      { return fmt.Sprintf("%v", f.Value) }
 func (f String) Type() ObjectType  { return STRING_OBJ }
-func (f String) Inspect() string   { return fmt.Sprintf("%s", f.Value) }
+func (f String) String() string    { return fmt.Sprintf("%s", f.Value) }
 func (f Null) Type() ObjectType    { return NULL_OBJ }
-func (f Null) Inspect() string     { return "null" }
+func (f Null) String() string      { return "null" }
 
 func Add(left Object, right Object) (Object, error) {
 	if left.Type() != right.Type() {
