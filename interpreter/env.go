@@ -59,7 +59,7 @@ func (e *Env) Get(varName string) (Object, error) {
 		if e.enclosing != nil {
 			return e.enclosing.Get(varName)
 		}
-		return NULL, newEnvError(fmt.Sprintf("variable not declared %s", varName))
+		return NIL, newEnvError(fmt.Sprintf("variable not declared %s", varName))
 	}
 	return e.scopeVariables[varName], nil
 }

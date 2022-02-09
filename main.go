@@ -56,7 +56,7 @@ func startREPL(in io.Reader, out io.Writer) {
 			val, err := ipt.Run(exp)
 			if err != nil {
 				fmt.Fprintf(out, "%s\n", err)
-			} else if val != interpreter.NULL {
+			} else if val != interpreter.NIL {
 				fmt.Fprintf(out, "%s\n", val)
 			}
 		}

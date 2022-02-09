@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-var NULL = Null{}
+var NIL = Nil{}
 
 type ObjectType string
 
@@ -12,7 +12,7 @@ const (
 	FLOAT64_OBJ = "float64"
 	BOOL_OBJ    = "bool"
 	STRING_OBJ  = "string"
-	NULL_OBJ    = "null"
+	NIL_OBJ     = "null"
 )
 
 type Object interface {
@@ -23,7 +23,7 @@ type Object interface {
 type Float64 struct{ Value float64 }
 type Bool struct{ Value bool }
 type String struct{ Value string }
-type Null struct{}
+type Nil struct{}
 
 func NewFloat64(value float64) Float64 { return Float64{Value: value} }
 func NewBool(value bool) Bool          { return Bool{Value: value} }
@@ -35,12 +35,12 @@ func (f Bool) Type() ObjectType    { return BOOL_OBJ }
 func (f Bool) String() string      { return fmt.Sprintf("%v", f.Value) }
 func (f String) Type() ObjectType  { return STRING_OBJ }
 func (f String) String() string    { return fmt.Sprintf("%s", f.Value) }
-func (f Null) Type() ObjectType    { return NULL_OBJ }
-func (f Null) String() string      { return "null" }
+func (f Nil) Type() ObjectType     { return NIL_OBJ }
+func (f Nil) String() string       { return "nil" }
 
 func Add(left Object, right Object) (Object, error) {
 	if left.Type() != right.Type() {
-		return NULL, fmt.Errorf("Cannot add types %s and %s", left.Type(), right.Type())
+		return NIL, fmt.Errorf("Cannot add types %s and %s", left.Type(), right.Type())
 	}
 
 	if left.Type() == FLOAT64_OBJ && right.Type() == FLOAT64_OBJ {
@@ -53,12 +53,12 @@ func Add(left Object, right Object) (Object, error) {
 		return NewString(l.Value + r.Value), nil
 	}
 
-	return NULL, fmt.Errorf("Cannot add types %s and %s", left.Type(), right.Type())
+	return NIL, fmt.Errorf("Cannot add types %s and %s", left.Type(), right.Type())
 }
 
 func Subtract(left Object, right Object) (Object, error) {
 	if left.Type() != right.Type() {
-		return NULL, fmt.Errorf("Cannot subtract types %s and %s", left.Type(), right.Type())
+		return NIL, fmt.Errorf("Cannot subtract types %s and %s", left.Type(), right.Type())
 	}
 
 	if left.Type() == FLOAT64_OBJ && right.Type() == FLOAT64_OBJ {
@@ -67,29 +67,29 @@ func Subtract(left Object, right Object) (Object, error) {
 		return NewFloat64(l.Value - r.Value), nil
 	}
 
-	return NULL, fmt.Errorf("Cannot subtract types %s and %s", left.Type(), right.Type())
+	return NIL, fmt.Errorf("Cannot subtract types %s and %s", left.Type(), right.Type())
 }
 
 func Divide(left Object, right Object) (Object, error) {
 	if left.Type() != right.Type() {
-		return NULL, fmt.Errorf("Cannot divide types %s and %s", left.Type(), right.Type())
+		return NIL, fmt.Errorf("Cannot divide types %s and %s", left.Type(), right.Type())
 	}
 
 	if left.Type() == FLOAT64_OBJ && right.Type() == FLOAT64_OBJ {
 		l := left.(Float64)
 		r := right.(Float64)
 		if r.Value == 0 {
-			return NULL, fmt.Errorf("Divide by zero error")
+			return NIL, fmt.Errorf("Divide by zero error")
 		}
 		return NewFloat64(l.Value / r.Value), nil
 	}
 
-	return NULL, fmt.Errorf("Cannot divide types %s and %s", left.Type(), right.Type())
+	return NIL, fmt.Errorf("Cannot divide types %s and %s", left.Type(), right.Type())
 }
 
 func Multiply(left Object, right Object) (Object, error) {
 	if left.Type() != right.Type() {
-		return NULL, fmt.Errorf("Cannot multiply types %s and %s", left.Type(), right.Type())
+		return NIL, fmt.Errorf("Cannot multiply types %s and %s", left.Type(), right.Type())
 	}
 
 	if left.Type() == FLOAT64_OBJ && right.Type() == FLOAT64_OBJ {
@@ -98,7 +98,7 @@ func Multiply(left Object, right Object) (Object, error) {
 		return NewFloat64(l.Value * r.Value), nil
 	}
 
-	return NULL, fmt.Errorf("Cannot multiply types %s and %s", left.Type(), right.Type())
+	return NIL, fmt.Errorf("Cannot multiply types %s and %s", left.Type(), right.Type())
 }
 
 func Negate(o Object) (Object, error) {
@@ -109,7 +109,7 @@ func Negate(o Object) (Object, error) {
 		obj := o.(Bool)
 		return NewBool(!obj.Value), nil
 	}
-	return NULL, fmt.Errorf("Cannot negate type %s", o.Type())
+	return NIL, fmt.Errorf("Cannot negate type %s", o.Type())
 }
 
 func Equals(left Object, right Object) Bool {
@@ -129,7 +129,7 @@ func Equals(left Object, right Object) Bool {
 		l := left.(String)
 		r := right.(String)
 		return NewBool(l.Value == r.Value)
-	} else if left.Type() == NULL_OBJ && right.Type() == NULL_OBJ {
+	} else if left.Type() == NIL_OBJ && right.Type() == NIL_OBJ {
 		return NewBool(true)
 	}
 

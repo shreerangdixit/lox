@@ -54,17 +54,17 @@ func (i *Interpreter) eval(node parser.Node) (Object, error) {
 	case parser.NilNode:
 		return i.evalNilNode(node.(parser.NilNode))
 	}
-	return NULL, fmt.Errorf("invalid node: %T", node)
+	return NIL, fmt.Errorf("invalid node: %T", node)
 }
 
 func (i *Interpreter) evalProgramNode(node parser.ProgramNode) (Object, error) {
 	for _, node := range node.Declarations {
 		_, err := i.eval(node)
 		if err != nil {
-			return NULL, err
+			return NIL, err
 		}
 	}
-	return NULL, nil
+	return NIL, nil
 }
 
 func (i *Interpreter) evalBlockNode(node parser.BlockNode) (Object, error) {
@@ -79,22 +79,22 @@ func (i *Interpreter) evalBlockNode(node parser.BlockNode) (Object, error) {
 	for _, node := range node.Declarations {
 		_, err := i.eval(node)
 		if err != nil {
-			return NULL, err
+			return NIL, err
 		}
 	}
-	return NULL, nil
+	return NIL, nil
 }
 
 func (i *Interpreter) evalLetStatementNode(node parser.LetStatementNode) (Object, error) {
 	value, err := i.eval(node.Value)
 	if err != nil {
-		return NULL, err
+		return NIL, err
 	}
 
 	if err := i.env.Declare(node.Identifier.Token.Literal, value); err != nil {
-		return NULL, err
+		return NIL, err
 	}
-	return NULL, nil
+	return NIL, nil
 }
 
 func (i *Interpreter) evalExpressionStatementNode(node parser.ExpressionStatementNode) (Object, error) {
@@ -104,11 +104,11 @@ func (i *Interpreter) evalExpressionStatementNode(node parser.ExpressionStatemen
 func (i *Interpreter) evalIfStatementNode(node parser.IfStatementNode) (Object, error) {
 	value, err := i.eval(node.Exp)
 	if err != nil {
-		return NULL, err
+		return NIL, err
 	}
 
 	if value.Type() != BOOL_OBJ {
-		return NULL, fmt.Errorf("expected if condition to evaluate to boolean")
+		return NIL, fmt.Errorf("expected if condition to evaluate to boolean")
 	}
 
 	if value.(Bool).Value {
@@ -121,30 +121,30 @@ func (i *Interpreter) evalIfStatementNode(node parser.IfStatementNode) (Object, 
 func (i *Interpreter) evalPrintStatementNode(node parser.PrintStatementNode) (Object, error) {
 	result, err := i.eval(node.Exp)
 	if err != nil {
-		return NULL, err
+		return NIL, err
 	}
 
 	fmt.Printf("%s\n", result)
 
-	return NULL, nil
+	return NIL, nil
 }
 
 func (i *Interpreter) evalAssignmentNode(node parser.AssignmentNode) (Object, error) {
 	value, err := i.eval(node.Value)
 	if err != nil {
-		return NULL, err
+		return NIL, err
 	}
-	return NULL, i.env.Assign(node.Identifier.Token.Literal, value)
+	return NIL, i.env.Assign(node.Identifier.Token.Literal, value)
 }
 
 func (i *Interpreter) evalTernaryOpNode(node parser.TernaryOpNode) (Object, error) {
 	value, err := i.eval(node.Exp)
 	if err != nil {
-		return NULL, err
+		return NIL, err
 	}
 
 	if value.Type() != BOOL_OBJ {
-		return NULL, fmt.Errorf("expected ternary condition to evaluate to boolean")
+		return NIL, fmt.Errorf("expected ternary condition to evaluate to boolean")
 	}
 
 	if value.(Bool).Value {
@@ -157,12 +157,12 @@ func (i *Interpreter) evalTernaryOpNode(node parser.TernaryOpNode) (Object, erro
 func (i *Interpreter) evalBinaryOpNode(node parser.BinaryOpNode) (Object, error) {
 	left, err := i.eval(node.LHS)
 	if err != nil {
-		return NULL, err
+		return NIL, err
 	}
 
 	right, err := i.eval(node.RHS)
 	if err != nil {
-		return NULL, err
+		return NIL, err
 	}
 
 	switch node.Op.Type {
@@ -187,20 +187,20 @@ func (i *Interpreter) evalBinaryOpNode(node parser.BinaryOpNode) (Object, error)
 	case token.TT_GTE:
 		return GreaterThanEq(left, right), nil
 	}
-	return NULL, fmt.Errorf("invalid binary op: %s", node.Op.Type)
+	return NIL, fmt.Errorf("invalid binary op: %s", node.Op.Type)
 }
 
 func (i *Interpreter) evalUnaryOpNode(node parser.UnaryOpNode) (Object, error) {
 	val, err := i.eval(node.Operand)
 	if err != nil {
-		return NULL, err
+		return NIL, err
 	}
 
 	if node.Op.Type == token.TT_MINUS || node.Op.Type == token.TT_NOT {
 		return Negate(val)
 	}
 
-	return NULL, fmt.Errorf("invalid unary op: %s", node.Op.Type)
+	return NIL, fmt.Errorf("invalid unary op: %s", node.Op.Type)
 }
 
 func (i *Interpreter) evalIdentifierNode(node parser.IdentifierNode) (Object, error) {
@@ -210,7 +210,7 @@ func (i *Interpreter) evalIdentifierNode(node parser.IdentifierNode) (Object, er
 func (i *Interpreter) evalNumberNode(node parser.NumberNode) (Object, error) {
 	val, err := strconv.ParseFloat(node.Token.Literal, 10)
 	if err != nil {
-		return NULL, err
+		return NIL, err
 	}
 
 	return NewFloat64(val), nil
@@ -219,7 +219,7 @@ func (i *Interpreter) evalNumberNode(node parser.NumberNode) (Object, error) {
 func (i *Interpreter) evalBooleanNode(node parser.BooleanNode) (Object, error) {
 	val, err := strconv.ParseBool(node.Token.Literal)
 	if err != nil {
-		return NULL, err
+		return NIL, err
 	}
 
 	return NewBool(val), nil
@@ -230,5 +230,5 @@ func (i *Interpreter) evalStringNode(node parser.StringNode) (Object, error) {
 }
 
 func (i *Interpreter) evalNilNode(node parser.NilNode) (Object, error) {
-	return NULL, nil
+	return NIL, nil
 }
