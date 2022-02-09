@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/shreerangdixit/lox/parser"
 	"github.com/shreerangdixit/lox/token"
-	"github.com/shreerangdixit/lox/types"
 	"strconv"
 )
 
@@ -16,11 +15,11 @@ func New() *Interpreter {
 	return &Interpreter{env: NewEnv()}
 }
 
-func (i *Interpreter) Run(root parser.Node) (types.TypeValue, error) {
+func (i *Interpreter) Run(root parser.Node) (Object, error) {
 	return i.eval(root)
 }
 
-func (i *Interpreter) eval(node parser.Node) (types.TypeValue, error) {
+func (i *Interpreter) eval(node parser.Node) (Object, error) {
 	switch node.(type) {
 	case parser.ProgramNode:
 		return i.evalProgramNode(node.(parser.ProgramNode))
@@ -55,20 +54,20 @@ func (i *Interpreter) eval(node parser.Node) (types.TypeValue, error) {
 	case parser.NilNode:
 		return i.evalNilNode(node.(parser.NilNode))
 	}
-	return types.NO_VALUE, fmt.Errorf("invalid node: %T", node)
+	return NULL, fmt.Errorf("invalid node: %T", node)
 }
 
-func (i *Interpreter) evalProgramNode(node parser.ProgramNode) (types.TypeValue, error) {
+func (i *Interpreter) evalProgramNode(node parser.ProgramNode) (Object, error) {
 	for _, node := range node.Declarations {
 		_, err := i.eval(node)
 		if err != nil {
-			return types.NO_VALUE, err
+			return NULL, err
 		}
 	}
-	return types.NO_VALUE, nil
+	return NULL, nil
 }
 
-func (i *Interpreter) evalBlockNode(node parser.BlockNode) (types.TypeValue, error) {
+func (i *Interpreter) evalBlockNode(node parser.BlockNode) (Object, error) {
 	// Reset environment at the end of block scope
 	prev := i.env
 	defer func() {
@@ -80,156 +79,156 @@ func (i *Interpreter) evalBlockNode(node parser.BlockNode) (types.TypeValue, err
 	for _, node := range node.Declarations {
 		_, err := i.eval(node)
 		if err != nil {
-			return types.NO_VALUE, err
+			return NULL, err
 		}
 	}
-	return types.NO_VALUE, nil
+	return NULL, nil
 }
 
-func (i *Interpreter) evalLetStatementNode(node parser.LetStatementNode) (types.TypeValue, error) {
+func (i *Interpreter) evalLetStatementNode(node parser.LetStatementNode) (Object, error) {
 	value, err := i.eval(node.Value)
 	if err != nil {
-		return types.NO_VALUE, err
+		return NULL, err
 	}
 
 	if err := i.env.Declare(node.Identifier.Token.Literal, value); err != nil {
-		return types.NO_VALUE, err
+		return NULL, err
 	}
-	return types.NO_VALUE, nil
+	return NULL, nil
 }
 
-func (i *Interpreter) evalExpressionStatementNode(node parser.ExpressionStatementNode) (types.TypeValue, error) {
+func (i *Interpreter) evalExpressionStatementNode(node parser.ExpressionStatementNode) (Object, error) {
 	return i.eval(node.Exp)
 }
 
-func (i *Interpreter) evalIfStatementNode(node parser.IfStatementNode) (types.TypeValue, error) {
+func (i *Interpreter) evalIfStatementNode(node parser.IfStatementNode) (Object, error) {
 	value, err := i.eval(node.Exp)
 	if err != nil {
-		return types.NO_VALUE, err
+		return NULL, err
 	}
 
-	if value.Type != types.BOOL {
-		return types.NO_VALUE, fmt.Errorf("expected if condition to evaluate to boolean")
+	if value.Type() != BOOL_OBJ {
+		return NULL, fmt.Errorf("expected if condition to evaluate to boolean")
 	}
 
-	if value.Value.(bool) {
+	if value.(Bool).Value {
 		return i.eval(node.True)
 	} else {
 		return i.eval(node.False)
 	}
 }
 
-func (i *Interpreter) evalPrintStatementNode(node parser.PrintStatementNode) (types.TypeValue, error) {
+func (i *Interpreter) evalPrintStatementNode(node parser.PrintStatementNode) (Object, error) {
 	result, err := i.eval(node.Exp)
 	if err != nil {
-		return types.NO_VALUE, err
+		return NULL, err
 	}
 
-	fmt.Printf("%v\n", result.Value)
+	fmt.Printf("%v\n", result.Inspect())
 
-	return types.NO_VALUE, nil
+	return NULL, nil
 }
 
-func (i *Interpreter) evalAssignmentNode(node parser.AssignmentNode) (types.TypeValue, error) {
+func (i *Interpreter) evalAssignmentNode(node parser.AssignmentNode) (Object, error) {
 	value, err := i.eval(node.Value)
 	if err != nil {
-		return types.NO_VALUE, err
+		return NULL, err
 	}
-	return types.NO_VALUE, i.env.Assign(node.Identifier.Token.Literal, value)
+	return NULL, i.env.Assign(node.Identifier.Token.Literal, value)
 }
 
-func (i *Interpreter) evalTernaryOpNode(node parser.TernaryOpNode) (types.TypeValue, error) {
+func (i *Interpreter) evalTernaryOpNode(node parser.TernaryOpNode) (Object, error) {
 	value, err := i.eval(node.Exp)
 	if err != nil {
-		return types.NO_VALUE, err
+		return NULL, err
 	}
 
-	if value.Type != types.BOOL {
-		return types.NO_VALUE, fmt.Errorf("expected ternary condition to evaluate to boolean")
+	if value.Type() != BOOL_OBJ {
+		return NULL, fmt.Errorf("expected ternary condition to evaluate to boolean")
 	}
 
-	if value.Value.(bool) {
+	if value.(Bool).Value {
 		return i.eval(node.TrueExp)
 	} else {
 		return i.eval(node.FalseExp)
 	}
 }
 
-func (i *Interpreter) evalBinaryOpNode(node parser.BinaryOpNode) (types.TypeValue, error) {
+func (i *Interpreter) evalBinaryOpNode(node parser.BinaryOpNode) (Object, error) {
 	left, err := i.eval(node.LHS)
 	if err != nil {
-		return types.NO_VALUE, err
+		return NULL, err
 	}
 
 	right, err := i.eval(node.RHS)
 	if err != nil {
-		return types.NO_VALUE, err
+		return NULL, err
 	}
 
 	switch node.Op.Type {
 	case token.TT_PLUS:
-		return left.Add(right)
+		return Add(left, right)
 	case token.TT_MINUS:
-		return left.Subtract(right)
+		return Subtract(left, right)
 	case token.TT_DIVIDE:
-		return left.Divide(right)
+		return Divide(left, right)
 	case token.TT_MULTIPLY:
-		return left.Multiply(right)
+		return Multiply(left, right)
 	case token.TT_EQ:
-		return left.Equals(right)
+		return Equals(left, right), nil
 	case token.TT_NEQ:
-		return left.NotEquals(right)
+		return NotEquals(left, right), nil
 	case token.TT_LT:
-		return left.LessThan(right)
+		return LessThan(left, right), nil
 	case token.TT_LTE:
-		return left.LessThanEq(right)
+		return LessThanEq(left, right), nil
 	case token.TT_GT:
-		return left.GreaterThan(right)
+		return GreaterThan(left, right), nil
 	case token.TT_GTE:
-		return left.GreaterThanEq(right)
+		return GreaterThanEq(left, right), nil
 	}
-	return types.NO_VALUE, fmt.Errorf("invalid binary op: %s", node.Op.Type)
+	return NULL, fmt.Errorf("invalid binary op: %s", node.Op.Type)
 }
 
-func (i *Interpreter) evalUnaryOpNode(node parser.UnaryOpNode) (types.TypeValue, error) {
+func (i *Interpreter) evalUnaryOpNode(node parser.UnaryOpNode) (Object, error) {
 	val, err := i.eval(node.Operand)
 	if err != nil {
-		return types.NO_VALUE, err
+		return NULL, err
 	}
 
 	if node.Op.Type == token.TT_MINUS || node.Op.Type == token.TT_NOT {
-		return val.Negate()
+		return Negate(val)
 	}
 
-	return types.NO_VALUE, fmt.Errorf("invalid unary op: %s", node.Op.Type)
+	return NULL, fmt.Errorf("invalid unary op: %s", node.Op.Type)
 }
 
-func (i *Interpreter) evalIdentifierNode(node parser.IdentifierNode) (types.TypeValue, error) {
+func (i *Interpreter) evalIdentifierNode(node parser.IdentifierNode) (Object, error) {
 	return i.env.Get(node.Token.Literal)
 }
 
-func (i *Interpreter) evalNumberNode(node parser.NumberNode) (types.TypeValue, error) {
+func (i *Interpreter) evalNumberNode(node parser.NumberNode) (Object, error) {
 	val, err := strconv.ParseFloat(node.Token.Literal, 10)
 	if err != nil {
-		return types.NO_VALUE, err
+		return NULL, err
 	}
 
-	return types.TypeValue{Type: types.NUMBER, Value: val}, nil
+	return NewFloat64(val), nil
 }
 
-func (i *Interpreter) evalBooleanNode(node parser.BooleanNode) (types.TypeValue, error) {
+func (i *Interpreter) evalBooleanNode(node parser.BooleanNode) (Object, error) {
 	val, err := strconv.ParseBool(node.Token.Literal)
 	if err != nil {
-		return types.NO_VALUE, err
+		return NULL, err
 	}
 
-	return types.TypeValue{Type: types.BOOL, Value: val}, nil
+	return NewBool(val), nil
 }
 
-func (i *Interpreter) evalStringNode(node parser.StringNode) (types.TypeValue, error) {
-	return types.TypeValue{Type: types.STRING, Value: node.Token.Literal}, nil
+func (i *Interpreter) evalStringNode(node parser.StringNode) (Object, error) {
+	return NewString(node.Token.Literal), nil
 }
 
-func (i *Interpreter) evalNilNode(node parser.NilNode) (types.TypeValue, error) {
-	return types.TypeValue{Type: types.NIL, Value: nil}, nil
+func (i *Interpreter) evalNilNode(node parser.NilNode) (Object, error) {
+	return NULL, nil
 }

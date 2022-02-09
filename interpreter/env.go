@@ -2,7 +2,6 @@ package interpreter
 
 import (
 	"fmt"
-	"github.com/shreerangdixit/lox/types"
 )
 
 type EnvError struct {
@@ -18,25 +17,25 @@ func newEnvError(msg string) EnvError {
 }
 
 type Env struct {
-	scopeVariables map[string]types.TypeValue
+	scopeVariables map[string]Object
 	enclosing      *Env
 }
 
 func NewEnv() *Env {
 	return &Env{
-		scopeVariables: make(map[string]types.TypeValue),
+		scopeVariables: make(map[string]Object),
 		enclosing:      nil,
 	}
 }
 
 func NewEnvWithEnclosing(env *Env) *Env {
 	return &Env{
-		scopeVariables: make(map[string]types.TypeValue),
+		scopeVariables: make(map[string]Object),
 		enclosing:      env,
 	}
 }
 
-func (e *Env) Declare(varName string, varValue types.TypeValue) error {
+func (e *Env) Declare(varName string, varValue Object) error {
 	if _, ok := e.scopeVariables[varName]; ok {
 		return newEnvError(fmt.Sprintf("cannot redeclare variable %s", varName))
 	}
@@ -44,7 +43,7 @@ func (e *Env) Declare(varName string, varValue types.TypeValue) error {
 	return nil
 }
 
-func (e *Env) Assign(varName string, varValue types.TypeValue) error {
+func (e *Env) Assign(varName string, varValue Object) error {
 	if _, ok := e.scopeVariables[varName]; !ok {
 		if e.enclosing != nil {
 			return e.enclosing.Assign(varName, varValue)
@@ -55,12 +54,12 @@ func (e *Env) Assign(varName string, varValue types.TypeValue) error {
 	return nil
 }
 
-func (e *Env) Get(varName string) (types.TypeValue, error) {
+func (e *Env) Get(varName string) (Object, error) {
 	if _, ok := e.scopeVariables[varName]; !ok {
 		if e.enclosing != nil {
 			return e.enclosing.Get(varName)
 		}
-		return types.NO_VALUE, newEnvError(fmt.Sprintf("variable not declared %s", varName))
+		return NULL, newEnvError(fmt.Sprintf("variable not declared %s", varName))
 	}
 	return e.scopeVariables[varName], nil
 }

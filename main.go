@@ -6,7 +6,6 @@ import (
 	"github.com/shreerangdixit/lox/interpreter"
 	"github.com/shreerangdixit/lox/lexer"
 	"github.com/shreerangdixit/lox/parser"
-	"github.com/shreerangdixit/lox/types"
 	"io"
 	"os"
 )
@@ -57,8 +56,8 @@ func startREPL(in io.Reader, out io.Writer) {
 			val, err := ipt.Run(exp)
 			if err != nil {
 				fmt.Fprintf(out, "%s\n", err)
-			} else if val != types.NO_VALUE {
-				fmt.Fprintf(out, "%v\n", val.Value)
+			} else if val != interpreter.NULL {
+				fmt.Fprintf(out, "%v\n", val.Inspect())
 			}
 		}
 	}

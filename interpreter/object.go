@@ -1,0 +1,204 @@
+package interpreter
+
+import (
+	"fmt"
+)
+
+var NULL = Null{}
+
+type ObjectType string
+
+const (
+	FLOAT64_OBJ = "float64"
+	BOOL_OBJ    = "bool"
+	STRING_OBJ  = "string"
+	NULL_OBJ    = "null"
+)
+
+type Object interface {
+	Type() ObjectType
+	Inspect() string
+}
+
+type Float64 struct{ Value float64 }
+type Bool struct{ Value bool }
+type String struct{ Value string }
+type Null struct{}
+
+func NewFloat64(value float64) Float64 {
+	return Float64{
+		Value: value,
+	}
+}
+
+func NewBool(value bool) Bool {
+	return Bool{
+		Value: value,
+	}
+}
+
+func NewString(value string) String {
+	return String{
+		Value: value,
+	}
+}
+
+func (f Float64) Type() ObjectType { return FLOAT64_OBJ }
+func (f Float64) Inspect() string  { return fmt.Sprintf("%v", f.Value) }
+func (f Bool) Type() ObjectType    { return BOOL_OBJ }
+func (f Bool) Inspect() string     { return fmt.Sprintf("%v", f.Value) }
+func (f String) Type() ObjectType  { return STRING_OBJ }
+func (f String) Inspect() string   { return fmt.Sprintf("%s", f.Value) }
+func (f Null) Type() ObjectType    { return NULL_OBJ }
+func (f Null) Inspect() string     { return "null" }
+
+func Add(left Object, right Object) (Object, error) {
+	if left.Type() != right.Type() {
+		return NULL, fmt.Errorf("Cannot add types %s and %s", left.Type(), right.Type())
+	}
+
+	if left.Type() == FLOAT64_OBJ && right.Type() == FLOAT64_OBJ {
+		l := left.(Float64)
+		r := right.(Float64)
+		return NewFloat64(l.Value + r.Value), nil
+	} else if left.Type() == STRING_OBJ && right.Type() == STRING_OBJ {
+		l := left.(String)
+		r := right.(String)
+		return NewString(l.Value + r.Value), nil
+	}
+
+	return NULL, fmt.Errorf("Cannot add types %s and %s", left.Type(), right.Type())
+}
+
+func Subtract(left Object, right Object) (Object, error) {
+	if left.Type() != right.Type() {
+		return NULL, fmt.Errorf("Cannot subtract types %s and %s", left.Type(), right.Type())
+	}
+
+	if left.Type() == FLOAT64_OBJ && right.Type() == FLOAT64_OBJ {
+		l := left.(Float64)
+		r := right.(Float64)
+		return NewFloat64(l.Value - r.Value), nil
+	}
+
+	return NULL, fmt.Errorf("Cannot subtract types %s and %s", left.Type(), right.Type())
+}
+
+func Divide(left Object, right Object) (Object, error) {
+	if left.Type() != right.Type() {
+		return NULL, fmt.Errorf("Cannot divide types %s and %s", left.Type(), right.Type())
+	}
+
+	if left.Type() == FLOAT64_OBJ && right.Type() == FLOAT64_OBJ {
+		l := left.(Float64)
+		r := right.(Float64)
+		if r.Value == 0 {
+			return NULL, fmt.Errorf("Divide by zero error")
+		}
+		return NewFloat64(l.Value / r.Value), nil
+	}
+
+	return NULL, fmt.Errorf("Cannot divide types %s and %s", left.Type(), right.Type())
+}
+
+func Multiply(left Object, right Object) (Object, error) {
+	if left.Type() != right.Type() {
+		return NULL, fmt.Errorf("Cannot multiply types %s and %s", left.Type(), right.Type())
+	}
+
+	if left.Type() == FLOAT64_OBJ && right.Type() == FLOAT64_OBJ {
+		l := left.(Float64)
+		r := right.(Float64)
+		return NewFloat64(l.Value * r.Value), nil
+	}
+
+	return NULL, fmt.Errorf("Cannot multiply types %s and %s", left.Type(), right.Type())
+}
+
+func Negate(o Object) (Object, error) {
+	if o.Type() == FLOAT64_OBJ {
+		obj := o.(Float64)
+		return NewFloat64(obj.Value * -1), nil
+	} else if o.Type() == BOOL_OBJ {
+		obj := o.(Bool)
+		return NewBool(!obj.Value), nil
+	}
+	return NULL, fmt.Errorf("Cannot negate type %s", o.Type())
+}
+
+func Equals(left Object, right Object) Bool {
+	if left.Type() != right.Type() {
+		return NewBool(false)
+	}
+
+	if left.Type() == FLOAT64_OBJ && right.Type() == FLOAT64_OBJ {
+		l := left.(Float64)
+		r := right.(Float64)
+		return NewBool(l.Value == r.Value)
+	} else if left.Type() == BOOL_OBJ && right.Type() == BOOL_OBJ {
+		l := left.(Bool)
+		r := right.(Bool)
+		return NewBool(l.Value == r.Value)
+	} else if left.Type() == STRING_OBJ && right.Type() == STRING_OBJ {
+		l := left.(String)
+		r := right.(String)
+		return NewBool(l.Value == r.Value)
+	} else if left.Type() == NULL_OBJ && right.Type() == NULL_OBJ {
+		return NewBool(true)
+	}
+
+	return NewBool(false)
+}
+
+func NotEquals(left Object, right Object) Bool {
+	equals := Equals(left, right)
+	return NewBool(!equals.Value)
+}
+
+func LessThan(left Object, right Object) Bool {
+	if left.Type() != right.Type() {
+		return NewBool(false)
+	}
+
+	if left.Type() == FLOAT64_OBJ && right.Type() == FLOAT64_OBJ {
+		l := left.(Float64)
+		r := right.(Float64)
+		return NewBool(l.Value < r.Value)
+	} else if left.Type() == STRING_OBJ && right.Type() == STRING_OBJ {
+		l := left.(String)
+		r := right.(String)
+		return NewBool(l.Value < r.Value)
+	}
+
+	return NewBool(false)
+}
+
+func LessThanEq(left Object, right Object) Bool {
+	lt := LessThan(left, right)
+	eq := Equals(left, right)
+	return NewBool(lt.Value || eq.Value)
+}
+
+func GreaterThan(left Object, right Object) Bool {
+	if left.Type() != right.Type() {
+		return NewBool(false)
+	}
+
+	if left.Type() == FLOAT64_OBJ && right.Type() == FLOAT64_OBJ {
+		l := left.(Float64)
+		r := right.(Float64)
+		return NewBool(l.Value > r.Value)
+	} else if left.Type() == STRING_OBJ && right.Type() == STRING_OBJ {
+		l := left.(String)
+		r := right.(String)
+		return NewBool(l.Value > r.Value)
+	}
+
+	return NewBool(false)
+}
+
+func GreaterThanEq(left Object, right Object) Bool {
+	gt := GreaterThan(left, right)
+	eq := Equals(left, right)
+	return NewBool(gt.Value || eq.Value)
+}
