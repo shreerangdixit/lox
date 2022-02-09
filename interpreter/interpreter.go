@@ -25,18 +25,18 @@ func (i *Interpreter) eval(node parser.Node) (Object, error) {
 		return i.evalProgramNode(node.(parser.ProgramNode))
 	case parser.BlockNode:
 		return i.evalBlockNode(node.(parser.BlockNode))
-	case parser.LetStatementNode:
-		return i.evalLetStatementNode(node.(parser.LetStatementNode))
-	case parser.ExpressionStatementNode:
-		return i.evalExpressionStatementNode(node.(parser.ExpressionStatementNode))
-	case parser.IfStatementNode:
-		return i.evalIfStatementNode(node.(parser.IfStatementNode))
-	case parser.PrintStatementNode:
-		return i.evalPrintStatementNode(node.(parser.PrintStatementNode))
+	case parser.LetStmtNode:
+		return i.evalLetStmtNode(node.(parser.LetStmtNode))
+	case parser.ExpStmtNode:
+		return i.evalExpStmtNode(node.(parser.ExpStmtNode))
+	case parser.IfStmtNode:
+		return i.evalIfStmtNode(node.(parser.IfStmtNode))
+	case parser.PrintStmtNode:
+		return i.evalPrintStmtNode(node.(parser.PrintStmtNode))
 	case parser.AssignmentNode:
 		return i.evalAssignmentNode(node.(parser.AssignmentNode))
-	case parser.ExpressionNode:
-		return i.eval(node.(parser.ExpressionNode).Exp)
+	case parser.ExpNode:
+		return i.eval(node.(parser.ExpNode).Exp)
 	case parser.TernaryOpNode:
 		return i.evalTernaryOpNode(node.(parser.TernaryOpNode))
 	case parser.BinaryOpNode:
@@ -85,7 +85,7 @@ func (i *Interpreter) evalBlockNode(node parser.BlockNode) (Object, error) {
 	return NIL, nil
 }
 
-func (i *Interpreter) evalLetStatementNode(node parser.LetStatementNode) (Object, error) {
+func (i *Interpreter) evalLetStmtNode(node parser.LetStmtNode) (Object, error) {
 	value, err := i.eval(node.Value)
 	if err != nil {
 		return NIL, err
@@ -97,11 +97,11 @@ func (i *Interpreter) evalLetStatementNode(node parser.LetStatementNode) (Object
 	return NIL, nil
 }
 
-func (i *Interpreter) evalExpressionStatementNode(node parser.ExpressionStatementNode) (Object, error) {
+func (i *Interpreter) evalExpStmtNode(node parser.ExpStmtNode) (Object, error) {
 	return i.eval(node.Exp)
 }
 
-func (i *Interpreter) evalIfStatementNode(node parser.IfStatementNode) (Object, error) {
+func (i *Interpreter) evalIfStmtNode(node parser.IfStmtNode) (Object, error) {
 	value, err := i.eval(node.Exp)
 	if err != nil {
 		return NIL, err
@@ -112,13 +112,13 @@ func (i *Interpreter) evalIfStatementNode(node parser.IfStatementNode) (Object, 
 	}
 
 	if value.(Bool).Value {
-		return i.eval(node.True)
+		return i.eval(node.TrueStmt)
 	} else {
-		return i.eval(node.False)
+		return i.eval(node.FalseStmt)
 	}
 }
 
-func (i *Interpreter) evalPrintStatementNode(node parser.PrintStatementNode) (Object, error) {
+func (i *Interpreter) evalPrintStmtNode(node parser.PrintStmtNode) (Object, error) {
 	result, err := i.eval(node.Exp)
 	if err != nil {
 		return NIL, err
@@ -155,12 +155,12 @@ func (i *Interpreter) evalTernaryOpNode(node parser.TernaryOpNode) (Object, erro
 }
 
 func (i *Interpreter) evalBinaryOpNode(node parser.BinaryOpNode) (Object, error) {
-	left, err := i.eval(node.LHS)
+	left, err := i.eval(node.LeftExp)
 	if err != nil {
 		return NIL, err
 	}
 
-	right, err := i.eval(node.RHS)
+	right, err := i.eval(node.RightExp)
 	if err != nil {
 		return NIL, err
 	}

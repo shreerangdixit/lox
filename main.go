@@ -73,7 +73,7 @@ func isSingleExpression(node parser.Node) (parser.Node, bool) {
 		return nil, false
 	}
 
-	expStat, ok := programNode.Declarations[0].(parser.ExpressionStatementNode)
+	expStat, ok := programNode.Declarations[0].(parser.ExpStmtNode)
 	if !ok {
 		return nil, false
 	}

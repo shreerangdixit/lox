@@ -46,22 +46,22 @@ type AssignmentNode struct {
 	Value      Node
 }
 
-type LetStatementNode struct {
+type LetStmtNode struct {
 	Identifier IdentifierNode
 	Value      Node
 }
 
-type ExpressionStatementNode struct {
+type ExpStmtNode struct {
 	Exp Node
 }
 
-type IfStatementNode struct {
-	Exp   Node
-	True  Node
-	False Node
+type IfStmtNode struct {
+	Exp       Node
+	TrueStmt  Node
+	FalseStmt Node
 }
 
-type PrintStatementNode struct {
+type PrintStmtNode struct {
 	Exp Node
 }
 
@@ -69,7 +69,7 @@ type BlockNode struct {
 	Declarations []Node
 }
 
-type ExpressionNode struct {
+type ExpNode struct {
 	Exp Node
 }
 
@@ -80,9 +80,9 @@ type TernaryOpNode struct {
 }
 
 type BinaryOpNode struct {
-	LHS Node
-	Op  token.Token
-	RHS Node
+	LeftExp  Node
+	Op       token.Token
+	RightExp Node
 }
 
 type UnaryOpNode struct {
@@ -102,22 +102,26 @@ type StringNode struct {
 	Token token.Token
 }
 
-func (n NilNode) String() string                 { return "nil" }
-func (n ProgramNode) String() string             { return fmt.Sprintf("+%s", n.Declarations) }
-func (n IdentifierNode) String() string          { return fmt.Sprintf("%s", n.Token) }
-func (n AssignmentNode) String() string          { return fmt.Sprintf("%s=%s", n.Identifier, n.Value) }
-func (n LetStatementNode) String() string        { return fmt.Sprintf("let %s=%s", n.Identifier, n.Value) }
-func (n BlockNode) String() string               { return fmt.Sprintf("{%+s}", n.Declarations) }
-func (n ExpressionStatementNode) String() string { return fmt.Sprintf("%s", n.Exp) }
-func (n IfStatementNode) String() string         { return fmt.Sprintf("(%s)(%s)(%s)", n.Exp, n.True, n.False) }
-func (n PrintStatementNode) String() string      { return fmt.Sprintf("%s", n.Exp) }
-func (n ExpressionNode) String() string          { return fmt.Sprintf("%s", n.Exp) }
-func (n TernaryOpNode) String() string           { return fmt.Sprintf("%s?%s:%s", n.Exp, n.TrueExp, n.FalseExp) }
-func (n BinaryOpNode) String() string            { return fmt.Sprintf("%s %s %s", n.LHS, n.Op, n.RHS) }
-func (n UnaryOpNode) String() string             { return fmt.Sprintf("%s%s", n.Op, n.Operand) }
-func (n BooleanNode) String() string             { return fmt.Sprintf("%s", n.Token) }
-func (n NumberNode) String() string              { return fmt.Sprintf("%s", n.Token) }
-func (n StringNode) String() string              { return fmt.Sprintf("%s", n.Token) }
+func (n NilNode) String() string        { return "nil" }
+func (n ProgramNode) String() string    { return fmt.Sprintf("+%s", n.Declarations) }
+func (n IdentifierNode) String() string { return fmt.Sprintf("%s", n.Token) }
+func (n AssignmentNode) String() string { return fmt.Sprintf("%s=%s", n.Identifier, n.Value) }
+func (n LetStmtNode) String() string    { return fmt.Sprintf("let %s=%s", n.Identifier, n.Value) }
+func (n BlockNode) String() string      { return fmt.Sprintf("{%+s}", n.Declarations) }
+func (n ExpStmtNode) String() string    { return fmt.Sprintf("%s", n.Exp) }
+func (n IfStmtNode) String() string {
+	return fmt.Sprintf("if(%s) %s else %s", n.Exp, n.TrueStmt, n.FalseStmt)
+}
+func (n PrintStmtNode) String() string { return fmt.Sprintf("%s", n.Exp) }
+func (n ExpNode) String() string       { return fmt.Sprintf("%s", n.Exp) }
+func (n TernaryOpNode) String() string {
+	return fmt.Sprintf("%s ? %s : %s", n.Exp, n.TrueExp, n.FalseExp)
+}
+func (n BinaryOpNode) String() string { return fmt.Sprintf("%s %s %s", n.LeftExp, n.Op, n.RightExp) }
+func (n UnaryOpNode) String() string  { return fmt.Sprintf("%s%s", n.Op, n.Operand) }
+func (n BooleanNode) String() string  { return fmt.Sprintf("%s", n.Token) }
+func (n NumberNode) String() string   { return fmt.Sprintf("%s", n.Token) }
+func (n StringNode) String() string   { return fmt.Sprintf("%s", n.Token) }
 
 // ------------------------------------
 // Parser
@@ -191,7 +195,7 @@ func (p *Parser) letDeclaration() (Node, error) {
 			return nil, newSyntaxError("expected a ; at the end of a declaration", p.curr)
 		}
 
-		return LetStatementNode{
+		return LetStmtNode{
 			Identifier: identifier,
 			Value:      NilNode{},
 		}, nil
@@ -206,7 +210,7 @@ func (p *Parser) letDeclaration() (Node, error) {
 		return nil, newSyntaxError("expected a ; at the end of a declaration", p.curr)
 	}
 
-	return LetStatementNode{
+	return LetStmtNode{
 		Identifier: identifier,
 		Value:      value,
 	}, nil
@@ -242,23 +246,23 @@ func (p *Parser) ifStatement() (Node, error) {
 		return nil, newSyntaxError("expected closing ')' for if condition", p.curr)
 	}
 
-	trueStatement, err := p.statement()
+	trueStmt, err := p.statement()
 	if err != nil {
 		return nil, err
 	}
 
-	var falseStatement Node = nil
+	var falseStmt Node = nil
 	if p.consume(token.TT_ELSE) {
-		falseStatement, err = p.statement()
+		falseStmt, err = p.statement()
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return IfStatementNode{
-		Exp:   condExp,
-		True:  trueStatement,
-		False: falseStatement,
+	return IfStmtNode{
+		Exp:       condExp,
+		TrueStmt:  trueStmt,
+		FalseStmt: falseStmt,
 	}, nil
 }
 
@@ -292,7 +296,7 @@ func (p *Parser) printStatement() (Node, error) {
 	}
 
 	if p.consume(token.TT_SEMICOLON) {
-		return PrintStatementNode{Exp: expr}, nil
+		return PrintStmtNode{Exp: expr}, nil
 	}
 	return nil, newSyntaxError("expected a ; at the end of a print statement", p.curr)
 }
@@ -305,7 +309,7 @@ func (p *Parser) exprStatement() (Node, error) {
 	}
 
 	if p.consume(token.TT_SEMICOLON) {
-		return ExpressionStatementNode{Exp: expr}, nil
+		return ExpStmtNode{Exp: expr}, nil
 	}
 	return nil, newSyntaxError("expected a ; at the end of an expression statement", p.curr)
 }
@@ -434,7 +438,7 @@ func (p *Parser) atom() (Node, error) {
 		}
 
 		if p.consume(token.TT_RPAREN) {
-			return ExpressionNode{Exp: exp}, nil
+			return ExpNode{Exp: exp}, nil
 		}
 		return nil, newSyntaxError("expected closing ')' after expression", p.curr)
 	}
@@ -460,9 +464,9 @@ func (p *Parser) binaryOp(tokenTypes []token.TokenType, fun GrammarRuleFunc) (No
 		}
 
 		left = BinaryOpNode{
-			LHS: left,
-			Op:  tok,
-			RHS: right,
+			LeftExp:  left,
+			Op:       tok,
+			RightExp: right,
 		}
 	}
 	return left, nil
