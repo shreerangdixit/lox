@@ -41,9 +41,7 @@ func (f Nil) String() string       { return "nil" }
 func IsTruthy(o Object) bool {
 	if o == NIL {
 		return false
-	}
-
-	if o.Type() == FLOAT64_OBJ {
+	} else if o.Type() == FLOAT64_OBJ {
 		return o.(Float64).Value != 0
 	} else if o.Type() == BOOL_OBJ {
 		return o.(Bool).Value
