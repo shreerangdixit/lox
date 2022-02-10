@@ -123,7 +123,7 @@ func Negate(o Object) (Object, error) {
 	return NIL, fmt.Errorf("Cannot negate type %s", o.Type())
 }
 
-func Equals(left Object, right Object) Bool {
+func EqualTo(left Object, right Object) Bool {
 	if left.Type() != right.Type() {
 		return NewBool(false)
 	}
@@ -147,9 +147,8 @@ func Equals(left Object, right Object) Bool {
 	return NewBool(false)
 }
 
-func NotEquals(left Object, right Object) Bool {
-	equals := Equals(left, right)
-	return NewBool(!equals.Value)
+func NotEqualTo(left Object, right Object) Bool {
+	return NewBool(!EqualTo(left, right).Value)
 }
 
 func LessThan(left Object, right Object) Bool {
@@ -171,9 +170,7 @@ func LessThan(left Object, right Object) Bool {
 }
 
 func LessThanEq(left Object, right Object) Bool {
-	lt := LessThan(left, right)
-	eq := Equals(left, right)
-	return NewBool(lt.Value || eq.Value)
+	return NewBool(LessThan(left, right).Value || EqualTo(left, right).Value)
 }
 
 func GreaterThan(left Object, right Object) Bool {
@@ -195,7 +192,5 @@ func GreaterThan(left Object, right Object) Bool {
 }
 
 func GreaterThanEq(left Object, right Object) Bool {
-	gt := GreaterThan(left, right)
-	eq := Equals(left, right)
-	return NewBool(gt.Value || eq.Value)
+	return NewBool(GreaterThan(left, right).Value || EqualTo(left, right).Value)
 }

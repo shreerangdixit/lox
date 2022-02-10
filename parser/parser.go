@@ -127,11 +127,13 @@ func (n ExpNode) String() string       { return fmt.Sprintf("%s", n.Exp) }
 func (n TernaryOpNode) String() string {
 	return fmt.Sprintf("%s ? %s : %s", n.Exp, n.TrueExp, n.FalseExp)
 }
-func (n BinaryOpNode) String() string { return fmt.Sprintf("%s %s %s", n.LeftExp, n.Op, n.RightExp) }
-func (n UnaryOpNode) String() string  { return fmt.Sprintf("%s%s", n.Op, n.Operand) }
-func (n BooleanNode) String() string  { return fmt.Sprintf("%s", n.Token) }
-func (n NumberNode) String() string   { return fmt.Sprintf("%s", n.Token) }
-func (n StringNode) String() string   { return fmt.Sprintf("%s", n.Token) }
+func (n LogicalAndNode) String() string { return fmt.Sprintf("%s && %s", n.LHS, n.RHS) }
+func (n LogicalOrNode) String() string  { return fmt.Sprintf("%s || %s", n.LHS, n.RHS) }
+func (n BinaryOpNode) String() string   { return fmt.Sprintf("%s %s %s", n.LeftExp, n.Op, n.RightExp) }
+func (n UnaryOpNode) String() string    { return fmt.Sprintf("%s%s", n.Op, n.Operand) }
+func (n BooleanNode) String() string    { return fmt.Sprintf("%s", n.Token) }
+func (n NumberNode) String() string     { return fmt.Sprintf("%s", n.Token) }
+func (n StringNode) String() string     { return fmt.Sprintf("%s", n.Token) }
 
 // ------------------------------------
 // Parser
@@ -390,19 +392,18 @@ func (p *Parser) logical_or() (Node, error) {
 		return nil, err
 	}
 
-	if p.consume(token.TT_LOGICAL_OR) {
+	for p.consume(token.TT_LOGICAL_OR) {
 		right, err := p.equality()
 		if err != nil {
 			return nil, err
 		}
 
-		return LogicalOrNode{
+		left = LogicalOrNode{
 			LHS: left,
 			RHS: right,
-		}, nil
-	} else {
-		return left, nil
+		}
 	}
+	return left, nil
 }
 
 // logical_and -> equality ( "&&" equality )* ;
@@ -412,19 +413,18 @@ func (p *Parser) logical_and() (Node, error) {
 		return nil, err
 	}
 
-	if p.consume(token.TT_LOGICAL_AND) {
+	for p.consume(token.TT_LOGICAL_AND) {
 		right, err := p.equality()
 		if err != nil {
 			return nil, err
 		}
 
-		return LogicalAndNode{
+		left = LogicalAndNode{
 			LHS: left,
 			RHS: right,
-		}, nil
-	} else {
-		return left, nil
+		}
 	}
+	return left, nil
 }
 
 // equality -> comparison ( ( "!=" | "==" ) comparison )* ;

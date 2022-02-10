@@ -203,9 +203,9 @@ func (i *Interpreter) evalBinaryOpNode(node parser.BinaryOpNode) (Object, error)
 	case token.TT_MULTIPLY:
 		return Multiply(left, right)
 	case token.TT_EQ:
-		return Equals(left, right), nil
+		return EqualTo(left, right), nil
 	case token.TT_NEQ:
-		return NotEquals(left, right), nil
+		return NotEqualTo(left, right), nil
 	case token.TT_LT:
 		return LessThan(left, right), nil
 	case token.TT_LTE:
