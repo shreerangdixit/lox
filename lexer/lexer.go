@@ -59,6 +59,24 @@ func (l *Lexer) NextToken() token.Token {
 		} else {
 			tok = newToken(token.TT_GT, string(l.ch))
 		}
+	case '&':
+		if l.peek() == '&' {
+			ch := l.ch
+			l.advance()
+			literal := string(ch) + string(l.ch)
+			tok = newToken(token.TT_LOGICAL_AND, literal)
+		} else {
+			tok = newToken(token.TT_ILLEGAL, string(l.ch))
+		}
+	case '|':
+		if l.peek() == '|' {
+			ch := l.ch
+			l.advance()
+			literal := string(ch) + string(l.ch)
+			tok = newToken(token.TT_LOGICAL_OR, literal)
+		} else {
+			tok = newToken(token.TT_ILLEGAL, string(l.ch))
+		}
 	case '+':
 		tok = newToken(token.TT_PLUS, string(l.ch))
 	case '-':

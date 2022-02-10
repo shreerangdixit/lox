@@ -14,7 +14,7 @@ func TestLexer_NextToken(t *testing.T) {
 	}{
 		{
 			name:  "operators_paren",
-			input: "= / + - * , ; ( ) { } == ! != < <= > >=",
+			input: "= / + - * , ; ( ) { } == ! != < <= > >= && ||",
 			want: []token.Token{
 				token.Token{Type: token.TT_ASSIGN, Literal: "="},
 				token.Token{Type: token.TT_DIVIDE, Literal: "/"},
@@ -34,6 +34,8 @@ func TestLexer_NextToken(t *testing.T) {
 				token.Token{Type: token.TT_LTE, Literal: "<="},
 				token.Token{Type: token.TT_GT, Literal: ">"},
 				token.Token{Type: token.TT_GTE, Literal: ">="},
+				token.Token{Type: token.TT_LOGICAL_AND, Literal: "&&"},
+				token.Token{Type: token.TT_LOGICAL_OR, Literal: "||"},
 				token.Token{Type: token.TT_EOF, Literal: "0"},
 			},
 		},

@@ -90,6 +90,16 @@ type UnaryOpNode struct {
 	Operand Node
 }
 
+type LogicalAndNode struct {
+	LHS Node
+	RHS Node
+}
+
+type LogicalOrNode struct {
+	LHS Node
+	RHS Node
+}
+
 type BooleanNode struct {
 	Token token.Token
 }
@@ -348,9 +358,9 @@ func (p *Parser) expression() (Node, error) {
 }
 
 // assignment -> IDENTIFIER "=" assignment
-//            | equality ;
+//            | logical_or ;
 func (p *Parser) assignment() (Node, error) {
-	expr, err := p.equality()
+	expr, err := p.logical_or()
 	if err != nil {
 		return nil, err
 	}
@@ -371,6 +381,50 @@ func (p *Parser) assignment() (Node, error) {
 		}, nil
 	}
 	return expr, nil
+}
+
+// logical_or -> logical_and ( "||" logical_and )*
+func (p *Parser) logical_or() (Node, error) {
+	left, err := p.logical_and()
+	if err != nil {
+		return nil, err
+	}
+
+	if p.consume(token.TT_LOGICAL_OR) {
+		right, err := p.equality()
+		if err != nil {
+			return nil, err
+		}
+
+		return LogicalOrNode{
+			LHS: left,
+			RHS: right,
+		}, nil
+	} else {
+		return left, nil
+	}
+}
+
+// logical_and -> equality ( "&&" equality )* ;
+func (p *Parser) logical_and() (Node, error) {
+	left, err := p.equality()
+	if err != nil {
+		return nil, err
+	}
+
+	if p.consume(token.TT_LOGICAL_AND) {
+		right, err := p.equality()
+		if err != nil {
+			return nil, err
+		}
+
+		return LogicalAndNode{
+			LHS: left,
+			RHS: right,
+		}, nil
+	} else {
+		return left, nil
+	}
 }
 
 // equality -> comparison ( ( "!=" | "==" ) comparison )* ;

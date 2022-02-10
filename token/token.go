@@ -59,6 +59,8 @@ const (
 	TT_LTE
 	TT_GT
 	TT_GTE
+	TT_LOGICAL_AND
+	TT_LOGICAL_OR
 
 	// Delimiters
 	TT_COMMA
@@ -120,6 +122,10 @@ func (t TokenType) String() string {
 		return ">"
 	case TT_GTE:
 		return ">="
+	case TT_LOGICAL_AND:
+		return "&&"
+	case TT_LOGICAL_OR:
+		return "||"
 	case TT_COMMA:
 		return ","
 	case TT_SEMICOLON:

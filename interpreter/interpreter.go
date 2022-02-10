@@ -35,6 +35,10 @@ func (i *Interpreter) eval(node parser.Node) (Object, error) {
 		return i.evalPrintStmtNode(node.(parser.PrintStmtNode))
 	case parser.AssignmentNode:
 		return i.evalAssignmentNode(node.(parser.AssignmentNode))
+	case parser.LogicalAndNode:
+		return i.evalLogicalAndNode(node.(parser.LogicalAndNode))
+	case parser.LogicalOrNode:
+		return i.evalLogicalOrNode(node.(parser.LogicalOrNode))
 	case parser.ExpNode:
 		return i.eval(node.(parser.ExpNode).Exp)
 	case parser.TernaryOpNode:
@@ -131,6 +135,38 @@ func (i *Interpreter) evalAssignmentNode(node parser.AssignmentNode) (Object, er
 		return NIL, err
 	}
 	return NIL, i.env.Assign(node.Identifier.Token.Literal, value)
+}
+
+func (i *Interpreter) evalLogicalAndNode(node parser.LogicalAndNode) (Object, error) {
+	left, err := i.eval(node.LHS)
+	if err != nil {
+		return NIL, err
+	}
+
+	right, err := i.eval(node.RHS)
+	if err != nil {
+		return NIL, err
+	}
+
+	return NewBool(IsTruthy(left) && IsTruthy(right)), nil
+}
+
+func (i *Interpreter) evalLogicalOrNode(node parser.LogicalOrNode) (Object, error) {
+	left, err := i.eval(node.LHS)
+	if err != nil {
+		return NIL, err
+	}
+
+	if IsTruthy(left) {
+		return NewBool(true), nil
+	}
+
+	right, err := i.eval(node.RHS)
+	if err != nil {
+		return NIL, err
+	}
+
+	return NewBool(IsTruthy(right)), nil
 }
 
 func (i *Interpreter) evalTernaryOpNode(node parser.TernaryOpNode) (Object, error) {
