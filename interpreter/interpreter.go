@@ -107,11 +107,7 @@ func (i *Interpreter) evalIfStmtNode(node parser.IfStmtNode) (Object, error) {
 		return NIL, err
 	}
 
-	if value.Type() != BOOL_OBJ {
-		return NIL, fmt.Errorf("expected if condition to evaluate to boolean")
-	}
-
-	if value.(Bool).Value {
+	if IsTruthy(value) {
 		return i.eval(node.TrueStmt)
 	} else {
 		return i.eval(node.FalseStmt)
@@ -143,11 +139,7 @@ func (i *Interpreter) evalTernaryOpNode(node parser.TernaryOpNode) (Object, erro
 		return NIL, err
 	}
 
-	if value.Type() != BOOL_OBJ {
-		return NIL, fmt.Errorf("expected ternary condition to evaluate to boolean")
-	}
-
-	if value.(Bool).Value {
+	if IsTruthy(value) {
 		return i.eval(node.TrueExp)
 	} else {
 		return i.eval(node.FalseExp)

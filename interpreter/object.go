@@ -38,6 +38,19 @@ func (f String) String() string    { return fmt.Sprintf("%s", f.Value) }
 func (f Nil) Type() ObjectType     { return NIL_OBJ }
 func (f Nil) String() string       { return "nil" }
 
+func IsTruthy(o Object) bool {
+	if o == NIL {
+		return false
+	}
+
+	if o.Type() == FLOAT64_OBJ {
+		return o.(Float64).Value != 0
+	} else if o.Type() == BOOL_OBJ {
+		return o.(Bool).Value
+	}
+	return true
+}
+
 func Add(left Object, right Object) (Object, error) {
 	if left.Type() != right.Type() {
 		return NIL, fmt.Errorf("Cannot add types %s and %s", left.Type(), right.Type())
