@@ -9,11 +9,11 @@ var NIL = Nil{}
 type ObjectType string
 
 const (
-	FLOAT64_OBJ = "float64"
-	BOOL_OBJ    = "bool"
-	STRING_OBJ  = "string"
-	FUNC_OBJ    = "function"
-	NIL_OBJ     = "null"
+	FLOAT64_OBJ ObjectType = "float64"
+	BOOL_OBJ    ObjectType = "bool"
+	STRING_OBJ  ObjectType = "string"
+	FUNC_OBJ    ObjectType = "function"
+	NIL_OBJ     ObjectType = "null"
 )
 
 type Object interface {
