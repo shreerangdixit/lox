@@ -20,4 +20,4 @@ ifndef GOLANGCI_LINT
 	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.44.0
 endif
 
-.PHONY: build fmt test lint lint.fix lint.dep
+.PHONY: build fmt test lint lint.fix lint.deps
