@@ -10,14 +10,14 @@ test:
 	@go test -v ./...
 
 lint: lint.deps
-	golangci-lint run
+	@golangci-lint run
 
 lint.fix: lint.deps
-	golangci-lint run --fix
+	@golangci-lint run --fix
 
 lint.deps:
 ifndef GOLANGCI_LINT
 	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.44.0
 endif
 
-.PHONY: build fmt test lint lint.dep
+.PHONY: build fmt test lint lint.fix lint.dep
