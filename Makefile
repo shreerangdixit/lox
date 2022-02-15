@@ -1,6 +1,8 @@
 GOLANGCI_LINT := $(shell command -v golangci-lint 2> /dev/null)
 GYCYCLO := $(shell command -v gocyclo 2> /dev/null)
 
+default: build
+
 build:
 	@go build .
 
