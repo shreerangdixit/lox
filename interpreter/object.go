@@ -34,7 +34,7 @@ func (f Float64) String() string   { return fmt.Sprintf("%v", f.Value) }
 func (f Bool) Type() ObjectType    { return BOOL_OBJ }
 func (f Bool) String() string      { return fmt.Sprintf("%v", f.Value) }
 func (f String) Type() ObjectType  { return STRING_OBJ }
-func (f String) String() string    { return fmt.Sprintf("%s", f.Value) }
+func (f String) String() string    { return f.Value }
 func (f Nil) Type() ObjectType     { return NIL_OBJ }
 func (f Nil) String() string       { return "nil" }
 

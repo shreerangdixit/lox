@@ -117,12 +117,17 @@ type StringNode struct {
 	Token token.Token
 }
 
+type CallNode struct {
+	Callee    Node
+	Arguments []Node
+}
+
 func (n NilNode) String() string        { return "nil" }
 func (n ProgramNode) String() string    { return fmt.Sprintf("+%s", n.Declarations) }
-func (n IdentifierNode) String() string { return fmt.Sprintf("%s", n.Token) }
+func (n IdentifierNode) String() string { return n.Token.String() }
 func (n AssignmentNode) String() string { return fmt.Sprintf("%s=%s", n.Identifier, n.Value) }
 func (n LetStmtNode) String() string    { return fmt.Sprintf("let %s=%s", n.Identifier, n.Value) }
-func (n BlockNode) String() string      { return fmt.Sprintf("{%+s}", n.Declarations) }
+func (n BlockNode) String() string      { return fmt.Sprintf("{%s}", n.Declarations) }
 func (n ExpStmtNode) String() string    { return fmt.Sprintf("%s", n.Exp) }
 func (n IfStmtNode) String() string {
 	return fmt.Sprintf("if(%s) %s else %s", n.Exp, n.TrueStmt, n.FalseStmt)
@@ -137,9 +142,10 @@ func (n LogicalAndNode) String() string { return fmt.Sprintf("%s && %s", n.LHS, 
 func (n LogicalOrNode) String() string  { return fmt.Sprintf("%s || %s", n.LHS, n.RHS) }
 func (n BinaryOpNode) String() string   { return fmt.Sprintf("%s %s %s", n.LeftExp, n.Op, n.RightExp) }
 func (n UnaryOpNode) String() string    { return fmt.Sprintf("%s%s", n.Op, n.Operand) }
-func (n BooleanNode) String() string    { return fmt.Sprintf("%s", n.Token) }
-func (n NumberNode) String() string     { return fmt.Sprintf("%s", n.Token) }
-func (n StringNode) String() string     { return fmt.Sprintf("%s", n.Token) }
+func (n BooleanNode) String() string    { return n.Token.String() }
+func (n NumberNode) String() string     { return n.Token.String() }
+func (n StringNode) String() string     { return n.Token.String() }
+func (n CallNode) String() string       { return fmt.Sprintf("func %s(%s)", n.Callee, n.Arguments) }
 
 // ------------------------------------
 // Parser
@@ -481,11 +487,9 @@ func (p *Parser) factor() (Node, error) {
 	return p.binaryOp([]token.TokenType{token.TT_DIVIDE, token.TT_MULTIPLY}, p.unary)
 }
 
-// unary -> ( "!" | "-" ) unary
-//       | atom ;
+// unary -> ( "!" | "-" ) unary | call ;
 func (p *Parser) unary() (Node, error) {
-	var node Node = nil
-
+	var node Node
 	for p.consumeAny([]token.TokenType{token.TT_NOT, token.TT_MINUS}) {
 		tok := p.curr
 
@@ -499,10 +503,71 @@ func (p *Parser) unary() (Node, error) {
 			Operand: n,
 		}
 	}
-	if node == nil {
-		return p.atom()
+
+	if node != nil {
+		return node, nil
 	}
-	return node, nil
+	return p.call()
+}
+
+// call -> atom ( "(" arguments? ")" )* ;
+func (p *Parser) call() (Node, error) {
+	expr, err := p.atom()
+	if err != nil {
+		return nil, err
+	}
+
+	for p.consume(token.TT_LPAREN) {
+		expr, err = p.finishCall(expr)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return expr, nil
+}
+
+func (p *Parser) finishCall(callee Node) (Node, error) {
+	arguments := []Node{}
+	var err error
+
+	for !p.check(token.TT_RPAREN) {
+		arguments, err = p.arguments()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if !p.consume(token.TT_RPAREN) {
+		return nil, newSyntaxError("expected closing ')' for function call", p.curr)
+	}
+
+	return CallNode{
+		Callee:    callee,
+		Arguments: arguments,
+	}, nil
+}
+
+// arguments -> expression ( "," expression )* ;
+func (p *Parser) arguments() ([]Node, error) {
+	arguments := make([]Node, 0, 255)
+
+	arg, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	arguments = append(arguments, arg)
+	for p.consume(token.TT_COMMA) {
+		arg, err := p.expression()
+		if err != nil {
+			return nil, err
+		}
+
+		arguments = append(arguments, arg)
+	}
+
+	return arguments, nil
 }
 
 // atom -> NUMBER | STRING | "true" | "false" | "nil"

@@ -20,45 +20,47 @@ func (i *Interpreter) Run(root parser.Node) (Object, error) {
 }
 
 func (i *Interpreter) eval(node parser.Node) (Object, error) {
-	switch node.(type) {
+	switch node := node.(type) {
 	case parser.ProgramNode:
-		return i.evalProgramNode(node.(parser.ProgramNode))
+		return i.evalProgramNode(node)
 	case parser.BlockNode:
-		return i.evalBlockNode(node.(parser.BlockNode))
+		return i.evalBlockNode(node)
 	case parser.LetStmtNode:
-		return i.evalLetStmtNode(node.(parser.LetStmtNode))
+		return i.evalLetStmtNode(node)
 	case parser.ExpStmtNode:
-		return i.evalExpStmtNode(node.(parser.ExpStmtNode))
+		return i.evalExpStmtNode(node)
 	case parser.IfStmtNode:
-		return i.evalIfStmtNode(node.(parser.IfStmtNode))
+		return i.evalIfStmtNode(node)
 	case parser.PrintStmtNode:
-		return i.evalPrintStmtNode(node.(parser.PrintStmtNode))
+		return i.evalPrintStmtNode(node)
 	case parser.WhileStmtNode:
-		return i.evalWhileStmtNode(node.(parser.WhileStmtNode))
+		return i.evalWhileStmtNode(node)
 	case parser.AssignmentNode:
-		return i.evalAssignmentNode(node.(parser.AssignmentNode))
+		return i.evalAssignmentNode(node)
 	case parser.LogicalAndNode:
-		return i.evalLogicalAndNode(node.(parser.LogicalAndNode))
+		return i.evalLogicalAndNode(node)
 	case parser.LogicalOrNode:
-		return i.evalLogicalOrNode(node.(parser.LogicalOrNode))
+		return i.evalLogicalOrNode(node)
 	case parser.ExpNode:
-		return i.eval(node.(parser.ExpNode).Exp)
+		return i.eval(node.Exp)
 	case parser.TernaryOpNode:
-		return i.evalTernaryOpNode(node.(parser.TernaryOpNode))
+		return i.evalTernaryOpNode(node)
 	case parser.BinaryOpNode:
-		return i.evalBinaryOpNode(node.(parser.BinaryOpNode))
+		return i.evalBinaryOpNode(node)
 	case parser.UnaryOpNode:
-		return i.evalUnaryOpNode(node.(parser.UnaryOpNode))
+		return i.evalUnaryOpNode(node)
 	case parser.IdentifierNode:
-		return i.evalIdentifierNode(node.(parser.IdentifierNode))
+		return i.evalIdentifierNode(node)
 	case parser.NumberNode:
-		return i.evalNumberNode(node.(parser.NumberNode))
+		return i.evalNumberNode(node)
 	case parser.BooleanNode:
-		return i.evalBooleanNode(node.(parser.BooleanNode))
+		return i.evalBooleanNode(node)
 	case parser.StringNode:
-		return i.evalStringNode(node.(parser.StringNode))
+		return i.evalStringNode(node)
 	case parser.NilNode:
-		return i.evalNilNode(node.(parser.NilNode))
+		return i.evalNilNode(node)
+	case parser.CallNode:
+		return i.evalCallNode(node)
 	}
 	return NIL, fmt.Errorf("invalid node: %T", node)
 }
@@ -279,5 +281,20 @@ func (i *Interpreter) evalStringNode(node parser.StringNode) (Object, error) {
 }
 
 func (i *Interpreter) evalNilNode(node parser.NilNode) (Object, error) {
+	return NIL, nil
+}
+
+func (i *Interpreter) evalCallNode(node parser.CallNode) (Object, error) {
+	argValues := make([]Object, 0, 255)
+	for _, arg := range node.Arguments {
+		argval, err := i.eval(arg)
+		if err != nil {
+			return NIL, err
+		}
+
+		argValues = append(argValues, argval)
+	}
+	// TODO: Evaluate function call
+	fmt.Printf("Calling %s with arguments %s\n", node.Callee, argValues)
 	return NIL, nil
 }
