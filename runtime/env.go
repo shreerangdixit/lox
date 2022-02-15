@@ -1,4 +1,4 @@
-package interpreter
+package runtime
 
 import (
 	"fmt"
@@ -22,10 +22,20 @@ type Env struct {
 }
 
 func NewEnv() *Env {
-	return &Env{
+	env := Env{
 		scopeVariables: make(map[string]Object),
 		enclosing:      nil,
 	}
+
+	// Declare native functions
+	for _, f := range NativeFunctions {
+		err := env.Declare(f.String(), f)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return &env
 }
 
 func NewEnvWithEnclosing(env *Env) *Env {

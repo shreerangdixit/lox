@@ -1,4 +1,4 @@
-package interpreter
+package runtime
 
 import (
 	"fmt"
@@ -12,12 +12,19 @@ const (
 	FLOAT64_OBJ = "float64"
 	BOOL_OBJ    = "bool"
 	STRING_OBJ  = "string"
+	FUNC_OBJ    = "function"
 	NIL_OBJ     = "null"
 )
 
 type Object interface {
 	Type() ObjectType
 	String() string
+}
+
+type Callable interface {
+	Object
+	Arity() int
+	Call(e *Evaluator, args []Object) (Object, error)
 }
 
 type Float64 struct{ Value float64 }

@@ -3,9 +3,9 @@ package runner
 import (
 	"bufio"
 	"fmt"
-	"github.com/shreerangdixit/lox/interpreter"
 	"github.com/shreerangdixit/lox/lexer"
 	"github.com/shreerangdixit/lox/parser"
+	"github.com/shreerangdixit/lox/runtime"
 	"io"
 	"os"
 )
@@ -32,8 +32,8 @@ func RunFile(file string) error {
 		return err
 	}
 
-	ipt := interpreter.New()
-	_, err = ipt.Run(ast)
+	e := runtime.NewEvaluator()
+	_, err = e.Evaluate(ast)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func startREPL(in io.Reader, out io.Writer) {
 	fmt.Fprintf(out, "%s\n", Logo)
 
 	scanner := bufio.NewScanner(in)
-	ipt := interpreter.New()
+	e := runtime.NewEvaluator()
 	for {
 		fmt.Printf("lox >>> ")
 
@@ -64,7 +64,7 @@ func startREPL(in io.Reader, out io.Writer) {
 		}
 
 		p := parser.New(lexer.New(txt))
-		root, err := p.Parse()
+		ast, err := p.Parse()
 		if err != nil {
 			fmt.Fprintf(out, "%s\n", err)
 			continue
@@ -72,17 +72,17 @@ func startREPL(in io.Reader, out io.Writer) {
 
 		// If the input is a single expression, evaluate and print the result
 		// Otherwise run statements
-		exp, ok := isSingleExpression(root)
+		exp, ok := isSingleExpression(ast)
 		if !ok {
-			_, err = ipt.Run(root)
+			_, err = e.Evaluate(ast)
 			if err != nil {
 				fmt.Fprintf(out, "%s\n", err)
 			}
 		} else {
-			val, err := ipt.Run(exp)
+			val, err := e.Evaluate(exp)
 			if err != nil {
 				fmt.Fprintf(out, "%s\n", err)
-			} else if val != interpreter.NIL {
+			} else if val != runtime.NIL {
 				fmt.Fprintf(out, "%s\n", val)
 			}
 		}
