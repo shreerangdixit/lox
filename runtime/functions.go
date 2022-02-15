@@ -35,6 +35,16 @@ var NativeFunctions = []Function{
 		arity:   1,
 		Handler: absHandler,
 	},
+	{
+		name:    "max",
+		arity:   2,
+		Handler: maxHandler,
+	},
+	{
+		name:    "min",
+		arity:   2,
+		Handler: minHandler,
+	},
 }
 
 func sleepHandler(e *Evaluator, args []Object) (Object, error) {
@@ -63,4 +73,32 @@ func absHandler(e *Evaluator, args []Object) (Object, error) {
 	default:
 		return NIL, fmt.Errorf("abs expects an argument of type float64")
 	}
+}
+
+func maxHandler(e *Evaluator, args []Object) (Object, error) {
+	arg1, ok := args[0].(Float64)
+	if !ok {
+		return NIL, fmt.Errorf("first argument to max() must be a number")
+	}
+
+	arg2, ok := args[1].(Float64)
+	if !ok {
+		return NIL, fmt.Errorf("second argument to max() must be a number")
+	}
+
+	return NewFloat64(math.Max(arg1.Value, arg2.Value)), nil
+}
+
+func minHandler(e *Evaluator, args []Object) (Object, error) {
+	arg1, ok := args[0].(Float64)
+	if !ok {
+		return NIL, fmt.Errorf("first argument to min() must be a number")
+	}
+
+	arg2, ok := args[1].(Float64)
+	if !ok {
+		return NIL, fmt.Errorf("second argument to min() must be a number")
+	}
+
+	return NewFloat64(math.Min(arg1.Value, arg2.Value)), nil
 }
