@@ -287,32 +287,34 @@ func (e *Evaluator) evalNilNode(node parser.NilNode) (Object, error) {
 func (e *Evaluator) evalCallNode(node parser.CallNode) (Object, error) {
 	callee, err := e.eval(node.Callee)
 	if err != nil {
-		return NIL, err
+		return NIL, fmt.Errorf("%s is not declared", node.Callee)
 	}
 
-	callable, err := e.env.Get(callee.String())
+	calleeValue, err := e.env.Get(callee.String())
 	if err != nil {
 		return NIL, fmt.Errorf("%s is not callable", callee.Type())
 	}
 
-	switch callable := callable.(type) {
-	case Callable:
-		if callable.Arity() != len(node.Arguments) {
-			return NIL, fmt.Errorf(
-				"incorrect number of arguments to %s - %d expected %d provided",
-				callable,
-				callable.Arity(),
-				len(node.Arguments),
-			)
-		}
-		argValues, err := e.makeCallArguments(node.Arguments)
-		if err != nil {
-			return NIL, err
-		}
-		return callable.Call(e, argValues)
-	default:
-		return NIL, fmt.Errorf("%s is not callable", callable.Type())
+	callable, ok := calleeValue.(Callable)
+	if !ok {
+		return NIL, fmt.Errorf("%s is not declared", calleeValue.Type())
 	}
+
+	if callable.Arity() != len(node.Arguments) {
+		return NIL, fmt.Errorf(
+			"incorrect number of arguments to %s - %d expected %d provided",
+			callable,
+			callable.Arity(),
+			len(node.Arguments),
+		)
+	}
+
+	argValues, err := e.makeCallArguments(node.Arguments)
+	if err != nil {
+		return NIL, err
+	}
+
+	return callable.Call(e, argValues)
 }
 
 func (e *Evaluator) makeCallArguments(argNodes []parser.Node) ([]Object, error) {
