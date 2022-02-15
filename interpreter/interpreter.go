@@ -33,6 +33,8 @@ func (i *Interpreter) eval(node parser.Node) (Object, error) {
 		return i.evalIfStmtNode(node.(parser.IfStmtNode))
 	case parser.PrintStmtNode:
 		return i.evalPrintStmtNode(node.(parser.PrintStmtNode))
+	case parser.WhileStmtNode:
+		return i.evalWhileStmtNode(node.(parser.WhileStmtNode))
 	case parser.AssignmentNode:
 		return i.evalAssignmentNode(node.(parser.AssignmentNode))
 	case parser.LogicalAndNode:
@@ -126,6 +128,25 @@ func (i *Interpreter) evalPrintStmtNode(node parser.PrintStmtNode) (Object, erro
 
 	fmt.Printf("%s\n", result)
 
+	return NIL, nil
+}
+
+func (i *Interpreter) evalWhileStmtNode(node parser.WhileStmtNode) (Object, error) {
+	for {
+		result, err := i.eval(node.Condition)
+		if err != nil {
+			return NIL, err
+		}
+
+		if !IsTruthy(result) {
+			break
+		}
+
+		_, err = i.eval(node.Body)
+		if err != nil {
+			return NIL, err
+		}
+	}
 	return NIL, nil
 }
 

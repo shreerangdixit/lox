@@ -65,6 +65,11 @@ type PrintStmtNode struct {
 	Exp Node
 }
 
+type WhileStmtNode struct {
+	Condition Node
+	Body      Node
+}
+
 type BlockNode struct {
 	Declarations []Node
 }
@@ -123,6 +128,7 @@ func (n IfStmtNode) String() string {
 	return fmt.Sprintf("if(%s) %s else %s", n.Exp, n.TrueStmt, n.FalseStmt)
 }
 func (n PrintStmtNode) String() string { return fmt.Sprintf("%s", n.Exp) }
+func (n WhileStmtNode) String() string { return fmt.Sprintf("while(%s)%s", n.Condition, n.Body) }
 func (n ExpNode) String() string       { return fmt.Sprintf("%s", n.Exp) }
 func (n TernaryOpNode) String() string {
 	return fmt.Sprintf("%s ? %s : %s", n.Exp, n.TrueExp, n.FalseExp)
@@ -235,10 +241,12 @@ func (p *Parser) letDeclaration() (Node, error) {
 func (p *Parser) statement() (Node, error) {
 	if p.consume(token.TT_IF) {
 		return p.ifStatement()
-	} else if p.consume(token.TT_LBRACE) {
-		return p.block()
 	} else if p.consume(token.TT_PRINT) {
 		return p.printStatement()
+	} else if p.consume(token.TT_WHILE) {
+		return p.whileStatement()
+	} else if p.consume(token.TT_LBRACE) {
+		return p.block()
 	}
 	return p.exprStatement()
 }
@@ -278,6 +286,45 @@ func (p *Parser) ifStatement() (Node, error) {
 	}, nil
 }
 
+// printStatement -> "print" expression ";" ;
+func (p *Parser) printStatement() (Node, error) {
+	expr, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	if p.consume(token.TT_SEMICOLON) {
+		return PrintStmtNode{Exp: expr}, nil
+	}
+	return nil, newSyntaxError("expected a ; at the end of a print statement", p.curr)
+}
+
+// whileStatement -> "while" "(" expression ")" statement ;
+func (p *Parser) whileStatement() (Node, error) {
+	if !p.consume(token.TT_LPAREN) {
+		return nil, newSyntaxError("expected opening '(' for 'while' condition", p.curr)
+	}
+
+	condition, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	if !p.consume(token.TT_RPAREN) {
+		return nil, newSyntaxError("expected closing ')' for 'while' condition", p.curr)
+	}
+
+	body, err := p.statement()
+	if err != nil {
+		return nil, err
+	}
+
+	return WhileStmtNode{
+		Condition: condition,
+		Body:      body,
+	}, nil
+}
+
 // block -> "{" declaration* "}" ;
 func (p *Parser) block() (Node, error) {
 	declarations := make([]Node, 0, 100)
@@ -298,19 +345,6 @@ func (p *Parser) block() (Node, error) {
 	return BlockNode{
 		Declarations: declarations,
 	}, nil
-}
-
-// printStatement -> "print" expression ";" ;
-func (p *Parser) printStatement() (Node, error) {
-	expr, err := p.expression()
-	if err != nil {
-		return nil, err
-	}
-
-	if p.consume(token.TT_SEMICOLON) {
-		return PrintStmtNode{Exp: expr}, nil
-	}
-	return nil, newSyntaxError("expected a ; at the end of a print statement", p.curr)
 }
 
 // exprStatement -> expression ";" ;

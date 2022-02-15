@@ -13,6 +13,7 @@ var keywords = map[string]TokenType{
 	"true":   TT_TRUE,
 	"false":  TT_FALSE,
 	"return": TT_RETURN,
+	"while":  TT_WHILE,
 	"nil":    TT_NIL,
 }
 
@@ -83,6 +84,7 @@ const (
 	TT_TRUE
 	TT_FALSE
 	TT_RETURN
+	TT_WHILE
 	TT_NIL
 )
 
