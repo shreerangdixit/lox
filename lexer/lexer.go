@@ -82,7 +82,11 @@ func (l *Lexer) NextToken() token.Token {
 	case '-':
 		tok = newToken(token.TT_MINUS, string(l.ch))
 	case '/':
-		tok = newToken(token.TT_DIVIDE, string(l.ch))
+		if l.peek() == '/' {
+			tok = l.readCommentToken()
+		} else {
+			tok = newToken(token.TT_DIVIDE, string(l.ch))
+		}
 	case '*':
 		tok = newToken(token.TT_MULTIPLY, string(l.ch))
 	case ',':
@@ -177,6 +181,15 @@ func (l *Lexer) readStringToken() token.Token {
 	return newToken(token.TT_STRING, value)
 }
 
+func (l *Lexer) readCommentToken() token.Token {
+	startPos := l.currentPos
+	for !isNewline(l.ch) && l.ch != 0 {
+		l.advance()
+	}
+	value := l.input[startPos:l.currentPos]
+	return newToken(token.TT_COMMENT, value)
+}
+
 func (l *Lexer) skipWhitespace() {
 	for isWhitespace(l.ch) {
 		l.advance()
@@ -200,4 +213,8 @@ func isLetter(b byte) bool {
 
 func isWhitespace(b byte) bool {
 	return b == ' ' || b == '\n' || b == '\r' || b == '\t'
+}
+
+func isNewline(b byte) bool {
+	return b == '\n' || b == '\r'
 }

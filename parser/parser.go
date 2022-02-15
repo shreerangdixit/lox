@@ -662,4 +662,7 @@ func (p *Parser) advance() {
 		p.curr = p.next
 		p.next = p.lex.NextToken()
 	}
+	if p.next.Type == token.TT_COMMENT {
+		p.advance()
+	}
 }

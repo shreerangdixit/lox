@@ -143,6 +143,14 @@ func TestLexer_NextToken(t *testing.T) {
 				token.Token{Type: token.TT_EOF, Literal: "0"},
 			},
 		},
+		{
+			name:  "comments",
+			input: "// my very very long comment",
+			want: []token.Token{
+				token.Token{Type: token.TT_COMMENT, Literal: "// my very very long comment"},
+				token.Token{Type: token.TT_EOF, Literal: "0"},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

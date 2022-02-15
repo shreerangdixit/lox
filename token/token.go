@@ -86,6 +86,9 @@ const (
 	TT_RETURN
 	TT_WHILE
 	TT_NIL
+
+	// Misc
+	TT_COMMENT
 )
 
 func (t TokenType) String() string {
@@ -136,6 +139,8 @@ func (t TokenType) String() string {
 		return "?"
 	case TT_COLON:
 		return ":"
+	case TT_COMMENT:
+		return "//"
 	case TT_LPAREN:
 		return "("
 	case TT_RPAREN:
