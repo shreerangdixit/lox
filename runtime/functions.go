@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"fmt"
+	"math"
 	"time"
 )
 
@@ -29,6 +30,11 @@ var NativeFunctions = []Function{
 		arity:   0,
 		Handler: timeHandler,
 	},
+	{
+		name:    "abs",
+		arity:   1,
+		Handler: absHandler,
+	},
 }
 
 func sleepHandler(e *Evaluator, args []Object) (Object, error) {
@@ -46,4 +52,15 @@ func sleepHandler(e *Evaluator, args []Object) (Object, error) {
 func timeHandler(e *Evaluator, args []Object) (Object, error) {
 	ms := time.Now().UnixNano() / int64(time.Millisecond)
 	return NewFloat64(float64(ms)), nil
+}
+
+func absHandler(e *Evaluator, args []Object) (Object, error) {
+	arg := args[0]
+
+	switch arg := arg.(type) {
+	case Float64:
+		return NewFloat64(math.Abs(arg.Value)), nil
+	default:
+		return NIL, fmt.Errorf("abs expects an argument of type float64")
+	}
 }
