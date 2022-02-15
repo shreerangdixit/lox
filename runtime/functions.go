@@ -11,39 +11,39 @@ type FunctionHandler func(e *Evaluator, args []Object) (Object, error)
 type Function struct {
 	name    string
 	arity   int
-	Handler FunctionHandler
+	handler FunctionHandler
 }
 
 func (f Function) Type() ObjectType                                 { return FUNC_OBJ }
 func (f Function) String() string                                   { return f.name }
 func (f Function) Arity() int                                       { return f.arity }
-func (f Function) Call(e *Evaluator, args []Object) (Object, error) { return f.Handler(e, args) }
+func (f Function) Call(e *Evaluator, args []Object) (Object, error) { return f.handler(e, args) }
 
 var NativeFunctions = []Function{
 	{
 		name:    "sleep",
 		arity:   1,
-		Handler: sleepHandler,
+		handler: sleepHandler,
 	},
 	{
 		name:    "time",
 		arity:   0,
-		Handler: timeHandler,
+		handler: timeHandler,
 	},
 	{
 		name:    "abs",
 		arity:   1,
-		Handler: absHandler,
+		handler: absHandler,
 	},
 	{
 		name:    "max",
 		arity:   2,
-		Handler: maxHandler,
+		handler: maxHandler,
 	},
 	{
 		name:    "min",
 		arity:   2,
-		Handler: minHandler,
+		handler: minHandler,
 	},
 }
 
