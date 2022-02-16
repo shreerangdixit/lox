@@ -14,6 +14,7 @@ const (
 	STRING_OBJ  ObjectType = "string"
 	FUNC_OBJ    ObjectType = "function"
 	NIL_OBJ     ObjectType = "null"
+	TYPE_OBJ    ObjectType = "type"
 )
 
 type Object interface {
@@ -30,11 +31,13 @@ type Callable interface {
 type Float64 struct{ Value float64 }
 type Bool struct{ Value bool }
 type String struct{ Value string }
+type Type struct{ Value ObjectType }
 type Nil struct{}
 
 func NewFloat64(value float64) Float64 { return Float64{Value: value} }
 func NewBool(value bool) Bool          { return Bool{Value: value} }
 func NewString(value string) String    { return String{Value: value} }
+func NewType(value ObjectType) Type    { return Type{Value: value} }
 
 func (f Float64) Type() ObjectType { return FLOAT64_OBJ }
 func (f Float64) String() string   { return fmt.Sprintf("%v", f.Value) }
@@ -44,6 +47,8 @@ func (f String) Type() ObjectType  { return STRING_OBJ }
 func (f String) String() string    { return f.Value }
 func (f Nil) Type() ObjectType     { return NIL_OBJ }
 func (f Nil) String() string       { return "nil" }
+func (f Type) Type() ObjectType    { return TYPE_OBJ }
+func (f Type) String() string      { return string(f.Value) }
 
 func IsTruthy(o Object) bool {
 	if o == NIL {

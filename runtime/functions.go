@@ -45,18 +45,21 @@ var NativeFunctions = []Function{
 		arity:   2,
 		handler: minHandler,
 	},
+	{
+		name:    "type",
+		arity:   1,
+		handler: typeHandler,
+	},
 }
 
 func sleepHandler(e *Evaluator, args []Object) (Object, error) {
-	arg := args[0]
-
-	switch arg := arg.(type) {
-	case Float64:
-		time.Sleep(time.Duration(arg.Value) * time.Second)
-		return NIL, nil
-	default:
+	arg, ok := args[0].(Float64)
+	if !ok {
 		return NIL, fmt.Errorf("sleep expects an argument of type float64")
 	}
+
+	time.Sleep(time.Duration(arg.Value) * time.Second)
+	return NIL, nil
 }
 
 func timeHandler(e *Evaluator, args []Object) (Object, error) {
@@ -65,14 +68,11 @@ func timeHandler(e *Evaluator, args []Object) (Object, error) {
 }
 
 func absHandler(e *Evaluator, args []Object) (Object, error) {
-	arg := args[0]
-
-	switch arg := arg.(type) {
-	case Float64:
-		return NewFloat64(math.Abs(arg.Value)), nil
-	default:
+	arg, ok := args[0].(Float64)
+	if !ok {
 		return NIL, fmt.Errorf("abs expects an argument of type float64")
 	}
+	return NewFloat64(math.Abs(arg.Value)), nil
 }
 
 func maxHandler(e *Evaluator, args []Object) (Object, error) {
@@ -101,4 +101,9 @@ func minHandler(e *Evaluator, args []Object) (Object, error) {
 	}
 
 	return NewFloat64(math.Min(arg1.Value, arg2.Value)), nil
+}
+
+func typeHandler(e *Evaluator, args []Object) (Object, error) {
+	arg := args[0]
+	return NewType(arg.Type()), nil
 }
