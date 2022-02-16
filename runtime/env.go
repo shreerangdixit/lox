@@ -4,6 +4,15 @@ import (
 	"fmt"
 )
 
+var globals map[string]Object = make(map[string]Object)
+
+func init() {
+	// Declare native functions
+	for _, f := range NativeFunctions {
+		globals[f.String()] = f
+	}
+}
+
 type EnvError struct {
 	msg string
 }
@@ -25,14 +34,6 @@ func NewEnv() *Env {
 	env := Env{
 		scopeVariables: make(map[string]Object),
 		enclosing:      nil,
-	}
-
-	// Declare native functions
-	for _, f := range NativeFunctions {
-		err := env.Declare(f.String(), f)
-		if err != nil {
-			panic(err)
-		}
 	}
 
 	return &env
@@ -65,6 +66,10 @@ func (e *Env) Assign(varName string, varValue Object) error {
 }
 
 func (e *Env) Get(varName string) (Object, error) {
+	if val, ok := globals[varName]; ok {
+		return val, nil
+	}
+
 	if _, ok := e.scopeVariables[varName]; !ok {
 		if e.enclosing != nil {
 			return e.enclosing.Get(varName)
