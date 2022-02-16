@@ -1,4 +1,4 @@
-package parser
+package ast
 
 import (
 	"fmt"
@@ -148,29 +148,29 @@ func (n StringNode) String() string     { return n.Token.String() }
 func (n CallNode) String() string       { return fmt.Sprintf("func %s(%s)", n.Callee, n.Arguments) }
 
 // ------------------------------------
-// Parser
+// AstBuilder
 // ------------------------------------
 
-type Parser struct {
+type AstBuilder struct {
 	lex  *lexer.Lexer
 	curr token.Token
 	prev token.Token
 	next token.Token
 }
 
-func New(lex *lexer.Lexer) *Parser {
-	p := Parser{
+func New(lex *lexer.Lexer) *AstBuilder {
+	b := AstBuilder{
 		lex:  lex,
 		curr: token.Token{Type: token.TT_ILLEGAL, Literal: "0"},
 		prev: token.Token{Type: token.TT_ILLEGAL, Literal: "0"},
 		next: token.Token{Type: token.TT_ILLEGAL, Literal: "0"},
 	}
-	p.advance()
-	return &p
+	b.advance()
+	return &b
 }
 
-func (p *Parser) Parse() (Node, error) {
-	return p.program()
+func (b *AstBuilder) RootNode() (Node, error) {
+	return b.program()
 }
 
 // ------------------------------------
@@ -178,10 +178,10 @@ func (p *Parser) Parse() (Node, error) {
 // ------------------------------------
 
 // program -> declaration* EOF ;
-func (p *Parser) program() (Node, error) {
+func (b *AstBuilder) program() (Node, error) {
 	declarations := make([]Node, 0, 100)
-	for !p.consume(token.TT_EOF) {
-		decl, err := p.declaration()
+	for !b.consume(token.TT_EOF) {
+		decl, err := b.declaration()
 		if err != nil {
 			return nil, err
 		}
@@ -195,28 +195,28 @@ func (p *Parser) program() (Node, error) {
 
 // declaration -> letDecl
 //             | statement ;
-func (p *Parser) declaration() (Node, error) {
-	if p.consume(token.TT_LET) {
-		return p.letDeclaration()
+func (b *AstBuilder) declaration() (Node, error) {
+	if b.consume(token.TT_LET) {
+		return b.letDeclaration()
 	}
-	return p.statement()
+	return b.statement()
 }
 
 // letDecl -> "let" IDENTIFIER ( "=" expression )? ";" ;
-func (p *Parser) letDeclaration() (Node, error) {
-	atom, err := p.atom()
+func (b *AstBuilder) letDeclaration() (Node, error) {
+	atom, err := b.atom()
 	if err != nil {
 		return nil, err
 	}
 
 	identifier, ok := atom.(IdentifierNode)
 	if !ok {
-		return nil, newSyntaxError("Expected identifier after let", p.curr)
+		return nil, newSyntaxError("Expected identifier after let", b.curr)
 	}
 
-	if !p.consume(token.TT_ASSIGN) {
-		if !p.consume(token.TT_SEMICOLON) {
-			return nil, newSyntaxError("expected a ; at the end of a declaration", p.curr)
+	if !b.consume(token.TT_ASSIGN) {
+		if !b.consume(token.TT_SEMICOLON) {
+			return nil, newSyntaxError("expected a ; at the end of a declaration", b.curr)
 		}
 
 		return LetStmtNode{
@@ -225,13 +225,13 @@ func (p *Parser) letDeclaration() (Node, error) {
 		}, nil
 	}
 
-	value, err := p.expression()
+	value, err := b.expression()
 	if err != nil {
 		return nil, err
 	}
 
-	if !p.consume(token.TT_SEMICOLON) {
-		return nil, newSyntaxError("expected a ; at the end of a declaration", p.curr)
+	if !b.consume(token.TT_SEMICOLON) {
+		return nil, newSyntaxError("expected a ; at the end of a declaration", b.curr)
 	}
 
 	return LetStmtNode{
@@ -244,42 +244,42 @@ func (p *Parser) letDeclaration() (Node, error) {
 //           | ifStatement
 //           | printStatement
 //           | block ;
-func (p *Parser) statement() (Node, error) {
-	if p.consume(token.TT_IF) {
-		return p.ifStatement()
-	} else if p.consume(token.TT_PRINT) {
-		return p.printStatement()
-	} else if p.consume(token.TT_WHILE) {
-		return p.whileStatement()
-	} else if p.consume(token.TT_LBRACE) {
-		return p.block()
+func (b *AstBuilder) statement() (Node, error) {
+	if b.consume(token.TT_IF) {
+		return b.ifStatement()
+	} else if b.consume(token.TT_PRINT) {
+		return b.printStatement()
+	} else if b.consume(token.TT_WHILE) {
+		return b.whileStatement()
+	} else if b.consume(token.TT_LBRACE) {
+		return b.block()
 	}
-	return p.exprStatement()
+	return b.exprStatement()
 }
 
 // ifStatement -> "if" "(" expression ")" statement ( "else" statement )? ;
-func (p *Parser) ifStatement() (Node, error) {
-	if !p.consume(token.TT_LPAREN) {
-		return nil, newSyntaxError("expected opening '(' for if condition", p.curr)
+func (b *AstBuilder) ifStatement() (Node, error) {
+	if !b.consume(token.TT_LPAREN) {
+		return nil, newSyntaxError("expected opening '(' for if condition", b.curr)
 	}
 
-	condExp, err := p.expression()
+	condExp, err := b.expression()
 	if err != nil {
 		return nil, err
 	}
 
-	if !p.consume(token.TT_RPAREN) {
-		return nil, newSyntaxError("expected closing ')' for if condition", p.curr)
+	if !b.consume(token.TT_RPAREN) {
+		return nil, newSyntaxError("expected closing ')' for if condition", b.curr)
 	}
 
-	trueStmt, err := p.statement()
+	trueStmt, err := b.statement()
 	if err != nil {
 		return nil, err
 	}
 
 	var falseStmt Node = nil
-	if p.consume(token.TT_ELSE) {
-		falseStmt, err = p.statement()
+	if b.consume(token.TT_ELSE) {
+		falseStmt, err = b.statement()
 		if err != nil {
 			return nil, err
 		}
@@ -293,34 +293,34 @@ func (p *Parser) ifStatement() (Node, error) {
 }
 
 // printStatement -> "print" expression ";" ;
-func (p *Parser) printStatement() (Node, error) {
-	expr, err := p.expression()
+func (b *AstBuilder) printStatement() (Node, error) {
+	expr, err := b.expression()
 	if err != nil {
 		return nil, err
 	}
 
-	if p.consume(token.TT_SEMICOLON) {
+	if b.consume(token.TT_SEMICOLON) {
 		return PrintStmtNode{Exp: expr}, nil
 	}
-	return nil, newSyntaxError("expected a ; at the end of a print statement", p.curr)
+	return nil, newSyntaxError("expected a ; at the end of a print statement", b.curr)
 }
 
 // whileStatement -> "while" "(" expression ")" statement ;
-func (p *Parser) whileStatement() (Node, error) {
-	if !p.consume(token.TT_LPAREN) {
-		return nil, newSyntaxError("expected opening '(' for 'while' condition", p.curr)
+func (b *AstBuilder) whileStatement() (Node, error) {
+	if !b.consume(token.TT_LPAREN) {
+		return nil, newSyntaxError("expected opening '(' for 'while' condition", b.curr)
 	}
 
-	condition, err := p.expression()
+	condition, err := b.expression()
 	if err != nil {
 		return nil, err
 	}
 
-	if !p.consume(token.TT_RPAREN) {
-		return nil, newSyntaxError("expected closing ')' for 'while' condition", p.curr)
+	if !b.consume(token.TT_RPAREN) {
+		return nil, newSyntaxError("expected closing ')' for 'while' condition", b.curr)
 	}
 
-	body, err := p.statement()
+	body, err := b.statement()
 	if err != nil {
 		return nil, err
 	}
@@ -332,11 +332,11 @@ func (p *Parser) whileStatement() (Node, error) {
 }
 
 // block -> "{" declaration* "}" ;
-func (p *Parser) block() (Node, error) {
+func (b *AstBuilder) block() (Node, error) {
 	declarations := make([]Node, 0, 100)
 
-	for !p.check(token.TT_RBRACE) && !p.check(token.TT_EOF) {
-		decl, err := p.declaration()
+	for !b.check(token.TT_RBRACE) && !b.check(token.TT_EOF) {
+		decl, err := b.declaration()
 		if err != nil {
 			return nil, err
 		}
@@ -344,8 +344,8 @@ func (p *Parser) block() (Node, error) {
 		declarations = append(declarations, decl)
 	}
 
-	if !p.consume(token.TT_RBRACE) {
-		return nil, newSyntaxError("expected closing '}'", p.curr)
+	if !b.consume(token.TT_RBRACE) {
+		return nil, newSyntaxError("expected closing '}'", b.curr)
 	}
 
 	return BlockNode{
@@ -354,37 +354,37 @@ func (p *Parser) block() (Node, error) {
 }
 
 // exprStatement -> expression ";" ;
-func (p *Parser) exprStatement() (Node, error) {
-	expr, err := p.expression()
+func (b *AstBuilder) exprStatement() (Node, error) {
+	expr, err := b.expression()
 	if err != nil {
 		return nil, err
 	}
 
-	if p.consume(token.TT_SEMICOLON) {
+	if b.consume(token.TT_SEMICOLON) {
 		return ExpStmtNode{Exp: expr}, nil
 	}
-	return nil, newSyntaxError("expected a ; at the end of an expression statement", p.curr)
+	return nil, newSyntaxError("expected a ; at the end of an expression statement", b.curr)
 }
 
 // expression -> assignment ( "?" assignment ":" assignment )? ;
-func (p *Parser) expression() (Node, error) {
-	exp, err := p.assignment()
+func (b *AstBuilder) expression() (Node, error) {
+	exp, err := b.assignment()
 	if err != nil {
 		return nil, err
 	}
 
 	// Check ternary operator: <assignment> ? <assignment> : <assignment>
-	if p.consume(token.TT_QUESTION) {
-		trueExp, err := p.assignment()
+	if b.consume(token.TT_QUESTION) {
+		trueExp, err := b.assignment()
 		if err != nil {
 			return nil, err
 		}
 
-		if !p.consume(token.TT_COLON) {
-			return nil, newSyntaxError("expected ':'", p.curr)
+		if !b.consume(token.TT_COLON) {
+			return nil, newSyntaxError("expected ':'", b.curr)
 		}
 
-		falseExp, err := p.assignment()
+		falseExp, err := b.assignment()
 		if err != nil {
 			return nil, err
 		}
@@ -401,18 +401,18 @@ func (p *Parser) expression() (Node, error) {
 
 // assignment -> IDENTIFIER "=" assignment
 //            | logical_or ;
-func (p *Parser) assignment() (Node, error) {
-	expr, err := p.logical_or()
+func (b *AstBuilder) assignment() (Node, error) {
+	expr, err := b.logical_or()
 	if err != nil {
 		return nil, err
 	}
 
-	if p.consume(token.TT_ASSIGN) {
+	if b.consume(token.TT_ASSIGN) {
 		if _, ok := expr.(IdentifierNode); !ok {
-			return nil, newSyntaxError("expected an identifier for assignment", p.curr)
+			return nil, newSyntaxError("expected an identifier for assignment", b.curr)
 		}
 
-		assign, err := p.assignment()
+		assign, err := b.assignment()
 		if err != nil {
 			return nil, err
 		}
@@ -426,14 +426,14 @@ func (p *Parser) assignment() (Node, error) {
 }
 
 // logical_or -> logical_and ( "||" logical_and )*
-func (p *Parser) logical_or() (Node, error) {
-	left, err := p.logical_and()
+func (b *AstBuilder) logical_or() (Node, error) {
+	left, err := b.logical_and()
 	if err != nil {
 		return nil, err
 	}
 
-	for p.consume(token.TT_LOGICAL_OR) {
-		right, err := p.equality()
+	for b.consume(token.TT_LOGICAL_OR) {
+		right, err := b.equality()
 		if err != nil {
 			return nil, err
 		}
@@ -447,14 +447,14 @@ func (p *Parser) logical_or() (Node, error) {
 }
 
 // logical_and -> equality ( "&&" equality )* ;
-func (p *Parser) logical_and() (Node, error) {
-	left, err := p.equality()
+func (b *AstBuilder) logical_and() (Node, error) {
+	left, err := b.equality()
 	if err != nil {
 		return nil, err
 	}
 
-	for p.consume(token.TT_LOGICAL_AND) {
-		right, err := p.equality()
+	for b.consume(token.TT_LOGICAL_AND) {
+		right, err := b.equality()
 		if err != nil {
 			return nil, err
 		}
@@ -468,32 +468,32 @@ func (p *Parser) logical_and() (Node, error) {
 }
 
 // equality -> comparison ( ( "!=" | "==" ) comparison )* ;
-func (p *Parser) equality() (Node, error) {
-	return p.binaryOp([]token.TokenType{token.TT_EQ, token.TT_NEQ}, p.comparison)
+func (b *AstBuilder) equality() (Node, error) {
+	return b.binaryOp([]token.TokenType{token.TT_EQ, token.TT_NEQ}, b.comparison)
 }
 
 // comparison -> term ( ( "<" | "<=" | ">" | ">=" ) term )* ;
-func (p *Parser) comparison() (Node, error) {
-	return p.binaryOp([]token.TokenType{token.TT_LT, token.TT_LTE, token.TT_GT, token.TT_GTE}, p.term)
+func (b *AstBuilder) comparison() (Node, error) {
+	return b.binaryOp([]token.TokenType{token.TT_LT, token.TT_LTE, token.TT_GT, token.TT_GTE}, b.term)
 }
 
 // term -> factor ( ( "+" | "-" ) factor )* ;
-func (p *Parser) term() (Node, error) {
-	return p.binaryOp([]token.TokenType{token.TT_PLUS, token.TT_MINUS}, p.factor)
+func (b *AstBuilder) term() (Node, error) {
+	return b.binaryOp([]token.TokenType{token.TT_PLUS, token.TT_MINUS}, b.factor)
 }
 
 // factor -> unary ( ( "/" | "*" ) unary )* ;
-func (p *Parser) factor() (Node, error) {
-	return p.binaryOp([]token.TokenType{token.TT_DIVIDE, token.TT_MULTIPLY}, p.unary)
+func (b *AstBuilder) factor() (Node, error) {
+	return b.binaryOp([]token.TokenType{token.TT_DIVIDE, token.TT_MULTIPLY}, b.unary)
 }
 
 // unary -> ( "!" | "-" ) unary | call ;
-func (p *Parser) unary() (Node, error) {
+func (b *AstBuilder) unary() (Node, error) {
 	var node Node
-	for p.consumeAny([]token.TokenType{token.TT_NOT, token.TT_MINUS}) {
-		tok := p.curr
+	for b.consumeAny([]token.TokenType{token.TT_NOT, token.TT_MINUS}) {
+		tok := b.curr
 
-		n, err := p.unary()
+		n, err := b.unary()
 		if err != nil {
 			return nil, err
 		}
@@ -507,18 +507,18 @@ func (p *Parser) unary() (Node, error) {
 	if node != nil {
 		return node, nil
 	}
-	return p.call()
+	return b.call()
 }
 
 // call -> atom ( "(" arguments? ")" )* ;
-func (p *Parser) call() (Node, error) {
-	expr, err := p.atom()
+func (b *AstBuilder) call() (Node, error) {
+	expr, err := b.atom()
 	if err != nil {
 		return nil, err
 	}
 
-	for p.consume(token.TT_LPAREN) {
-		expr, err = p.finishCall(expr)
+	for b.consume(token.TT_LPAREN) {
+		expr, err = b.finishCall(expr)
 		if err != nil {
 			return nil, err
 		}
@@ -527,19 +527,19 @@ func (p *Parser) call() (Node, error) {
 	return expr, nil
 }
 
-func (p *Parser) finishCall(callee Node) (Node, error) {
+func (b *AstBuilder) finishCall(callee Node) (Node, error) {
 	arguments := []Node{}
 	var err error
 
-	for !p.check(token.TT_RPAREN) {
-		arguments, err = p.arguments()
+	for !b.check(token.TT_RPAREN) {
+		arguments, err = b.arguments()
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	if !p.consume(token.TT_RPAREN) {
-		return nil, newSyntaxError("expected closing ')' for function call", p.curr)
+	if !b.consume(token.TT_RPAREN) {
+		return nil, newSyntaxError("expected closing ')' for function call", b.curr)
 	}
 
 	return CallNode{
@@ -549,17 +549,17 @@ func (p *Parser) finishCall(callee Node) (Node, error) {
 }
 
 // arguments -> expression ( "," expression )* ;
-func (p *Parser) arguments() ([]Node, error) {
+func (b *AstBuilder) arguments() ([]Node, error) {
 	arguments := make([]Node, 0, 255)
 
-	arg, err := p.expression()
+	arg, err := b.expression()
 	if err != nil {
 		return nil, err
 	}
 
 	arguments = append(arguments, arg)
-	for p.consume(token.TT_COMMA) {
-		arg, err := p.expression()
+	for b.consume(token.TT_COMMA) {
+		arg, err := b.expression()
 		if err != nil {
 			return nil, err
 		}
@@ -573,43 +573,43 @@ func (p *Parser) arguments() ([]Node, error) {
 // atom -> NUMBER | STRING | "true" | "false" | "nil"
 //      | "(" expression ")"
 //      | IDENTIFIER ;
-func (p *Parser) atom() (Node, error) {
-	if p.consume(token.TT_NUMBER) {
-		return NumberNode{Token: p.curr}, nil
-	} else if p.consume(token.TT_STRING) {
-		return StringNode{Token: p.curr}, nil
-	} else if p.consumeAny([]token.TokenType{token.TT_TRUE, token.TT_FALSE}) {
-		return BooleanNode{Token: p.curr}, nil
-	} else if p.consume(token.TT_IDENTIFIER) {
-		return IdentifierNode{Token: p.curr}, nil
-	} else if p.consume(token.TT_NIL) {
+func (b *AstBuilder) atom() (Node, error) {
+	if b.consume(token.TT_NUMBER) {
+		return NumberNode{Token: b.curr}, nil
+	} else if b.consume(token.TT_STRING) {
+		return StringNode{Token: b.curr}, nil
+	} else if b.consumeAny([]token.TokenType{token.TT_TRUE, token.TT_FALSE}) {
+		return BooleanNode{Token: b.curr}, nil
+	} else if b.consume(token.TT_IDENTIFIER) {
+		return IdentifierNode{Token: b.curr}, nil
+	} else if b.consume(token.TT_NIL) {
 		return NilNode{}, nil
-	} else if p.consume(token.TT_LPAREN) {
-		exp, err := p.expression()
+	} else if b.consume(token.TT_LPAREN) {
+		exp, err := b.expression()
 		if err != nil {
 			return nil, err
 		}
 
-		if p.consume(token.TT_RPAREN) {
+		if b.consume(token.TT_RPAREN) {
 			return ExpNode{Exp: exp}, nil
 		}
-		return nil, newSyntaxError("expected closing ')' after expression", p.curr)
+		return nil, newSyntaxError("expected closing ')' after expression", b.curr)
 	}
-	return nil, newSyntaxError("expected a literal or an expression", p.curr)
+	return nil, newSyntaxError("expected a literal or an expression", b.curr)
 }
 
 // ------------------------------------
 // Helpers
 // ------------------------------------
 
-func (p *Parser) binaryOp(tokenTypes []token.TokenType, fun GrammarRuleFunc) (Node, error) {
+func (b *AstBuilder) binaryOp(tokenTypes []token.TokenType, fun GrammarRuleFunc) (Node, error) {
 	left, err := fun()
 	if err != nil {
 		return nil, err
 	}
 
-	for p.consumeAny(tokenTypes) {
-		tok := p.curr
+	for b.consumeAny(tokenTypes) {
+		tok := b.curr
 
 		right, err := fun()
 		if err != nil {
@@ -626,14 +626,14 @@ func (p *Parser) binaryOp(tokenTypes []token.TokenType, fun GrammarRuleFunc) (No
 }
 
 // check checks the next token if it matches the given type and returns true, otherwise it returns false
-func (p *Parser) check(tokType token.TokenType) bool {
-	return p.checkAny([]token.TokenType{tokType})
+func (b *AstBuilder) check(tokType token.TokenType) bool {
+	return b.checkAny([]token.TokenType{tokType})
 }
 
 // checkAny checks the next token if it matches any of the given types and returns true, otherwise it returns false
-func (p *Parser) checkAny(tokTypes []token.TokenType) bool {
+func (b *AstBuilder) checkAny(tokTypes []token.TokenType) bool {
 	for _, straw := range tokTypes {
-		if p.next.Type == straw {
+		if b.next.Type == straw {
 			return true
 		}
 	}
@@ -641,28 +641,28 @@ func (p *Parser) checkAny(tokTypes []token.TokenType) bool {
 }
 
 // consume consumes the next token if it matches the given type and returns true, otherwise it returns false
-func (p *Parser) consume(tokType token.TokenType) bool {
-	return p.consumeAny([]token.TokenType{tokType})
+func (b *AstBuilder) consume(tokType token.TokenType) bool {
+	return b.consumeAny([]token.TokenType{tokType})
 }
 
 // consumeAny consumes the next token if it matches any of the given types and returns true, otherwise it returns false
-func (p *Parser) consumeAny(tokTypes []token.TokenType) bool {
+func (b *AstBuilder) consumeAny(tokTypes []token.TokenType) bool {
 	for _, straw := range tokTypes {
-		if p.next.Type == straw {
-			p.advance()
+		if b.next.Type == straw {
+			b.advance()
 			return true
 		}
 	}
 	return false
 }
 
-func (p *Parser) advance() {
-	if p.curr.Type != token.TT_EOF {
-		p.prev = p.curr
-		p.curr = p.next
-		p.next = p.lex.NextToken()
+func (b *AstBuilder) advance() {
+	if b.curr.Type != token.TT_EOF {
+		b.prev = b.curr
+		b.curr = b.next
+		b.next = b.lex.NextToken()
 	}
-	if p.next.Type == token.TT_COMMENT {
-		p.advance()
+	if b.next.Type == token.TT_COMMENT {
+		b.advance()
 	}
 }

@@ -3,8 +3,8 @@ package runner
 import (
 	"bufio"
 	"fmt"
+	"github.com/shreerangdixit/lox/ast"
 	"github.com/shreerangdixit/lox/lexer"
-	"github.com/shreerangdixit/lox/parser"
 	"github.com/shreerangdixit/lox/runtime"
 	"io"
 	"os"
@@ -25,15 +25,13 @@ func RunFile(file string) error {
 		return err
 	}
 
-	p := parser.New(lexer.New(string(script)))
-
-	ast, err := p.Parse()
+	root, err := ast.New(lexer.New(string(script))).RootNode()
 	if err != nil {
 		return err
 	}
 
 	e := runtime.NewEvaluator()
-	_, err = e.Evaluate(ast)
+	_, err = e.Evaluate(root)
 	if err != nil {
 		return err
 	}
@@ -63,8 +61,7 @@ func startREPL(in io.Reader, out io.Writer) {
 			break
 		}
 
-		p := parser.New(lexer.New(txt))
-		ast, err := p.Parse()
+		root, err := ast.New(lexer.New(txt)).RootNode()
 		if err != nil {
 			fmt.Fprintf(out, "%s\n", err)
 			continue
@@ -72,9 +69,9 @@ func startREPL(in io.Reader, out io.Writer) {
 
 		// If the input is a single expression, evaluate and print the result
 		// Otherwise run statements
-		exp, ok := isSingleExpression(ast)
+		exp, ok := isSingleExpression(root)
 		if !ok {
-			_, err = e.Evaluate(ast)
+			_, err = e.Evaluate(root)
 			if err != nil {
 				fmt.Fprintf(out, "%s\n", err)
 			}
@@ -89,8 +86,8 @@ func startREPL(in io.Reader, out io.Writer) {
 	}
 }
 
-func isSingleExpression(node parser.Node) (parser.Node, bool) {
-	programNode, ok := node.(parser.ProgramNode)
+func isSingleExpression(node ast.Node) (ast.Node, bool) {
+	programNode, ok := node.(ast.ProgramNode)
 	if !ok {
 		return nil, false
 	}
@@ -99,7 +96,7 @@ func isSingleExpression(node parser.Node) (parser.Node, bool) {
 		return nil, false
 	}
 
-	expStat, ok := programNode.Declarations[0].(parser.ExpStmtNode)
+	expStat, ok := programNode.Declarations[0].(ast.ExpStmtNode)
 	if !ok {
 		return nil, false
 	}

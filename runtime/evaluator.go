@@ -2,7 +2,7 @@ package runtime
 
 import (
 	"fmt"
-	"github.com/shreerangdixit/lox/parser"
+	"github.com/shreerangdixit/lox/ast"
 	"github.com/shreerangdixit/lox/token"
 	"strconv"
 )
@@ -15,57 +15,57 @@ func NewEvaluator() *Evaluator {
 	return &Evaluator{env: NewEnv()}
 }
 
-func (e *Evaluator) Evaluate(root parser.Node) (Object, error) {
+func (e *Evaluator) Evaluate(root ast.Node) (Object, error) {
 	return e.eval(root)
 }
 
-func (e *Evaluator) eval(node parser.Node) (Object, error) {
+func (e *Evaluator) eval(node ast.Node) (Object, error) {
 	switch node := node.(type) {
-	case parser.ProgramNode:
+	case ast.ProgramNode:
 		return e.evalProgramNode(node)
-	case parser.BlockNode:
+	case ast.BlockNode:
 		return e.evalBlockNode(node)
-	case parser.LetStmtNode:
+	case ast.LetStmtNode:
 		return e.evalLetStmtNode(node)
-	case parser.ExpStmtNode:
+	case ast.ExpStmtNode:
 		return e.evalExpStmtNode(node)
-	case parser.IfStmtNode:
+	case ast.IfStmtNode:
 		return e.evalIfStmtNode(node)
-	case parser.PrintStmtNode:
+	case ast.PrintStmtNode:
 		return e.evalPrintStmtNode(node)
-	case parser.WhileStmtNode:
+	case ast.WhileStmtNode:
 		return e.evalWhileStmtNode(node)
-	case parser.AssignmentNode:
+	case ast.AssignmentNode:
 		return e.evalAssignmentNode(node)
-	case parser.LogicalAndNode:
+	case ast.LogicalAndNode:
 		return e.evalLogicalAndNode(node)
-	case parser.LogicalOrNode:
+	case ast.LogicalOrNode:
 		return e.evalLogicalOrNode(node)
-	case parser.ExpNode:
+	case ast.ExpNode:
 		return e.eval(node.Exp)
-	case parser.TernaryOpNode:
+	case ast.TernaryOpNode:
 		return e.evalTernaryOpNode(node)
-	case parser.BinaryOpNode:
+	case ast.BinaryOpNode:
 		return e.evalBinaryOpNode(node)
-	case parser.UnaryOpNode:
+	case ast.UnaryOpNode:
 		return e.evalUnaryOpNode(node)
-	case parser.IdentifierNode:
+	case ast.IdentifierNode:
 		return e.evalIdentifierNode(node)
-	case parser.NumberNode:
+	case ast.NumberNode:
 		return e.evalNumberNode(node)
-	case parser.BooleanNode:
+	case ast.BooleanNode:
 		return e.evalBooleanNode(node)
-	case parser.StringNode:
+	case ast.StringNode:
 		return e.evalStringNode(node)
-	case parser.NilNode:
+	case ast.NilNode:
 		return e.evalNilNode(node)
-	case parser.CallNode:
+	case ast.CallNode:
 		return e.evalCallNode(node)
 	}
 	return NIL, fmt.Errorf("invalid node: %T", node)
 }
 
-func (e *Evaluator) evalProgramNode(node parser.ProgramNode) (Object, error) {
+func (e *Evaluator) evalProgramNode(node ast.ProgramNode) (Object, error) {
 	for _, node := range node.Declarations {
 		_, err := e.eval(node)
 		if err != nil {
@@ -75,7 +75,7 @@ func (e *Evaluator) evalProgramNode(node parser.ProgramNode) (Object, error) {
 	return NIL, nil
 }
 
-func (e *Evaluator) evalBlockNode(node parser.BlockNode) (Object, error) {
+func (e *Evaluator) evalBlockNode(node ast.BlockNode) (Object, error) {
 	// Reset environment at the end of block scope
 	prev := e.env
 	defer func() {
@@ -93,7 +93,7 @@ func (e *Evaluator) evalBlockNode(node parser.BlockNode) (Object, error) {
 	return NIL, nil
 }
 
-func (e *Evaluator) evalLetStmtNode(node parser.LetStmtNode) (Object, error) {
+func (e *Evaluator) evalLetStmtNode(node ast.LetStmtNode) (Object, error) {
 	value, err := e.eval(node.Value)
 	if err != nil {
 		return NIL, err
@@ -105,11 +105,11 @@ func (e *Evaluator) evalLetStmtNode(node parser.LetStmtNode) (Object, error) {
 	return NIL, nil
 }
 
-func (e *Evaluator) evalExpStmtNode(node parser.ExpStmtNode) (Object, error) {
+func (e *Evaluator) evalExpStmtNode(node ast.ExpStmtNode) (Object, error) {
 	return e.eval(node.Exp)
 }
 
-func (e *Evaluator) evalIfStmtNode(node parser.IfStmtNode) (Object, error) {
+func (e *Evaluator) evalIfStmtNode(node ast.IfStmtNode) (Object, error) {
 	value, err := e.eval(node.Exp)
 	if err != nil {
 		return NIL, err
@@ -122,7 +122,7 @@ func (e *Evaluator) evalIfStmtNode(node parser.IfStmtNode) (Object, error) {
 	}
 }
 
-func (e *Evaluator) evalPrintStmtNode(node parser.PrintStmtNode) (Object, error) {
+func (e *Evaluator) evalPrintStmtNode(node ast.PrintStmtNode) (Object, error) {
 	result, err := e.eval(node.Exp)
 	if err != nil {
 		return NIL, err
@@ -133,7 +133,7 @@ func (e *Evaluator) evalPrintStmtNode(node parser.PrintStmtNode) (Object, error)
 	return NIL, nil
 }
 
-func (e *Evaluator) evalWhileStmtNode(node parser.WhileStmtNode) (Object, error) {
+func (e *Evaluator) evalWhileStmtNode(node ast.WhileStmtNode) (Object, error) {
 	for {
 		result, err := e.eval(node.Condition)
 		if err != nil {
@@ -152,7 +152,7 @@ func (e *Evaluator) evalWhileStmtNode(node parser.WhileStmtNode) (Object, error)
 	return NIL, nil
 }
 
-func (e *Evaluator) evalAssignmentNode(node parser.AssignmentNode) (Object, error) {
+func (e *Evaluator) evalAssignmentNode(node ast.AssignmentNode) (Object, error) {
 	value, err := e.eval(node.Value)
 	if err != nil {
 		return NIL, err
@@ -160,7 +160,7 @@ func (e *Evaluator) evalAssignmentNode(node parser.AssignmentNode) (Object, erro
 	return NIL, e.env.Assign(node.Identifier.Token.Literal, value)
 }
 
-func (e *Evaluator) evalLogicalAndNode(node parser.LogicalAndNode) (Object, error) {
+func (e *Evaluator) evalLogicalAndNode(node ast.LogicalAndNode) (Object, error) {
 	left, err := e.eval(node.LHS)
 	if err != nil {
 		return NIL, err
@@ -174,7 +174,7 @@ func (e *Evaluator) evalLogicalAndNode(node parser.LogicalAndNode) (Object, erro
 	return NewBool(IsTruthy(left) && IsTruthy(right)), nil
 }
 
-func (e *Evaluator) evalLogicalOrNode(node parser.LogicalOrNode) (Object, error) {
+func (e *Evaluator) evalLogicalOrNode(node ast.LogicalOrNode) (Object, error) {
 	left, err := e.eval(node.LHS)
 	if err != nil {
 		return NIL, err
@@ -192,7 +192,7 @@ func (e *Evaluator) evalLogicalOrNode(node parser.LogicalOrNode) (Object, error)
 	return NewBool(IsTruthy(right)), nil
 }
 
-func (e *Evaluator) evalTernaryOpNode(node parser.TernaryOpNode) (Object, error) {
+func (e *Evaluator) evalTernaryOpNode(node ast.TernaryOpNode) (Object, error) {
 	value, err := e.eval(node.Exp)
 	if err != nil {
 		return NIL, err
@@ -205,7 +205,7 @@ func (e *Evaluator) evalTernaryOpNode(node parser.TernaryOpNode) (Object, error)
 	}
 }
 
-func (e *Evaluator) evalBinaryOpNode(node parser.BinaryOpNode) (Object, error) {
+func (e *Evaluator) evalBinaryOpNode(node ast.BinaryOpNode) (Object, error) {
 	left, err := e.eval(node.LeftExp)
 	if err != nil {
 		return NIL, err
@@ -241,7 +241,7 @@ func (e *Evaluator) evalBinaryOpNode(node parser.BinaryOpNode) (Object, error) {
 	return NIL, fmt.Errorf("invalid binary op: %s", node.Op.Type)
 }
 
-func (e *Evaluator) evalUnaryOpNode(node parser.UnaryOpNode) (Object, error) {
+func (e *Evaluator) evalUnaryOpNode(node ast.UnaryOpNode) (Object, error) {
 	val, err := e.eval(node.Operand)
 	if err != nil {
 		return NIL, err
@@ -254,11 +254,11 @@ func (e *Evaluator) evalUnaryOpNode(node parser.UnaryOpNode) (Object, error) {
 	return NIL, fmt.Errorf("invalid unary op: %s", node.Op.Type)
 }
 
-func (e *Evaluator) evalIdentifierNode(node parser.IdentifierNode) (Object, error) {
+func (e *Evaluator) evalIdentifierNode(node ast.IdentifierNode) (Object, error) {
 	return e.env.Get(node.Token.Literal)
 }
 
-func (e *Evaluator) evalNumberNode(node parser.NumberNode) (Object, error) {
+func (e *Evaluator) evalNumberNode(node ast.NumberNode) (Object, error) {
 	val, err := strconv.ParseFloat(node.Token.Literal, 10)
 	if err != nil {
 		return NIL, err
@@ -267,7 +267,7 @@ func (e *Evaluator) evalNumberNode(node parser.NumberNode) (Object, error) {
 	return NewFloat64(val), nil
 }
 
-func (e *Evaluator) evalBooleanNode(node parser.BooleanNode) (Object, error) {
+func (e *Evaluator) evalBooleanNode(node ast.BooleanNode) (Object, error) {
 	val, err := strconv.ParseBool(node.Token.Literal)
 	if err != nil {
 		return NIL, err
@@ -276,15 +276,15 @@ func (e *Evaluator) evalBooleanNode(node parser.BooleanNode) (Object, error) {
 	return NewBool(val), nil
 }
 
-func (e *Evaluator) evalStringNode(node parser.StringNode) (Object, error) {
+func (e *Evaluator) evalStringNode(node ast.StringNode) (Object, error) {
 	return NewString(node.Token.Literal), nil
 }
 
-func (e *Evaluator) evalNilNode(node parser.NilNode) (Object, error) {
+func (e *Evaluator) evalNilNode(node ast.NilNode) (Object, error) {
 	return NIL, nil
 }
 
-func (e *Evaluator) evalCallNode(node parser.CallNode) (Object, error) {
+func (e *Evaluator) evalCallNode(node ast.CallNode) (Object, error) {
 	callee, err := e.eval(node.Callee)
 	if err != nil {
 		return NIL, fmt.Errorf("%s is not declared", node.Callee)
@@ -317,7 +317,7 @@ func (e *Evaluator) evalCallNode(node parser.CallNode) (Object, error) {
 	return callable.Call(e, argValues)
 }
 
-func (e *Evaluator) makeCallArguments(argNodes []parser.Node) ([]Object, error) {
+func (e *Evaluator) makeCallArguments(argNodes []ast.Node) ([]Object, error) {
 	argValues := make([]Object, 0, 255)
 	for _, arg := range argNodes {
 		argval, err := e.eval(arg)
