@@ -9,12 +9,12 @@ var NIL = Nil{}
 type ObjectType string
 
 const (
-	FLOAT64_OBJ ObjectType = "float64"
-	BOOL_OBJ    ObjectType = "bool"
-	STRING_OBJ  ObjectType = "string"
-	FUNC_OBJ    ObjectType = "function"
-	NIL_OBJ     ObjectType = "null"
-	TYPE_OBJ    ObjectType = "type"
+	TypeFloat64 ObjectType = "float64"
+	TypeBool    ObjectType = "bool"
+	TypeString  ObjectType = "string"
+	TypeFunc    ObjectType = "function"
+	TypeNil     ObjectType = "null"
+	TypeType    ObjectType = "type"
 )
 
 type Object interface {
@@ -39,23 +39,23 @@ func NewBool(value bool) Bool          { return Bool{Value: value} }
 func NewString(value string) String    { return String{Value: value} }
 func NewType(value ObjectType) Type    { return Type{Value: value} }
 
-func (f Float64) Type() ObjectType { return FLOAT64_OBJ }
+func (f Float64) Type() ObjectType { return TypeFloat64 }
 func (f Float64) String() string   { return fmt.Sprintf("%v", f.Value) }
-func (f Bool) Type() ObjectType    { return BOOL_OBJ }
+func (f Bool) Type() ObjectType    { return TypeBool }
 func (f Bool) String() string      { return fmt.Sprintf("%v", f.Value) }
-func (f String) Type() ObjectType  { return STRING_OBJ }
+func (f String) Type() ObjectType  { return TypeString }
 func (f String) String() string    { return f.Value }
-func (f Nil) Type() ObjectType     { return NIL_OBJ }
+func (f Nil) Type() ObjectType     { return TypeNil }
 func (f Nil) String() string       { return "nil" }
-func (f Type) Type() ObjectType    { return TYPE_OBJ }
+func (f Type) Type() ObjectType    { return TypeType }
 func (f Type) String() string      { return string(f.Value) }
 
 func IsTruthy(o Object) bool {
 	if o == NIL {
 		return false
-	} else if o.Type() == FLOAT64_OBJ {
+	} else if o.Type() == TypeFloat64 {
 		return o.(Float64).Value != 0
-	} else if o.Type() == BOOL_OBJ {
+	} else if o.Type() == TypeBool {
 		return o.(Bool).Value
 	}
 	return true
@@ -66,11 +66,11 @@ func Add(left Object, right Object) (Object, error) {
 		return NIL, fmt.Errorf("Cannot add types %s and %s", left.Type(), right.Type())
 	}
 
-	if left.Type() == FLOAT64_OBJ && right.Type() == FLOAT64_OBJ {
+	if left.Type() == TypeFloat64 && right.Type() == TypeFloat64 {
 		l := left.(Float64)
 		r := right.(Float64)
 		return NewFloat64(l.Value + r.Value), nil
-	} else if left.Type() == STRING_OBJ && right.Type() == STRING_OBJ {
+	} else if left.Type() == TypeString && right.Type() == TypeString {
 		l := left.(String)
 		r := right.(String)
 		return NewString(l.Value + r.Value), nil
@@ -84,7 +84,7 @@ func Subtract(left Object, right Object) (Object, error) {
 		return NIL, fmt.Errorf("Cannot subtract types %s and %s", left.Type(), right.Type())
 	}
 
-	if left.Type() == FLOAT64_OBJ && right.Type() == FLOAT64_OBJ {
+	if left.Type() == TypeFloat64 && right.Type() == TypeFloat64 {
 		l := left.(Float64)
 		r := right.(Float64)
 		return NewFloat64(l.Value - r.Value), nil
@@ -98,7 +98,7 @@ func Divide(left Object, right Object) (Object, error) {
 		return NIL, fmt.Errorf("Cannot divide types %s and %s", left.Type(), right.Type())
 	}
 
-	if left.Type() == FLOAT64_OBJ && right.Type() == FLOAT64_OBJ {
+	if left.Type() == TypeFloat64 && right.Type() == TypeFloat64 {
 		l := left.(Float64)
 		r := right.(Float64)
 		if r.Value == 0 {
@@ -115,7 +115,7 @@ func Multiply(left Object, right Object) (Object, error) {
 		return NIL, fmt.Errorf("Cannot multiply types %s and %s", left.Type(), right.Type())
 	}
 
-	if left.Type() == FLOAT64_OBJ && right.Type() == FLOAT64_OBJ {
+	if left.Type() == TypeFloat64 && right.Type() == TypeFloat64 {
 		l := left.(Float64)
 		r := right.(Float64)
 		return NewFloat64(l.Value * r.Value), nil
@@ -125,10 +125,10 @@ func Multiply(left Object, right Object) (Object, error) {
 }
 
 func Negate(o Object) (Object, error) {
-	if o.Type() == FLOAT64_OBJ {
+	if o.Type() == TypeFloat64 {
 		obj := o.(Float64)
 		return NewFloat64(obj.Value * -1), nil
-	} else if o.Type() == BOOL_OBJ {
+	} else if o.Type() == TypeBool {
 		obj := o.(Bool)
 		return NewBool(!obj.Value), nil
 	}
@@ -140,19 +140,19 @@ func EqualTo(left Object, right Object) Bool {
 		return NewBool(false)
 	}
 
-	if left.Type() == FLOAT64_OBJ && right.Type() == FLOAT64_OBJ {
+	if left.Type() == TypeFloat64 && right.Type() == TypeFloat64 {
 		l := left.(Float64)
 		r := right.(Float64)
 		return NewBool(l.Value == r.Value)
-	} else if left.Type() == BOOL_OBJ && right.Type() == BOOL_OBJ {
+	} else if left.Type() == TypeBool && right.Type() == TypeBool {
 		l := left.(Bool)
 		r := right.(Bool)
 		return NewBool(l.Value == r.Value)
-	} else if left.Type() == STRING_OBJ && right.Type() == STRING_OBJ {
+	} else if left.Type() == TypeString && right.Type() == TypeString {
 		l := left.(String)
 		r := right.(String)
 		return NewBool(l.Value == r.Value)
-	} else if left.Type() == NIL_OBJ && right.Type() == NIL_OBJ {
+	} else if left.Type() == TypeNil && right.Type() == TypeNil {
 		return NewBool(true)
 	}
 
@@ -168,11 +168,11 @@ func LessThan(left Object, right Object) Bool {
 		return NewBool(false)
 	}
 
-	if left.Type() == FLOAT64_OBJ && right.Type() == FLOAT64_OBJ {
+	if left.Type() == TypeFloat64 && right.Type() == TypeFloat64 {
 		l := left.(Float64)
 		r := right.(Float64)
 		return NewBool(l.Value < r.Value)
-	} else if left.Type() == STRING_OBJ && right.Type() == STRING_OBJ {
+	} else if left.Type() == TypeString && right.Type() == TypeString {
 		l := left.(String)
 		r := right.(String)
 		return NewBool(l.Value < r.Value)
@@ -190,11 +190,11 @@ func GreaterThan(left Object, right Object) Bool {
 		return NewBool(false)
 	}
 
-	if left.Type() == FLOAT64_OBJ && right.Type() == FLOAT64_OBJ {
+	if left.Type() == TypeFloat64 && right.Type() == TypeFloat64 {
 		l := left.(Float64)
 		r := right.(Float64)
 		return NewBool(l.Value > r.Value)
-	} else if left.Type() == STRING_OBJ && right.Type() == STRING_OBJ {
+	} else if left.Type() == TypeString && right.Type() == TypeString {
 		l := left.(String)
 		r := right.(String)
 		return NewBool(l.Value > r.Value)

@@ -14,7 +14,7 @@ type Function struct {
 	handler FunctionHandler
 }
 
-func (f Function) Type() ObjectType                                 { return FUNC_OBJ }
+func (f Function) Type() ObjectType                                 { return TypeFunc }
 func (f Function) String() string                                   { return f.name }
 func (f Function) Arity() int                                       { return f.arity }
 func (f Function) Call(e *Evaluator, args []Object) (Object, error) { return f.handler(e, args) }
