@@ -9,7 +9,9 @@ import (
 // Nodes
 // ------------------------------------
 
-type Node interface{}
+type Node interface {
+	String() string
+}
 
 type NilNode struct {
 }
@@ -113,18 +115,18 @@ type IndexOfNode struct {
 }
 
 func (n NilNode) String() string        { return "nil" }
-func (n ProgramNode) String() string    { return fmt.Sprintf("+%s", n.Declarations) }
+func (n ProgramNode) String() string    { return fmt.Sprintf("%s", n.Declarations) }
 func (n IdentifierNode) String() string { return n.Token.String() }
 func (n AssignmentNode) String() string { return fmt.Sprintf("%s=%s", n.Identifier, n.Value) }
 func (n LetStmtNode) String() string    { return fmt.Sprintf("let %s=%s", n.Identifier, n.Value) }
 func (n BlockNode) String() string      { return fmt.Sprintf("{%s}", n.Declarations) }
-func (n ExpStmtNode) String() string    { return fmt.Sprintf("%s", n.Exp) }
+func (n ExpStmtNode) String() string    { return n.Exp.String() }
 func (n IfStmtNode) String() string {
 	return fmt.Sprintf("if(%s) %s else %s", n.Exp, n.TrueStmt, n.FalseStmt)
 }
-func (n PrintStmtNode) String() string { return fmt.Sprintf("%s", n.Exp) }
+func (n PrintStmtNode) String() string { return n.Exp.String() }
 func (n WhileStmtNode) String() string { return fmt.Sprintf("while(%s)%s", n.Condition, n.Body) }
-func (n ExpNode) String() string       { return fmt.Sprintf("%s", n.Exp) }
+func (n ExpNode) String() string       { return n.Exp.String() }
 func (n TernaryOpNode) String() string {
 	return fmt.Sprintf("%s ? %s : %s", n.Exp, n.TrueExp, n.FalseExp)
 }
@@ -136,3 +138,5 @@ func (n BooleanNode) String() string    { return n.Token.String() }
 func (n NumberNode) String() string     { return n.Token.String() }
 func (n StringNode) String() string     { return n.Token.String() }
 func (n CallNode) String() string       { return fmt.Sprintf("func %s(%s)", n.Callee, n.Arguments) }
+func (n ListNode) String() string       { return fmt.Sprintf("%s", n.Elements) }
+func (n IndexOfNode) String() string    { return fmt.Sprintf("%s[%s]", n.Sequence, n.Index) }
