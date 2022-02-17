@@ -211,12 +211,16 @@ func GreaterThanEq(left Object, right Object) Bool {
 	return NewBool(GreaterThan(left, right).Value || EqualTo(left, right).Value)
 }
 
-func ItemAtIndex(o Object, idx Number) (Object, error) {
-	if seq, ok := o.(Sequence); ok {
-		return seq.Index(idx)
+func ItemAtIndex(o Object, idx Object) (Object, error) {
+	if _, ok := o.(Sequence); !ok {
+		return NIL, fmt.Errorf("%s is not a sequence (non-indexable)", o.Type())
 	}
-	return NIL, fmt.Errorf("Cannot index type %s", o.Type())
 
+	if _, ok := idx.(Number); !ok {
+		return NIL, fmt.Errorf("index must be a number, was %s", idx.Type())
+	}
+
+	return o.(Sequence).Index(idx.(Number))
 }
 
 // ------------------------------------

@@ -320,24 +320,14 @@ func (e *Evaluator) evalCallNode(node ast.CallNode) (Object, error) {
 }
 
 func (e *Evaluator) evalIndexOfNode(node ast.IndexOfNode) (Object, error) {
-	seqNode, err := e.eval(node.Sequence)
+	seq, err := e.eval(node.Sequence)
 	if err != nil {
 		return nil, err
 	}
 
-	seq, ok := seqNode.(Sequence)
-	if !ok {
-		return NIL, fmt.Errorf("%s is not indexable", seqNode.Type())
-	}
-
-	idxNode, err := e.eval(node.Index)
+	idx, err := e.eval(node.Index)
 	if err != nil {
 		return nil, err
-	}
-
-	idx, ok := idxNode.(Number)
-	if !ok {
-		return NIL, fmt.Errorf("index must be a number, was %s", idxNode.Type())
 	}
 
 	return ItemAtIndex(seq, idx)
