@@ -74,6 +74,8 @@ const (
 	TT_RPAREN
 	TT_LBRACE
 	TT_RBRACE
+	TT_LBRACKET
+	TT_RBRACKET
 
 	// Keywords
 	TT_PRINT
@@ -149,6 +151,10 @@ func (t TokenType) String() string {
 		return "{"
 	case TT_RBRACE:
 		return "}"
+	case TT_LBRACKET:
+		return "["
+	case TT_RBRACKET:
+		return "]"
 	case TT_PRINT:
 		return "print"
 	case TT_FUNCTION:

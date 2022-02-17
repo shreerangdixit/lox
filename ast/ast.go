@@ -431,6 +431,7 @@ func (a *Ast) arguments() ([]Node, error) {
 
 // atom -> NUMBER | STRING | "true" | "false" | "nil"
 //      | "(" expression ")"
+//      | "[" arguments? "]"
 //      | IDENTIFIER ;
 func (a *Ast) atom() (Node, error) {
 	if a.consume(token.TT_NUMBER) {
@@ -453,8 +454,32 @@ func (a *Ast) atom() (Node, error) {
 			return ExpNode{Exp: exp}, nil
 		}
 		return nil, newSyntaxError("expected closing ')' after expression", a.curr)
+	} else if a.consume(token.TT_LBRACKET) {
+		return a.list()
 	}
 	return nil, newSyntaxError("expected a literal or an expression", a.curr)
+}
+
+func (a *Ast) list() (Node, error) {
+	// List is empty []
+	if a.consume(token.TT_RBRACKET) {
+		return ListNode{
+			Elements: make([]Node, 0),
+		}, nil
+	} else {
+		arguments, err := a.arguments()
+		if err != nil {
+			return nil, err
+		}
+
+		if !a.consume(token.TT_RBRACKET) {
+			return nil, newSyntaxError("expected closing ']' for list", a.curr)
+		}
+
+		return ListNode{
+			Elements: arguments,
+		}, nil
+	}
 }
 
 // ------------------------------------

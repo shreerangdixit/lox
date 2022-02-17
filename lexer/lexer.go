@@ -101,6 +101,10 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.TT_LBRACE, string(l.ch))
 	case '}':
 		tok = newToken(token.TT_RBRACE, string(l.ch))
+	case '[':
+		tok = newToken(token.TT_LBRACKET, string(l.ch))
+	case ']':
+		tok = newToken(token.TT_RBRACKET, string(l.ch))
 	case '?':
 		tok = newToken(token.TT_QUESTION, string(l.ch))
 	case ':':
@@ -164,7 +168,7 @@ func (l *Lexer) readNumberToken() token.Token {
 func (l *Lexer) readIdentifierToken() token.Token {
 	defer l.rewind()
 	startPos := l.currentPos
-	for isLetter(l.ch) {
+	for isLetter(l.ch) || isDigit(l.ch) {
 		l.advance()
 	}
 	value := l.input[startPos:l.currentPos]

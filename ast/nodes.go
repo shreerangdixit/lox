@@ -98,6 +98,10 @@ type StringNode struct {
 	Token token.Token
 }
 
+type ListNode struct {
+	Elements []Node
+}
+
 type CallNode struct {
 	Callee    Node
 	Arguments []Node

@@ -50,12 +50,17 @@ var NativeFunctions = []Function{
 		arity:   1,
 		handler: typeHandler,
 	},
+	{
+		name:    "len",
+		arity:   1,
+		handler: lenHandler,
+	},
 }
 
 func sleepHandler(e *Evaluator, args []Object) (Object, error) {
 	arg, ok := args[0].(Float64)
 	if !ok {
-		return NIL, fmt.Errorf("sleep expects an argument of type float64")
+		return NIL, fmt.Errorf("sleep() expects a number")
 	}
 
 	time.Sleep(time.Duration(arg.Value) * time.Second)
@@ -70,7 +75,7 @@ func timeHandler(e *Evaluator, args []Object) (Object, error) {
 func absHandler(e *Evaluator, args []Object) (Object, error) {
 	arg, ok := args[0].(Float64)
 	if !ok {
-		return NIL, fmt.Errorf("abs expects an argument of type float64")
+		return NIL, fmt.Errorf("abs() expects a number")
 	}
 	return NewFloat64(math.Abs(arg.Value)), nil
 }
@@ -78,12 +83,12 @@ func absHandler(e *Evaluator, args []Object) (Object, error) {
 func maxHandler(e *Evaluator, args []Object) (Object, error) {
 	arg1, ok := args[0].(Float64)
 	if !ok {
-		return NIL, fmt.Errorf("first argument to max() must be a number")
+		return NIL, fmt.Errorf("max() expects a number")
 	}
 
 	arg2, ok := args[1].(Float64)
 	if !ok {
-		return NIL, fmt.Errorf("second argument to max() must be a number")
+		return NIL, fmt.Errorf("max() expects a number")
 	}
 
 	return NewFloat64(math.Max(arg1.Value, arg2.Value)), nil
@@ -92,12 +97,12 @@ func maxHandler(e *Evaluator, args []Object) (Object, error) {
 func minHandler(e *Evaluator, args []Object) (Object, error) {
 	arg1, ok := args[0].(Float64)
 	if !ok {
-		return NIL, fmt.Errorf("first argument to min() must be a number")
+		return NIL, fmt.Errorf("min() expects a number")
 	}
 
 	arg2, ok := args[1].(Float64)
 	if !ok {
-		return NIL, fmt.Errorf("second argument to min() must be a number")
+		return NIL, fmt.Errorf("min() expects a number")
 	}
 
 	return NewFloat64(math.Min(arg1.Value, arg2.Value)), nil
@@ -106,4 +111,12 @@ func minHandler(e *Evaluator, args []Object) (Object, error) {
 func typeHandler(e *Evaluator, args []Object) (Object, error) {
 	arg := args[0]
 	return NewType(arg.Type()), nil
+}
+
+func lenHandler(e *Evaluator, args []Object) (Object, error) {
+	arg, ok := args[0].(Sequence)
+	if !ok {
+		return NIL, fmt.Errorf("len() expects a sequence")
+	}
+	return NewFloat64(float64(arg.Size())), nil
 }

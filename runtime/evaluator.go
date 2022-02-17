@@ -57,6 +57,8 @@ func (e *Evaluator) eval(node ast.Node) (Object, error) {
 		return e.evalBooleanNode(node)
 	case ast.StringNode:
 		return e.evalStringNode(node)
+	case ast.ListNode:
+		return e.evalListNode(node)
 	case ast.NilNode:
 		return e.evalNilNode(node)
 	case ast.CallNode:
@@ -280,6 +282,15 @@ func (e *Evaluator) evalStringNode(node ast.StringNode) (Object, error) {
 	return NewString(node.Token.Literal), nil
 }
 
+func (e *Evaluator) evalListNode(node ast.ListNode) (Object, error) {
+	elements, err := e.evalNodes(node.Elements)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewList(elements), nil
+}
+
 func (e *Evaluator) evalNilNode(node ast.NilNode) (Object, error) {
 	return NIL, nil
 }
@@ -309,7 +320,7 @@ func (e *Evaluator) evalCallNode(node ast.CallNode) (Object, error) {
 		)
 	}
 
-	argValues, err := e.makeCallArguments(node.Arguments)
+	argValues, err := e.evalNodes(node.Arguments)
 	if err != nil {
 		return NIL, err
 	}
@@ -317,7 +328,7 @@ func (e *Evaluator) evalCallNode(node ast.CallNode) (Object, error) {
 	return callable.Call(e, argValues)
 }
 
-func (e *Evaluator) makeCallArguments(argNodes []ast.Node) ([]Object, error) {
+func (e *Evaluator) evalNodes(argNodes []ast.Node) ([]Object, error) {
 	argValues := make([]Object, 0, 255)
 	for _, arg := range argNodes {
 		argval, err := e.eval(arg)

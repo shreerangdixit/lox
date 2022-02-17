@@ -26,4 +26,5 @@ call           -> atom ( "(" arguments? ")" )* ;
 arguments      -> expression ( "," expression )* ;
 atom           -> NUMBER | STRING | "true" | "false" | "nil"
                | "(" expression ")"
+               | "[" arguments? "]"
                | IDENTIFIER ;
