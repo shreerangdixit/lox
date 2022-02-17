@@ -24,7 +24,7 @@ factor         -> unary ( ( "/" | "*" ) unary )* ;
 unary          -> ( "!" | "-" ) unary
                 | call ;
 call           -> atom ( "(" arguments? ")" )*
-                | atom "[" expression "]";
+                | atom ( "[" expression "]" )* ;
 arguments      -> expression ( "," expression )* ;
 atom           -> NUMBER | STRING | "true" | "false" | "nil"
                | "(" expression ")"

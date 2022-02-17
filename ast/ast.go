@@ -371,7 +371,7 @@ func (a *Ast) unary() (Node, error) {
 }
 
 // call -> atom ( "(" arguments? ")" )*
-//      | atom "[" NUMBER "]";
+//      | atom ( "[" expression "]" )* ;
 func (a *Ast) call() (Node, error) {
 	expr, err := a.atom()
 	if err != nil {
