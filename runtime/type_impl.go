@@ -50,6 +50,7 @@ func (f Number) Divide(other Object) (Object, error) {
 // Implements the following interfaces
 // Object
 // Truthifier
+// EqualToComparator
 // Notter
 type Bool struct{ Value bool }
 
