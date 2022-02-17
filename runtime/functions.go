@@ -58,7 +58,7 @@ var NativeFunctions = []Function{
 }
 
 func sleepHandler(e *Evaluator, args []Object) (Object, error) {
-	arg, ok := args[0].(Float64)
+	arg, ok := args[0].(Number)
 	if !ok {
 		return NIL, fmt.Errorf("sleep() expects a number")
 	}
@@ -69,43 +69,43 @@ func sleepHandler(e *Evaluator, args []Object) (Object, error) {
 
 func timeHandler(e *Evaluator, args []Object) (Object, error) {
 	ms := time.Now().UnixNano() / int64(time.Millisecond)
-	return NewFloat64(float64(ms)), nil
+	return NewNumber(float64(ms)), nil
 }
 
 func absHandler(e *Evaluator, args []Object) (Object, error) {
-	arg, ok := args[0].(Float64)
+	arg, ok := args[0].(Number)
 	if !ok {
 		return NIL, fmt.Errorf("abs() expects a number")
 	}
-	return NewFloat64(math.Abs(arg.Value)), nil
+	return NewNumber(math.Abs(arg.Value)), nil
 }
 
 func maxHandler(e *Evaluator, args []Object) (Object, error) {
-	arg1, ok := args[0].(Float64)
+	arg1, ok := args[0].(Number)
 	if !ok {
 		return NIL, fmt.Errorf("max() expects a number")
 	}
 
-	arg2, ok := args[1].(Float64)
+	arg2, ok := args[1].(Number)
 	if !ok {
 		return NIL, fmt.Errorf("max() expects a number")
 	}
 
-	return NewFloat64(math.Max(arg1.Value, arg2.Value)), nil
+	return NewNumber(math.Max(arg1.Value, arg2.Value)), nil
 }
 
 func minHandler(e *Evaluator, args []Object) (Object, error) {
-	arg1, ok := args[0].(Float64)
+	arg1, ok := args[0].(Number)
 	if !ok {
 		return NIL, fmt.Errorf("min() expects a number")
 	}
 
-	arg2, ok := args[1].(Float64)
+	arg2, ok := args[1].(Number)
 	if !ok {
 		return NIL, fmt.Errorf("min() expects a number")
 	}
 
-	return NewFloat64(math.Min(arg1.Value, arg2.Value)), nil
+	return NewNumber(math.Min(arg1.Value, arg2.Value)), nil
 }
 
 func typeHandler(e *Evaluator, args []Object) (Object, error) {

@@ -9,13 +9,13 @@ var NIL = Nil{}
 type ObjectType string
 
 const (
-	TypeFloat64 ObjectType = "float64"
-	TypeBool    ObjectType = "bool"
-	TypeString  ObjectType = "string"
-	TypeFunc    ObjectType = "function"
-	TypeNil     ObjectType = "null"
-	TypeType    ObjectType = "type"
-	TypeList    ObjectType = "list"
+	TypeNumber ObjectType = "number"
+	TypeBool   ObjectType = "bool"
+	TypeString ObjectType = "string"
+	TypeFunc   ObjectType = "function"
+	TypeNil    ObjectType = "null"
+	TypeType   ObjectType = "type"
+	TypeList   ObjectType = "list"
 )
 
 // ------------------------------------
@@ -35,7 +35,7 @@ type Callable interface {
 
 type Sequence interface {
 	Object
-	Size() Float64
+	Size() Number
 }
 
 type Truthifier interface {

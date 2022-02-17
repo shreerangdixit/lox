@@ -268,7 +268,7 @@ func (e *Evaluator) evalNumberNode(node ast.NumberNode) (Object, error) {
 		return NIL, err
 	}
 
-	return NewFloat64(val), nil
+	return NewNumber(val), nil
 }
 
 func (e *Evaluator) evalBooleanNode(node ast.BooleanNode) (Object, error) {

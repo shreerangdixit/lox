@@ -16,34 +16,34 @@ import (
 // Subtractor
 // Multiplier
 // Divider
-type Float64 struct{ Value float64 }
+type Number struct{ Value float64 }
 
-func NewFloat64(value float64) Float64          { return Float64{Value: value} }
-func (f Float64) Type() ObjectType              { return TypeFloat64 }
-func (f Float64) String() string                { return fmt.Sprintf("%v", f.Value) }
-func (f Float64) Truthy() Bool                  { return NewBool(f.Value != 0) }
-func (f Float64) Negate() (Object, error)       { return f.Multiply(NewFloat64(-1)) }
-func (f Float64) LessThan(other Object) Bool    { return NewBool(f.Value < other.(Float64).Value) }
-func (f Float64) GreaterThan(other Object) Bool { return NewBool(f.Value > other.(Float64).Value) }
-func (f Float64) EqualTo(other Object) Bool     { return NewBool(f.Value == other.(Float64).Value) }
+func NewNumber(value float64) Number           { return Number{Value: value} }
+func (f Number) Type() ObjectType              { return TypeNumber }
+func (f Number) String() string                { return fmt.Sprintf("%v", f.Value) }
+func (f Number) Truthy() Bool                  { return NewBool(f.Value != 0) }
+func (f Number) Negate() (Object, error)       { return f.Multiply(NewNumber(-1)) }
+func (f Number) LessThan(other Object) Bool    { return NewBool(f.Value < other.(Number).Value) }
+func (f Number) GreaterThan(other Object) Bool { return NewBool(f.Value > other.(Number).Value) }
+func (f Number) EqualTo(other Object) Bool     { return NewBool(f.Value == other.(Number).Value) }
 
-func (f Float64) Add(other Object) (Object, error) {
-	return NewFloat64(f.Value + other.(Float64).Value), nil
+func (f Number) Add(other Object) (Object, error) {
+	return NewNumber(f.Value + other.(Number).Value), nil
 }
 
-func (f Float64) Subtract(other Object) (Object, error) {
-	return NewFloat64(f.Value - other.(Float64).Value), nil
+func (f Number) Subtract(other Object) (Object, error) {
+	return NewNumber(f.Value - other.(Number).Value), nil
 }
 
-func (f Float64) Multiply(other Object) (Object, error) {
-	return NewFloat64(f.Value * other.(Float64).Value), nil
+func (f Number) Multiply(other Object) (Object, error) {
+	return NewNumber(f.Value * other.(Number).Value), nil
 }
 
-func (f Float64) Divide(other Object) (Object, error) {
-	if other.(Float64).Value == 0 {
+func (f Number) Divide(other Object) (Object, error) {
+	if other.(Number).Value == 0 {
 		return nil, fmt.Errorf("Divide by zero error")
 	}
-	return NewFloat64(f.Value / other.(Float64).Value), nil
+	return NewNumber(f.Value / other.(Number).Value), nil
 }
 
 // Boolean type
@@ -77,7 +77,7 @@ type String struct{ Value string }
 func NewString(value string) String            { return String{Value: value} }
 func (f String) Type() ObjectType              { return TypeString }
 func (f String) String() string                { return f.Value }
-func (f String) Size() Float64                 { return NewFloat64(float64(len(f.Value))) }
+func (f String) Size() Number                  { return NewNumber(float64(len(f.Value))) }
 func (f String) Truthy() Bool                  { return NewBool(f.Size().Value > 0) }
 func (f String) LessThan(other Object) Bool    { return NewBool(f.Value < other.(String).Value) }
 func (f String) GreaterThan(other Object) Bool { return NewBool(f.Value > other.(String).Value) }
@@ -115,7 +115,7 @@ type List struct{ Values []Object }
 func NewList(values []Object) List { return List{Values: values} }
 func (f List) Type() ObjectType    { return TypeList }
 func (f List) String() string      { return fmt.Sprintf("%v", f.Values) }
-func (f List) Size() Float64       { return NewFloat64(float64(len(f.Values))) }
+func (f List) Size() Number        { return NewNumber(float64(len(f.Values))) }
 func (f List) Truthy() Bool        { return NewBool(f.Size().Value > 0) }
 
 func (f List) Add(other Object) (Object, error) {
