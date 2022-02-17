@@ -63,6 +63,8 @@ func (e *Evaluator) eval(node ast.Node) (Object, error) {
 		return e.evalNilNode(node)
 	case ast.CallNode:
 		return e.evalCallNode(node)
+	case ast.IndexOfNode:
+		return e.evalIndexOfNode(node)
 	}
 	return NIL, fmt.Errorf("invalid node: %T", node)
 }
@@ -328,6 +330,30 @@ func (e *Evaluator) evalCallNode(node ast.CallNode) (Object, error) {
 	}
 
 	return callable.Call(e, argValues)
+}
+
+func (e *Evaluator) evalIndexOfNode(node ast.IndexOfNode) (Object, error) {
+	seqNode, err := e.eval(node.Sequence)
+	if err != nil {
+		return nil, err
+	}
+
+	seq, ok := seqNode.(Sequence)
+	if !ok {
+		return NIL, fmt.Errorf("%s is not indexable", seqNode.Type())
+	}
+
+	idxNode, err := e.eval(node.Index)
+	if err != nil {
+		return nil, err
+	}
+
+	idx, ok := idxNode.(Number)
+	if !ok {
+		return NIL, fmt.Errorf("index must be a number, was %s", idxNode.Type())
+	}
+
+	return ItemAtIndex(seq, idx)
 }
 
 func (e *Evaluator) evalNodes(argNodes []ast.Node) ([]Object, error) {

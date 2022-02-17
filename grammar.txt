@@ -21,8 +21,10 @@ equality       -> comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     -> term ( ( "<" | "<=" | ">" | ">=" ) term )* ;
 term           -> factor ( ( "+" | "-" ) factor )* ;
 factor         -> unary ( ( "/" | "*" ) unary )* ;
-unary          -> ( "!" | "-" ) unary | call ;
-call           -> atom ( "(" arguments? ")" )* ;
+unary          -> ( "!" | "-" ) unary
+                | call ;
+call           -> atom ( "(" arguments? ")" )*
+                | atom "[" expression "]";
 arguments      -> expression ( "," expression )* ;
 atom           -> NUMBER | STRING | "true" | "false" | "nil"
                | "(" expression ")"

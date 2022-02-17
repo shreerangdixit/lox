@@ -346,7 +346,8 @@ func (a *Ast) factor() (Node, error) {
 	return a.binaryOp([]token.TokenType{token.TT_DIVIDE, token.TT_MULTIPLY}, a.unary)
 }
 
-// unary -> ( "!" | "-" ) unary | call ;
+// unary -> ( "!" | "-" ) unary
+//       | call ;
 func (a *Ast) unary() (Node, error) {
 	var node Node
 	for a.consumeAny([]token.TokenType{token.TT_NOT, token.TT_MINUS}) {
@@ -369,20 +370,36 @@ func (a *Ast) unary() (Node, error) {
 	return a.call()
 }
 
-// call -> atom ( "(" arguments? ")" )* ;
+// call -> atom ( "(" arguments? ")" )*
+//      | atom "[" NUMBER "]";
 func (a *Ast) call() (Node, error) {
 	expr, err := a.atom()
 	if err != nil {
 		return nil, err
 	}
 
-	for a.consume(token.TT_LPAREN) {
-		expr, err = a.finishCall(expr)
+	if a.check(token.TT_LPAREN) {
+		for a.consume(token.TT_LPAREN) {
+			expr, err = a.finishCall(expr)
+			if err != nil {
+				return nil, err
+			}
+		}
+	} else if a.consume(token.TT_LBRACKET) {
+		indexExpr, err := a.expression()
 		if err != nil {
 			return nil, err
 		}
-	}
 
+		if !a.consume(token.TT_RBRACKET) {
+			return nil, newSyntaxError("expected closing ']' for index operation", a.curr)
+		}
+
+		expr = IndexOfNode{
+			Sequence: expr,
+			Index:    indexExpr,
+		}
+	}
 	return expr, nil
 }
 

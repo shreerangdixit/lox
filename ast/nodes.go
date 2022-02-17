@@ -107,6 +107,11 @@ type CallNode struct {
 	Arguments []Node
 }
 
+type IndexOfNode struct {
+	Sequence Node
+	Index    Node
+}
+
 func (n NilNode) String() string        { return "nil" }
 func (n ProgramNode) String() string    { return fmt.Sprintf("+%s", n.Declarations) }
 func (n IdentifierNode) String() string { return n.Token.String() }

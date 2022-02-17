@@ -78,14 +78,22 @@ type String struct{ Value string }
 func NewString(value string) String            { return String{Value: value} }
 func (f String) Type() ObjectType              { return TypeString }
 func (f String) String() string                { return f.Value }
-func (f String) Size() Number                  { return NewNumber(float64(len(f.Value))) }
 func (f String) Truthy() Bool                  { return NewBool(f.Size().Value > 0) }
 func (f String) LessThan(other Object) Bool    { return NewBool(f.Value < other.(String).Value) }
 func (f String) GreaterThan(other Object) Bool { return NewBool(f.Value > other.(String).Value) }
 func (f String) EqualTo(other Object) Bool     { return NewBool(f.Value == other.(String).Value) }
+func (f String) Size() Number                  { return NewNumber(float64(len(f.Value))) }
 
 func (f String) Add(other Object) (Object, error) {
 	return NewString(f.Value + other.(String).Value), nil
+}
+
+func (f String) Index(n Number) (Object, error) {
+	idx := int(n.Value)
+	if idx >= len(f.Value) {
+		return nil, fmt.Errorf("string index out of range")
+	}
+	return NewString(string(f.Value[idx])), nil
 }
 
 // Type information meta-type
@@ -126,6 +134,14 @@ func (f List) Add(other Object) (Object, error) {
 	}
 
 	return NewList(append(f.Values, l.Values...)), nil
+}
+
+func (f List) Index(n Number) (Object, error) {
+	idx := int(n.Value)
+	if idx >= len(f.Values) {
+		return nil, fmt.Errorf("list index out of range")
+	}
+	return f.Values[idx], nil
 }
 
 // Nil type

@@ -36,6 +36,7 @@ type Callable interface {
 type Sequence interface {
 	Object
 	Size() Number
+	Index(Number) (Object, error)
 }
 
 type Truthifier interface {
@@ -207,6 +208,14 @@ func GreaterThan(left Object, right Object) Bool {
 
 func GreaterThanEq(left Object, right Object) Bool {
 	return NewBool(GreaterThan(left, right).Value || EqualTo(left, right).Value)
+}
+
+func ItemAtIndex(o Object, idx Number) (Object, error) {
+	if seq, ok := o.(Sequence); ok {
+		return seq.Index(idx)
+	}
+	return NIL, fmt.Errorf("Cannot index type %s", o.Type())
+
 }
 
 // ------------------------------------
