@@ -183,7 +183,7 @@ func (e *Evaluator) evalLogicalOrNode(node ast.LogicalOrNode) (Object, error) {
 	}
 
 	if IsTruthy(left) {
-		return NewBool(true), nil
+		return TRUE, nil
 	}
 
 	right, err := e.eval(node.RHS)
@@ -249,8 +249,10 @@ func (e *Evaluator) evalUnaryOpNode(node ast.UnaryOpNode) (Object, error) {
 		return NIL, err
 	}
 
-	if node.Op.Type == token.TT_MINUS || node.Op.Type == token.TT_NOT {
+	if node.Op.Type == token.TT_MINUS {
 		return Negate(val)
+	} else if node.Op.Type == token.TT_NOT {
+		return Not(val)
 	}
 
 	return NIL, fmt.Errorf("invalid unary op: %s", node.Op.Type)
