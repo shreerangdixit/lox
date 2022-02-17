@@ -212,15 +212,17 @@ func GreaterThanEq(left Object, right Object) Bool {
 }
 
 func ItemAtIndex(o Object, idx Object) (Object, error) {
-	if _, ok := o.(Sequence); !ok {
+	seq, ok := o.(Sequence)
+	if !ok {
 		return NIL, fmt.Errorf("%s is not a sequence (non-indexable)", o.Type())
 	}
 
-	if _, ok := idx.(Number); !ok {
+	i, ok := idx.(Number)
+	if !ok {
 		return NIL, fmt.Errorf("index must be a number, was %s", idx.Type())
 	}
 
-	return o.(Sequence).Index(idx.(Number))
+	return seq.Index(i)
 }
 
 // ------------------------------------
