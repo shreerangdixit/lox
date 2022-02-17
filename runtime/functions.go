@@ -63,7 +63,7 @@ func sleepHandler(e *Evaluator, args []Object) (Object, error) {
 		return NIL, fmt.Errorf("sleep() expects a number")
 	}
 
-	time.Sleep(time.Duration(arg.Value) * time.Second)
+	time.Sleep(time.Duration(arg.Value) * time.Millisecond)
 	return NIL, nil
 }
 
