@@ -31,8 +31,6 @@ func (e *Evaluator) eval(node ast.Node) (Object, error) {
 		return e.evalExpStmtNode(node)
 	case ast.IfStmtNode:
 		return e.evalIfStmtNode(node)
-	case ast.PrintStmtNode:
-		return e.evalPrintStmtNode(node)
 	case ast.WhileStmtNode:
 		return e.evalWhileStmtNode(node)
 	case ast.AssignmentNode:
@@ -124,17 +122,6 @@ func (e *Evaluator) evalIfStmtNode(node ast.IfStmtNode) (Object, error) {
 	} else {
 		return e.eval(node.FalseStmt)
 	}
-}
-
-func (e *Evaluator) evalPrintStmtNode(node ast.PrintStmtNode) (Object, error) {
-	result, err := e.eval(node.Exp)
-	if err != nil {
-		return NIL, err
-	}
-
-	fmt.Printf("%s\n", result)
-
-	return NIL, nil
 }
 
 func (e *Evaluator) evalWhileStmtNode(node ast.WhileStmtNode) (Object, error) {
@@ -315,7 +302,7 @@ func (e *Evaluator) evalCallNode(node ast.CallNode) (Object, error) {
 		return NIL, fmt.Errorf("%s is not declared", calleeValue.Type())
 	}
 
-	if callable.Arity() != len(node.Arguments) {
+	if !callable.Variadic() && callable.Arity() != len(node.Arguments) {
 		return NIL, fmt.Errorf(
 			"incorrect number of arguments to %s - %d expected %d provided",
 			callable,

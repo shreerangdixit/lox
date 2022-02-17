@@ -101,13 +101,10 @@ func (a *Ast) letDeclaration() (Node, error) {
 
 // statement -> exprStatement
 //           | ifStatement
-//           | printStatement
 //           | block ;
 func (a *Ast) statement() (Node, error) {
 	if a.consume(token.TT_IF) {
 		return a.ifStatement()
-	} else if a.consume(token.TT_PRINT) {
-		return a.printStatement()
 	} else if a.consume(token.TT_WHILE) {
 		return a.whileStatement()
 	} else if a.consume(token.TT_LBRACE) {
@@ -149,19 +146,6 @@ func (a *Ast) ifStatement() (Node, error) {
 		TrueStmt:  trueStmt,
 		FalseStmt: falseStmt,
 	}, nil
-}
-
-// printStatement -> "print" expression ";" ;
-func (a *Ast) printStatement() (Node, error) {
-	expr, err := a.expression()
-	if err != nil {
-		return nil, err
-	}
-
-	if a.consume(token.TT_SEMICOLON) {
-		return PrintStmtNode{Exp: expr}, nil
-	}
-	return nil, newSyntaxError("expected a ; at the end of a print statement", a.curr)
 }
 
 // whileStatement -> "while" "(" expression ")" statement ;

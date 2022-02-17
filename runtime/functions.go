@@ -9,51 +9,72 @@ import (
 type FunctionHandler func(e *Evaluator, args []Object) (Object, error)
 
 type Function struct {
-	name    string
-	arity   int
-	handler FunctionHandler
+	name     string
+	arity    int
+	variadic bool
+	handler  FunctionHandler
 }
 
 func (f Function) Type() ObjectType                                 { return TypeFunc }
 func (f Function) String() string                                   { return f.name }
 func (f Function) Arity() int                                       { return f.arity }
+func (f Function) Variadic() bool                                   { return f.variadic }
 func (f Function) Call(e *Evaluator, args []Object) (Object, error) { return f.handler(e, args) }
 
 var NativeFunctions = []Function{
 	{
-		name:    "sleep",
-		arity:   1,
-		handler: sleepHandler,
+		name:     "sleep",
+		arity:    1,
+		variadic: false,
+		handler:  sleepHandler,
 	},
 	{
-		name:    "time",
-		arity:   0,
-		handler: timeHandler,
+		name:     "time",
+		arity:    0,
+		variadic: false,
+		handler:  timeHandler,
 	},
 	{
-		name:    "abs",
-		arity:   1,
-		handler: absHandler,
+		name:     "abs",
+		arity:    1,
+		variadic: false,
+		handler:  absHandler,
 	},
 	{
-		name:    "max",
-		arity:   2,
-		handler: maxHandler,
+		name:     "max",
+		arity:    2,
+		variadic: false,
+		handler:  maxHandler,
 	},
 	{
-		name:    "min",
-		arity:   2,
-		handler: minHandler,
+		name:     "min",
+		arity:    2,
+		variadic: false,
+		handler:  minHandler,
 	},
 	{
-		name:    "type",
-		arity:   1,
-		handler: typeHandler,
+		name:     "type",
+		arity:    1,
+		variadic: false,
+		handler:  typeHandler,
 	},
 	{
-		name:    "len",
-		arity:   1,
-		handler: lenHandler,
+		name:     "len",
+		arity:    1,
+		variadic: false,
+		handler:  lenHandler,
+	},
+	{
+		name:     "print",
+		arity:    -1,
+		variadic: true,
+		handler:  printHandler,
+	},
+	{
+		name:     "println",
+		arity:    -1,
+		variadic: true,
+		handler:  printlnHandler,
 	},
 }
 
@@ -119,4 +140,19 @@ func lenHandler(e *Evaluator, args []Object) (Object, error) {
 		return NIL, fmt.Errorf("len() expects a sequence")
 	}
 	return arg.Size(), nil
+}
+
+func printHandler(e *Evaluator, args []Object) (Object, error) {
+	for _, obj := range args {
+		fmt.Printf("%v", obj)
+	}
+	return NIL, nil
+}
+
+func printlnHandler(e *Evaluator, args []Object) (Object, error) {
+	for _, obj := range args {
+		fmt.Printf("%v", obj)
+	}
+	fmt.Println()
+	return NIL, nil
 }

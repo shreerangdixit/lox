@@ -44,10 +44,6 @@ type IfStmtNode struct {
 	FalseStmt Node
 }
 
-type PrintStmtNode struct {
-	Exp Node
-}
-
 type WhileStmtNode struct {
 	Condition Node
 	Body      Node
@@ -124,7 +120,6 @@ func (n ExpStmtNode) String() string    { return n.Exp.String() }
 func (n IfStmtNode) String() string {
 	return fmt.Sprintf("if(%s) %s else %s", n.Exp, n.TrueStmt, n.FalseStmt)
 }
-func (n PrintStmtNode) String() string { return n.Exp.String() }
 func (n WhileStmtNode) String() string { return fmt.Sprintf("while(%s)%s", n.Condition, n.Body) }
 func (n ExpNode) String() string       { return n.Exp.String() }
 func (n TernaryOpNode) String() string {

@@ -30,6 +30,7 @@ type Object interface {
 type Callable interface {
 	Object
 	Arity() int
+	Variadic() bool
 	Call(e *Evaluator, args []Object) (Object, error)
 }
 

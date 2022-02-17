@@ -5,7 +5,6 @@ import (
 )
 
 var keywords = map[string]TokenType{
-	"print":  TT_PRINT,
 	"let":    TT_LET,
 	"fun":    TT_FUNCTION,
 	"if":     TT_IF,
@@ -78,7 +77,6 @@ const (
 	TT_RBRACKET
 
 	// Keywords
-	TT_PRINT
 	TT_FUNCTION
 	TT_LET
 	TT_IF
@@ -155,8 +153,6 @@ func (t TokenType) String() string {
 		return "["
 	case TT_RBRACKET:
 		return "]"
-	case TT_PRINT:
-		return "print"
 	case TT_FUNCTION:
 		return "fun"
 	case TT_LET:
