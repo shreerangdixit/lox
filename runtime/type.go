@@ -35,12 +35,12 @@ type Callable interface {
 
 type Sequence interface {
 	Object
-	Size() int
+	Size() Float64
 }
 
 type Truthifier interface {
 	Object
-	Truthy() bool
+	Truthy() Bool
 }
 
 type Adder interface {
@@ -75,17 +75,17 @@ type Divider interface {
 
 type LessThanComparator interface {
 	Object
-	LessThan(other Object) bool
+	LessThan(other Object) Bool
 }
 
 type GreaterThanComparator interface {
 	Object
-	GreaterThan(other Object) bool
+	GreaterThan(other Object) Bool
 }
 
 type EqualToComparator interface {
 	Object
-	EqualTo(other Object) bool
+	EqualTo(other Object) Bool
 }
 
 // ------------------------------------
@@ -94,7 +94,7 @@ type EqualToComparator interface {
 
 func IsTruthy(o Object) bool {
 	if truthy, ok := o.(Truthifier); ok {
-		return truthy.Truthy()
+		return truthy.Truthy().Value
 	}
 	return false
 }
@@ -167,7 +167,7 @@ func EqualTo(left Object, right Object) Bool {
 	}
 
 	if eqto, ok := left.(EqualToComparator); ok {
-		return NewBool(eqto.EqualTo(right.(EqualToComparator)))
+		return eqto.EqualTo(right.(EqualToComparator))
 	}
 
 	return FALSE
@@ -183,7 +183,7 @@ func LessThan(left Object, right Object) Bool {
 	}
 
 	if lt, ok := left.(LessThanComparator); ok {
-		return NewBool(lt.LessThan(right.(LessThanComparator)))
+		return lt.LessThan(right.(LessThanComparator))
 	}
 
 	return FALSE
@@ -199,7 +199,7 @@ func GreaterThan(left Object, right Object) Bool {
 	}
 
 	if gt, ok := left.(GreaterThanComparator); ok {
-		return NewBool(gt.GreaterThan(right.(GreaterThanComparator)))
+		return gt.GreaterThan(right.(GreaterThanComparator))
 	}
 
 	return FALSE

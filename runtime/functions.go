@@ -118,5 +118,5 @@ func lenHandler(e *Evaluator, args []Object) (Object, error) {
 	if !ok {
 		return NIL, fmt.Errorf("len() expects a sequence")
 	}
-	return NewFloat64(float64(arg.Size())), nil
+	return arg.Size(), nil
 }
