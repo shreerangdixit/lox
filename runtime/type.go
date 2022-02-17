@@ -100,7 +100,7 @@ func IsTruthy(o Object) bool {
 }
 
 func Add(left Object, right Object) (Object, error) {
-	if err := checkSameTypes(left, right); err != nil {
+	if err := checkTypeCompat(left, right); err != nil {
 		return NIL, err
 	}
 
@@ -112,7 +112,7 @@ func Add(left Object, right Object) (Object, error) {
 }
 
 func Subtract(left Object, right Object) (Object, error) {
-	if err := checkSameTypes(left, right); err != nil {
+	if err := checkTypeCompat(left, right); err != nil {
 		return NIL, err
 	}
 
@@ -124,7 +124,7 @@ func Subtract(left Object, right Object) (Object, error) {
 }
 
 func Divide(left Object, right Object) (Object, error) {
-	if err := checkSameTypes(left, right); err != nil {
+	if err := checkTypeCompat(left, right); err != nil {
 		return NIL, err
 	}
 
@@ -136,7 +136,7 @@ func Divide(left Object, right Object) (Object, error) {
 }
 
 func Multiply(left Object, right Object) (Object, error) {
-	if err := checkSameTypes(left, right); err != nil {
+	if err := checkTypeCompat(left, right); err != nil {
 		return NIL, err
 	}
 
@@ -162,7 +162,7 @@ func Not(o Object) (Object, error) {
 }
 
 func EqualTo(left Object, right Object) Bool {
-	if err := checkSameTypes(left, right); err != nil {
+	if err := checkTypeCompat(left, right); err != nil {
 		return FALSE
 	}
 
@@ -178,7 +178,7 @@ func NotEqualTo(left Object, right Object) Bool {
 }
 
 func LessThan(left Object, right Object) Bool {
-	if err := checkSameTypes(left, right); err != nil {
+	if err := checkTypeCompat(left, right); err != nil {
 		return FALSE
 	}
 
@@ -194,7 +194,7 @@ func LessThanEq(left Object, right Object) Bool {
 }
 
 func GreaterThan(left Object, right Object) Bool {
-	if err := checkSameTypes(left, right); err != nil {
+	if err := checkTypeCompat(left, right); err != nil {
 		return FALSE
 	}
 
@@ -213,7 +213,7 @@ func GreaterThanEq(left Object, right Object) Bool {
 // Helpers
 // ------------------------------------
 
-func checkSameTypes(left Object, right Object) error {
+func checkTypeCompat(left Object, right Object) error {
 	if left.Type() != right.Type() {
 		return fmt.Errorf("incompatible types %s and %s", left.Type(), right.Type())
 	}
