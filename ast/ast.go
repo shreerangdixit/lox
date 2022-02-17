@@ -4,7 +4,7 @@ import (
 	"github.com/shreerangdixit/lox/token"
 )
 
-type GrammarRuleFunc func() (Node, error)
+type ProductionRuleHandler func() (Node, error)
 
 type Tokenizer interface {
 	NextToken() token.Token
@@ -33,7 +33,7 @@ func (a *Ast) RootNode() (Node, error) {
 }
 
 // ------------------------------------
-// Grammar rule functions
+// Production rule handlers
 // ------------------------------------
 
 // program -> declaration* EOF ;
@@ -487,7 +487,7 @@ func (a *Ast) list() (Node, error) {
 // Helpers
 // ------------------------------------
 
-func (a *Ast) binaryOp(tokenTypes []token.TokenType, fun GrammarRuleFunc) (Node, error) {
+func (a *Ast) binaryOp(tokenTypes []token.TokenType, fun ProductionRuleHandler) (Node, error) {
 	left, err := fun()
 	if err != nil {
 		return nil, err
