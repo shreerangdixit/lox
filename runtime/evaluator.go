@@ -294,7 +294,7 @@ func (e *Evaluator) evalCallNode(node ast.CallNode) (Object, error) {
 
 	calleeValue, err := e.env.Get(calleeNode.String())
 	if err != nil {
-		return NIL, fmt.Errorf("%s is not declared", calleeNode.Type())
+		return NIL, fmt.Errorf("%s is not callable", calleeNode.Type())
 	}
 
 	callable, ok := calleeValue.(Callable)
