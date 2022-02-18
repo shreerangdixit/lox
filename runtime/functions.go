@@ -59,6 +59,12 @@ var NativeFunctions = []Function{
 		handler:  avgHandler,
 	},
 	{
+		name:     "sqrt",
+		arity:    1,
+		variadic: false,
+		handler:  sqrtHandler,
+	},
+	{
 		name:     "type",
 		arity:    1,
 		variadic: false,
@@ -152,6 +158,13 @@ func avgHandler(e *Evaluator, args []Object) (Object, error) {
 	}
 
 	return sum.Divide(seq.Size())
+}
+
+func sqrtHandler(e *Evaluator, args []Object) (Object, error) {
+	if num, ok := args[0].(Number); ok {
+		return NewNumber(math.Sqrt(num.Value)), nil
+	}
+	return NIL, fmt.Errorf("sqrt() expects a number")
 }
 
 func typeHandler(e *Evaluator, args []Object) (Object, error) {
