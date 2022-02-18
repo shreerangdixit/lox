@@ -96,6 +96,14 @@ func (f String) Index(n Number) (Object, error) {
 	return NewString(string(f.Value[idx])), nil
 }
 
+func (f String) Elements() []Object {
+	elems := make([]Object, 0, 500)
+	for _, i := range f.Value {
+		elems = append(elems, NewString(string(i)))
+	}
+	return elems
+}
+
 // Type information meta-type
 // Implements the following interfaces
 // Object
@@ -142,6 +150,10 @@ func (f List) Index(n Number) (Object, error) {
 		return nil, fmt.Errorf("list index out of range")
 	}
 	return f.Values[idx], nil
+}
+
+func (f List) Elements() []Object {
+	return f.Values
 }
 
 // Nil type

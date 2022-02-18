@@ -53,6 +53,12 @@ var NativeFunctions = []Function{
 		handler:  minHandler,
 	},
 	{
+		name:     "avg",
+		arity:    1,
+		variadic: false,
+		handler:  avgHandler,
+	},
+	{
 		name:     "type",
 		arity:    1,
 		variadic: false,
@@ -127,6 +133,25 @@ func minHandler(e *Evaluator, args []Object) (Object, error) {
 	}
 
 	return NewNumber(math.Min(arg1.Value, arg2.Value)), nil
+}
+
+func avgHandler(e *Evaluator, args []Object) (Object, error) {
+	seq, ok := args[0].(Sequence)
+	if !ok {
+		return NIL, fmt.Errorf("avg() expects a sequence")
+	}
+
+	sum := NewNumber(0)
+	for _, arg := range seq.Elements() {
+		if num, ok := arg.(Number); ok {
+			s, _ := sum.Add(num)
+			sum = s.(Number)
+		} else {
+			return NIL, fmt.Errorf("avg() expects numbers")
+		}
+	}
+
+	return sum.Divide(seq.Size())
 }
 
 func typeHandler(e *Evaluator, args []Object) (Object, error) {

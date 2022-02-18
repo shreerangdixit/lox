@@ -38,6 +38,7 @@ type Sequence interface {
 	Object
 	Size() Number
 	Index(Number) (Object, error)
+	Elements() []Object
 }
 
 type Truthifier interface {
