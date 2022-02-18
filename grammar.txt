@@ -1,7 +1,7 @@
 program        -> declaration* EOF ;
-declaration    -> letDecl
+declaration    -> varDecl
                |  statement ;
-letDecl        -> "let" IDENTIFIER ( "=" expression )? ";" ;
+varDecl        -> "var" IDENTIFIER ( "=" expression )? ";" ;
 statement      -> exprStatement
                | ifStatement
                | whileStatement

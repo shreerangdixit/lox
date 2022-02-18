@@ -145,14 +145,13 @@ func lenHandler(e *Evaluator, args []Object) (Object, error) {
 func printHandler(e *Evaluator, args []Object) (Object, error) {
 	for _, obj := range args {
 		fmt.Printf("%v", obj)
+		fmt.Printf(" ")
 	}
 	return NIL, nil
 }
 
 func printlnHandler(e *Evaluator, args []Object) (Object, error) {
-	for _, obj := range args {
-		fmt.Printf("%v", obj)
-	}
+	_, _ = printHandler(e, args)
 	fmt.Println()
 	return NIL, nil
 }

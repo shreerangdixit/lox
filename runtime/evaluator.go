@@ -287,19 +287,19 @@ func (e *Evaluator) evalNilNode(node ast.NilNode) (Object, error) {
 }
 
 func (e *Evaluator) evalCallNode(node ast.CallNode) (Object, error) {
-	callee, err := e.eval(node.Callee)
+	calleeNode, err := e.eval(node.Callee)
 	if err != nil {
-		return NIL, fmt.Errorf("%s is not declared", node.Callee)
+		return NIL, err
 	}
 
-	calleeValue, err := e.env.Get(callee.String())
+	calleeValue, err := e.env.Get(calleeNode.String())
 	if err != nil {
-		return NIL, fmt.Errorf("%s is not callable", callee.Type())
+		return NIL, fmt.Errorf("%s is not declared", calleeNode.Type())
 	}
 
 	callable, ok := calleeValue.(Callable)
 	if !ok {
-		return NIL, fmt.Errorf("%s is not declared", calleeValue.Type())
+		return NIL, fmt.Errorf("%s is not callable", calleeValue.Type())
 	}
 
 	if !callable.Variadic() && callable.Arity() != len(node.Arguments) {

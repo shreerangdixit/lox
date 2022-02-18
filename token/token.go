@@ -5,7 +5,7 @@ import (
 )
 
 var keywords = map[string]TokenType{
-	"let":    TT_LET,
+	"var":    TT_VAR,
 	"fun":    TT_FUNCTION,
 	"if":     TT_IF,
 	"else":   TT_ELSE,
@@ -78,7 +78,7 @@ const (
 
 	// Keywords
 	TT_FUNCTION
-	TT_LET
+	TT_VAR
 	TT_IF
 	TT_ELSE
 	TT_TRUE
@@ -155,8 +155,8 @@ func (t TokenType) String() string {
 		return "]"
 	case TT_FUNCTION:
 		return "fun"
-	case TT_LET:
-		return "let"
+	case TT_VAR:
+		return "var"
 	case TT_IF:
 		return "if"
 	case TT_ELSE:

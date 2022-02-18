@@ -52,17 +52,17 @@ func (a *Ast) program() (Node, error) {
 	}, nil
 }
 
-// declaration -> letDecl
+// declaration -> varDecl
 //             | statement ;
 func (a *Ast) declaration() (Node, error) {
-	if a.consume(token.TT_LET) {
-		return a.letDeclaration()
+	if a.consume(token.TT_VAR) {
+		return a.varDeclaration()
 	}
 	return a.statement()
 }
 
-// letDecl -> "let" IDENTIFIER ( "=" expression )? ";" ;
-func (a *Ast) letDeclaration() (Node, error) {
+// varDecl -> "var" IDENTIFIER ( "=" expression )? ";" ;
+func (a *Ast) varDeclaration() (Node, error) {
 	atom, err := a.atom()
 	if err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ func (a *Ast) letDeclaration() (Node, error) {
 
 	identifier, ok := atom.(IdentifierNode)
 	if !ok {
-		return nil, newSyntaxError("Expected identifier after let", a.curr)
+		return nil, newSyntaxError("Expected identifier after var", a.curr)
 	}
 
 	if !a.consume(token.TT_ASSIGN) {

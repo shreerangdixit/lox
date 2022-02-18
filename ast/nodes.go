@@ -114,7 +114,7 @@ func (n NilNode) String() string        { return "nil" }
 func (n ProgramNode) String() string    { return fmt.Sprintf("%s", n.Declarations) }
 func (n IdentifierNode) String() string { return n.Token.String() }
 func (n AssignmentNode) String() string { return fmt.Sprintf("%s=%s", n.Identifier, n.Value) }
-func (n LetStmtNode) String() string    { return fmt.Sprintf("let %s=%s", n.Identifier, n.Value) }
+func (n LetStmtNode) String() string    { return fmt.Sprintf("var %s=%s", n.Identifier, n.Value) }
 func (n BlockNode) String() string      { return fmt.Sprintf("{%s}", n.Declarations) }
 func (n ExpStmtNode) String() string    { return n.Exp.String() }
 func (n IfStmtNode) String() string {
