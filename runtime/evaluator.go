@@ -25,8 +25,8 @@ func (e *Evaluator) eval(node ast.Node) (Object, error) {
 		return e.evalProgramNode(node)
 	case ast.BlockNode:
 		return e.evalBlockNode(node)
-	case ast.LetStmtNode:
-		return e.evalLetStmtNode(node)
+	case ast.VarStmtNode:
+		return e.evalVarStmtNode(node)
 	case ast.ExpStmtNode:
 		return e.evalExpStmtNode(node)
 	case ast.IfStmtNode:
@@ -95,7 +95,7 @@ func (e *Evaluator) evalBlockNode(node ast.BlockNode) (Object, error) {
 	return NIL, nil
 }
 
-func (e *Evaluator) evalLetStmtNode(node ast.LetStmtNode) (Object, error) {
+func (e *Evaluator) evalVarStmtNode(node ast.VarStmtNode) (Object, error) {
 	value, err := e.eval(node.Value)
 	if err != nil {
 		return NIL, err

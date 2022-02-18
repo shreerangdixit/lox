@@ -78,7 +78,7 @@ func (a *Ast) varDeclaration() (Node, error) {
 			return nil, newSyntaxError("expected a ; at the end of a declaration", a.curr)
 		}
 
-		return LetStmtNode{
+		return VarStmtNode{
 			Identifier: identifier,
 			Value:      NilNode{},
 		}, nil
@@ -93,7 +93,7 @@ func (a *Ast) varDeclaration() (Node, error) {
 		return nil, newSyntaxError("expected a ; at the end of a declaration", a.curr)
 	}
 
-	return LetStmtNode{
+	return VarStmtNode{
 		Identifier: identifier,
 		Value:      value,
 	}, nil
