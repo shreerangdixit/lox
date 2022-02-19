@@ -57,6 +57,15 @@ type NativeFunction struct {
 	handler  NativeFunctionHandler
 }
 
+func NewNativeFunction(name string, arity int, variadic bool, handler NativeFunctionHandler) *NativeFunction {
+	return &NativeFunction{
+		name:     name,
+		arity:    arity,
+		variadic: variadic,
+		handler:  handler,
+	}
+}
+
 func (f *NativeFunction) Type() ObjectType                                 { return TypeFunc }
 func (f *NativeFunction) String() string                                   { return f.name }
 func (f *NativeFunction) Arity() int                                       { return f.arity }
@@ -64,72 +73,17 @@ func (f *NativeFunction) Variadic() bool                                   { ret
 func (f *NativeFunction) Call(e *Evaluator, args []Object) (Object, error) { return f.handler(e, args) }
 
 var NativeFunctions = []*NativeFunction{
-	&NativeFunction{
-		name:     "sleep",
-		arity:    1,
-		variadic: false,
-		handler:  sleepHandler,
-	},
-	&NativeFunction{
-		name:     "time",
-		arity:    0,
-		variadic: false,
-		handler:  timeHandler,
-	},
-	&NativeFunction{
-		name:     "abs",
-		arity:    1,
-		variadic: false,
-		handler:  absHandler,
-	},
-	&NativeFunction{
-		name:     "max",
-		arity:    2,
-		variadic: false,
-		handler:  maxHandler,
-	},
-	&NativeFunction{
-		name:     "min",
-		arity:    2,
-		variadic: false,
-		handler:  minHandler,
-	},
-	&NativeFunction{
-		name:     "avg",
-		arity:    1,
-		variadic: false,
-		handler:  avgHandler,
-	},
-	&NativeFunction{
-		name:     "sqrt",
-		arity:    1,
-		variadic: false,
-		handler:  sqrtHandler,
-	},
-	&NativeFunction{
-		name:     "type",
-		arity:    1,
-		variadic: false,
-		handler:  typeHandler,
-	},
-	&NativeFunction{
-		name:     "len",
-		arity:    1,
-		variadic: false,
-		handler:  lenHandler,
-	},
-	&NativeFunction{
-		name:     "print",
-		arity:    -1,
-		variadic: true,
-		handler:  printHandler,
-	},
-	&NativeFunction{
-		name:     "println",
-		arity:    -1,
-		variadic: true,
-		handler:  printlnHandler,
-	},
+	NewNativeFunction("sleep", 1, false, sleepHandler),
+	NewNativeFunction("time", 0, false, timeHandler),
+	NewNativeFunction("abs", 1, false, absHandler),
+	NewNativeFunction("max", 2, false, maxHandler),
+	NewNativeFunction("min", 2, false, minHandler),
+	NewNativeFunction("avg", 1, false, avgHandler),
+	NewNativeFunction("sqrt", 1, false, sqrtHandler),
+	NewNativeFunction("type", 1, false, typeHandler),
+	NewNativeFunction("len", 1, false, lenHandler),
+	NewNativeFunction("print", 0, true, printHandler),
+	NewNativeFunction("println", 0, true, printlnHandler),
 }
 
 func sleepHandler(e *Evaluator, args []Object) (Object, error) {
