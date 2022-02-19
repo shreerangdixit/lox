@@ -61,6 +61,11 @@ type Multiplier interface {
 	Multiply(other Object) (Object, error)
 }
 
+type Modulator interface {
+	Object
+	Modulate(other Object) (Object, error)
+}
+
 type Notter interface {
 	Object
 	Not() (Object, error)
@@ -145,6 +150,18 @@ func Multiply(left Object, right Object) (Object, error) {
 
 	if multiplier, ok := left.(Multiplier); ok {
 		return multiplier.Multiply(right.(Multiplier))
+	}
+
+	return NIL, fmt.Errorf("Cannot multiply type %s", left.Type())
+}
+
+func Modulo(left Object, right Object) (Object, error) {
+	if err := checkTypeCompat(left, right); err != nil {
+		return NIL, err
+	}
+
+	if modulator, ok := left.(Modulator); ok {
+		return modulator.Modulate(right.(Modulator))
 	}
 
 	return NIL, fmt.Errorf("Cannot multiply type %s", left.Type())

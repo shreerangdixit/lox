@@ -52,6 +52,7 @@ const (
 	TT_MINUS
 	TT_DIVIDE
 	TT_MULTIPLY
+	TT_MODULO
 	TT_NOT
 	TT_EQ
 	TT_NEQ
@@ -131,6 +132,8 @@ func (t TokenType) String() string {
 		return "&&"
 	case TT_LOGICAL_OR:
 		return "||"
+	case TT_MODULO:
+		return "%"
 	case TT_COMMA:
 		return ","
 	case TT_SEMICOLON:

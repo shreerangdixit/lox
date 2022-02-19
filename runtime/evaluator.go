@@ -216,6 +216,8 @@ func (e *Evaluator) evalBinaryOpNode(node ast.BinaryOpNode) (Object, error) {
 		return Divide(left, right)
 	case token.TT_MULTIPLY:
 		return Multiply(left, right)
+	case token.TT_MODULO:
+		return Modulo(left, right)
 	case token.TT_EQ:
 		return EqualTo(left, right), nil
 	case token.TT_NEQ:

@@ -16,6 +16,7 @@ import (
 // Subtractor
 // Multiplier
 // Divider
+// Modulator
 type Number struct{ Value float64 }
 
 func NewNumber(value float64) Number           { return Number{Value: value} }
@@ -44,6 +45,10 @@ func (f Number) Divide(other Object) (Object, error) {
 		return nil, fmt.Errorf("Divide by zero error")
 	}
 	return NewNumber(f.Value / other.(Number).Value), nil
+}
+
+func (f Number) Modulate(other Object) (Object, error) {
+	return NewNumber(float64(int(f.Value) % int(other.(Number).Value))), nil
 }
 
 // Boolean type

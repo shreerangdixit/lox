@@ -325,9 +325,9 @@ func (a *Ast) term() (Node, error) {
 	return a.binaryOp([]token.TokenType{token.TT_PLUS, token.TT_MINUS}, a.factor)
 }
 
-// factor -> unary ( ( "/" | "*" ) unary )* ;
+// factor -> unary ( ( "/" | "*" | "%" ) unary )* ;
 func (a *Ast) factor() (Node, error) {
-	return a.binaryOp([]token.TokenType{token.TT_DIVIDE, token.TT_MULTIPLY}, a.unary)
+	return a.binaryOp([]token.TokenType{token.TT_DIVIDE, token.TT_MULTIPLY, token.TT_MODULO}, a.unary)
 }
 
 // unary -> ( "!" | "-" ) unary
