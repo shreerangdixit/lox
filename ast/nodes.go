@@ -53,6 +53,10 @@ type BreakStmtNode struct {
 	Token token.Token
 }
 
+type ReturnStmtNode struct {
+	Exp Node
+}
+
 type BlockNode struct {
 	Declarations []Node
 }
@@ -136,7 +140,13 @@ func (n IfStmtNode) String() string {
 }
 func (n WhileStmtNode) String() string { return fmt.Sprintf("while(%s)%s", n.Condition, n.Body) }
 func (n BreakStmtNode) String() string { return n.Token.String() }
-func (n ExpNode) String() string       { return n.Exp.String() }
+func (n ReturnStmtNode) String() string {
+	if n.Exp != nil {
+		return n.Exp.String()
+	}
+	return "return"
+}
+func (n ExpNode) String() string { return n.Exp.String() }
 func (n TernaryOpNode) String() string {
 	return fmt.Sprintf("%s ? %s : %s", n.Exp, n.TrueExp, n.FalseExp)
 }

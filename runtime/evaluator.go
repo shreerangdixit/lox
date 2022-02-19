@@ -7,17 +7,6 @@ import (
 	"strconv"
 )
 
-type BreakError struct {
-}
-
-func (e BreakError) Error() string {
-	return "break"
-}
-
-func newBreakError() error {
-	return BreakError{}
-}
-
 type Evaluator struct {
 	env *Env
 }
@@ -46,6 +35,8 @@ func (e *Evaluator) eval(node ast.Node) (Object, error) {
 		return e.evalWhileStmtNode(node)
 	case ast.BreakStmtNode:
 		return e.evalBreakStmtNode(node)
+	case ast.ReturnStmtNode:
+		return e.evalReturnStmtNode(node)
 	case ast.AssignmentNode:
 		return e.evalAssignmentNode(node)
 	case ast.LogicalAndNode:
@@ -166,7 +157,7 @@ func (e *Evaluator) evalWhileStmtNode(node ast.WhileStmtNode) (Object, error) {
 }
 
 func (e *Evaluator) evalBreakStmtNode(node ast.BreakStmtNode) (Object, error) {
-	return NIL, newBreakError()
+	return NIL, NewBreakError()
 }
 
 func (e *Evaluator) evalAssignmentNode(node ast.AssignmentNode) (Object, error) {
@@ -364,6 +355,15 @@ func (e *Evaluator) evalIndexOfNode(node ast.IndexOfNode) (Object, error) {
 func (e *Evaluator) evalFunctionNode(node ast.FunctionNode) (Object, error) {
 	fun := NewUserFunction(node)
 	return NIL, e.env.Declare(fun.String(), fun)
+}
+
+func (e *Evaluator) evalReturnStmtNode(node ast.ReturnStmtNode) (Object, error) {
+	val, err := e.eval(node.Exp)
+	if err != nil {
+		return NIL, err
+	}
+
+	return NIL, NewReturnError(val)
 }
 
 func (e *Evaluator) evalNodes(argNodes []ast.Node) ([]Object, error) {

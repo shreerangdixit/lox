@@ -74,7 +74,7 @@ func (a *Ast) funDeclaration() (Node, error) {
 	}
 
 	if _, ok := identifier.(IdentifierNode); !ok {
-		return nil, newSyntaxError("function name should be an identifier", a.curr)
+		return nil, NewSyntaxError("function name should be an identifier", a.curr)
 	}
 
 	parameters, err := a.parameters()
@@ -83,7 +83,7 @@ func (a *Ast) funDeclaration() (Node, error) {
 	}
 
 	if !a.consume(token.TT_LBRACE) {
-		return nil, newSyntaxError("expected opening '{' for function body", a.curr)
+		return nil, NewSyntaxError("expected opening '{' for function body", a.curr)
 	}
 
 	body, err := a.block()
@@ -92,7 +92,7 @@ func (a *Ast) funDeclaration() (Node, error) {
 	}
 
 	if _, ok := body.(BlockNode); !ok {
-		return nil, newSyntaxError("expected function body to be a block", a.curr)
+		return nil, NewSyntaxError("expected function body to be a block", a.curr)
 	}
 
 	return FunctionNode{
@@ -105,7 +105,7 @@ func (a *Ast) funDeclaration() (Node, error) {
 // parameters -> IDENTIFIER ("," IDENTIFIER)* ;
 func (a *Ast) parameters() ([]IdentifierNode, error) {
 	if !a.consume(token.TT_LPAREN) {
-		return nil, newSyntaxError("expected opening '(' for parameters", a.curr)
+		return nil, NewSyntaxError("expected opening '(' for parameters", a.curr)
 	}
 
 	if a.consume(token.TT_RPAREN) { // Function arity = 0
@@ -131,7 +131,7 @@ func (a *Ast) parameters() ([]IdentifierNode, error) {
 	}
 
 	if !a.consume(token.TT_RPAREN) {
-		return nil, newSyntaxError("expected closing ')' for parameters", a.curr)
+		return nil, NewSyntaxError("expected closing ')' for parameters", a.curr)
 	}
 
 	return params, nil
@@ -144,7 +144,7 @@ func (a *Ast) parameter() (IdentifierNode, error) {
 	}
 
 	if _, ok := param.(IdentifierNode); !ok {
-		return IdentifierNode{}, newSyntaxError("param should be an identifier", a.curr)
+		return IdentifierNode{}, NewSyntaxError("param should be an identifier", a.curr)
 	}
 
 	return param.(IdentifierNode), nil
@@ -159,12 +159,12 @@ func (a *Ast) varDeclaration() (Node, error) {
 
 	identifier, ok := atom.(IdentifierNode)
 	if !ok {
-		return nil, newSyntaxError("Expected identifier after var", a.curr)
+		return nil, NewSyntaxError("Expected identifier after var", a.curr)
 	}
 
 	if !a.consume(token.TT_ASSIGN) {
 		if !a.consume(token.TT_SEMICOLON) {
-			return nil, newSyntaxError("expected a ; at the end of a declaration", a.curr)
+			return nil, NewSyntaxError("expected a ; at the end of a declaration", a.curr)
 		}
 
 		return VarStmtNode{
@@ -179,7 +179,7 @@ func (a *Ast) varDeclaration() (Node, error) {
 	}
 
 	if !a.consume(token.TT_SEMICOLON) {
-		return nil, newSyntaxError("expected a ; at the end of a declaration", a.curr)
+		return nil, NewSyntaxError("expected a ; at the end of a declaration", a.curr)
 	}
 
 	return VarStmtNode{
@@ -192,6 +192,7 @@ func (a *Ast) varDeclaration() (Node, error) {
 //           | ifStatement
 //           | whileStatement
 //           | breakStatement
+//           | returnStatement
 //           | block ;
 func (a *Ast) statement() (Node, error) {
 	if a.consume(token.TT_IF) {
@@ -200,6 +201,8 @@ func (a *Ast) statement() (Node, error) {
 		return a.whileStatement()
 	} else if a.consume(token.TT_BREAK) {
 		return a.breakStatement()
+	} else if a.consume(token.TT_RETURN) {
+		return a.returnStatement()
 	} else if a.consume(token.TT_LBRACE) {
 		return a.block()
 	}
@@ -209,7 +212,7 @@ func (a *Ast) statement() (Node, error) {
 // ifStatement -> "if" "(" expression ")" statement ( "else" statement )? ;
 func (a *Ast) ifStatement() (Node, error) {
 	if !a.consume(token.TT_LPAREN) {
-		return nil, newSyntaxError("expected opening '(' for if condition", a.curr)
+		return nil, NewSyntaxError("expected opening '(' for if condition", a.curr)
 	}
 
 	condExp, err := a.expression()
@@ -218,7 +221,7 @@ func (a *Ast) ifStatement() (Node, error) {
 	}
 
 	if !a.consume(token.TT_RPAREN) {
-		return nil, newSyntaxError("expected closing ')' for if condition", a.curr)
+		return nil, NewSyntaxError("expected closing ')' for if condition", a.curr)
 	}
 
 	trueStmt, err := a.statement()
@@ -244,7 +247,7 @@ func (a *Ast) ifStatement() (Node, error) {
 // whileStatement -> "while" "(" expression ")" statement ;
 func (a *Ast) whileStatement() (Node, error) {
 	if !a.consume(token.TT_LPAREN) {
-		return nil, newSyntaxError("expected opening '(' for 'while' condition", a.curr)
+		return nil, NewSyntaxError("expected opening '(' for 'while' condition", a.curr)
 	}
 
 	condition, err := a.expression()
@@ -253,7 +256,7 @@ func (a *Ast) whileStatement() (Node, error) {
 	}
 
 	if !a.consume(token.TT_RPAREN) {
-		return nil, newSyntaxError("expected closing ')' for 'while' condition", a.curr)
+		return nil, NewSyntaxError("expected closing ')' for 'while' condition", a.curr)
 	}
 
 	body, err := a.statement()
@@ -270,10 +273,32 @@ func (a *Ast) whileStatement() (Node, error) {
 // breakStatement -> "break" ;
 func (a *Ast) breakStatement() (Node, error) {
 	if !a.consume(token.TT_SEMICOLON) {
-		return nil, newSyntaxError("expected ';' after 'break'", a.curr)
+		return nil, NewSyntaxError("expected ';' after 'break'", a.curr)
 	}
 	return BreakStmtNode{
 		Token: a.curr,
+	}, nil
+}
+
+// returnStatement -> "return" expression? ";" ;
+func (a *Ast) returnStatement() (Node, error) {
+	if a.consume(token.TT_SEMICOLON) {
+		return ReturnStmtNode{
+			Exp: nil,
+		}, nil
+	}
+
+	exp, err := a.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	if !a.consume(token.TT_SEMICOLON) {
+		return nil, NewSyntaxError("expected ';' after return expression", a.curr)
+	}
+
+	return ReturnStmtNode{
+		Exp: exp,
 	}, nil
 }
 
@@ -291,7 +316,7 @@ func (a *Ast) block() (Node, error) {
 	}
 
 	if !a.consume(token.TT_RBRACE) {
-		return nil, newSyntaxError("expected closing '}'", a.curr)
+		return nil, NewSyntaxError("expected closing '}'", a.curr)
 	}
 
 	return BlockNode{
@@ -309,7 +334,7 @@ func (a *Ast) exprStatement() (Node, error) {
 	if a.consume(token.TT_SEMICOLON) {
 		return ExpStmtNode{Exp: expr}, nil
 	}
-	return nil, newSyntaxError("expected a ; at the end of an expression statement", a.curr)
+	return nil, NewSyntaxError("expected a ; at the end of an expression statement", a.curr)
 }
 
 // expression -> assignment ( "?" assignment ":" assignment )? ;
@@ -327,7 +352,7 @@ func (a *Ast) expression() (Node, error) {
 		}
 
 		if !a.consume(token.TT_COLON) {
-			return nil, newSyntaxError("expected ':'", a.curr)
+			return nil, NewSyntaxError("expected ':'", a.curr)
 		}
 
 		falseExp, err := a.assignment()
@@ -355,7 +380,7 @@ func (a *Ast) assignment() (Node, error) {
 
 	if a.consume(token.TT_ASSIGN) {
 		if _, ok := expr.(IdentifierNode); !ok {
-			return nil, newSyntaxError("expected an identifier for assignment", a.curr)
+			return nil, NewSyntaxError("expected an identifier for assignment", a.curr)
 		}
 
 		assign, err := a.assignment()
@@ -479,7 +504,7 @@ func (a *Ast) call() (Node, error) {
 		}
 
 		if !a.consume(token.TT_RBRACKET) {
-			return nil, newSyntaxError("expected closing ']' for index operation", a.curr)
+			return nil, NewSyntaxError("expected closing ']' for index operation", a.curr)
 		}
 
 		expr = IndexOfNode{
@@ -502,7 +527,7 @@ func (a *Ast) finishCall(callee Node) (Node, error) {
 	}
 
 	if !a.consume(token.TT_RPAREN) {
-		return nil, newSyntaxError("expected closing ')' for function call", a.curr)
+		return nil, NewSyntaxError("expected closing ')' for function call", a.curr)
 	}
 
 	return CallNode{
@@ -557,11 +582,11 @@ func (a *Ast) atom() (Node, error) {
 		if a.consume(token.TT_RPAREN) {
 			return ExpNode{Exp: exp}, nil
 		}
-		return nil, newSyntaxError("expected closing ')' after expression", a.curr)
+		return nil, NewSyntaxError("expected closing ')' after expression", a.curr)
 	} else if a.consume(token.TT_LBRACKET) {
 		return a.list()
 	}
-	return nil, newSyntaxError("expected a literal or an expression", a.curr)
+	return nil, NewSyntaxError("expected a literal or an expression", a.curr)
 }
 
 func (a *Ast) list() (Node, error) {
@@ -577,7 +602,7 @@ func (a *Ast) list() (Node, error) {
 		}
 
 		if !a.consume(token.TT_RBRACKET) {
-			return nil, newSyntaxError("expected closing ']' for list", a.curr)
+			return nil, NewSyntaxError("expected closing ']' for list", a.curr)
 		}
 
 		return ListNode{

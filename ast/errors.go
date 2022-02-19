@@ -10,7 +10,7 @@ type SyntaxError struct {
 	tok token.Token
 }
 
-func newSyntaxError(err string, tok token.Token) SyntaxError {
+func NewSyntaxError(err string, tok token.Token) SyntaxError {
 	return SyntaxError{
 		err: err,
 		tok: tok,

@@ -41,7 +41,17 @@ func (f *UserFunction) Call(e *Evaluator, args []Object) (Object, error) {
 			return NIL, err
 		}
 	}
-	return e.eval(f.node.Body)
+
+	val, err := e.eval(f.node.Body)
+	if err != nil {
+		switch err := err.(type) {
+		case ReturnError:
+			return err.Value, nil
+		default:
+			return NIL, err
+		}
+	}
+	return val, err
 }
 
 // ------------------------------------
