@@ -10,7 +10,7 @@ statement      -> exprStatement
 exprStatement  -> expression ";" ;
 ifStatement    -> "if" "(" expression ")" statement ( "else" statement )? ;
 whileStatement -> "while" "(" expression ")" statement ;
-breakStatement -> "break" ;
+breakStatement -> "break" ";" ;
 block          -> "{" declaration* "}" ;
 expression     -> assignment ( "?" assignment ":" assignment )? ;
 assignment     -> IDENTIFIER "=" assignment
