@@ -2,87 +2,129 @@ package runtime
 
 import (
 	"fmt"
+	"github.com/shreerangdixit/lox/ast"
 	"math"
 	"time"
 )
 
-type FunctionHandler func(e *Evaluator, args []Object) (Object, error)
+// ------------------------------------
+// User function
+// ------------------------------------
 
-type Function struct {
+type UserFunction struct {
+	node ast.FunctionNode
+}
+
+func NewUserFunction(node ast.FunctionNode) *UserFunction {
+	return &UserFunction{
+		node: node,
+	}
+}
+
+func (f *UserFunction) Type() ObjectType { return TypeFunc }
+func (f *UserFunction) String() string   { return f.node.Identifier.Token.Literal }
+func (f *UserFunction) Arity() int       { return len(f.node.Parameters) }
+func (f *UserFunction) Variadic() bool   { return false }
+func (f *UserFunction) Call(e *Evaluator, args []Object) (Object, error) {
+	// Reset environment at the end of function call
+	prev := e.env
+	defer func() {
+		e.env = prev
+	}()
+
+	// New environment at the beginning of function call
+	e.env = NewEnvWithEnclosing(e.env)
+	for i := range args {
+		// Bind function arguments to values
+		err := e.env.Declare(f.node.Parameters[i].Token.Literal, args[i])
+		if err != nil {
+			return NIL, err
+		}
+	}
+	return e.eval(f.node.Body)
+}
+
+// ------------------------------------
+// Native (in-built) functions
+// ------------------------------------
+
+type NativeFunctionHandler func(e *Evaluator, args []Object) (Object, error)
+
+type NativeFunction struct {
 	name     string
 	arity    int
 	variadic bool
-	handler  FunctionHandler
+	handler  NativeFunctionHandler
 }
 
-func (f Function) Type() ObjectType                                 { return TypeFunc }
-func (f Function) String() string                                   { return f.name }
-func (f Function) Arity() int                                       { return f.arity }
-func (f Function) Variadic() bool                                   { return f.variadic }
-func (f Function) Call(e *Evaluator, args []Object) (Object, error) { return f.handler(e, args) }
+func (f *NativeFunction) Type() ObjectType                                 { return TypeFunc }
+func (f *NativeFunction) String() string                                   { return f.name }
+func (f *NativeFunction) Arity() int                                       { return f.arity }
+func (f *NativeFunction) Variadic() bool                                   { return f.variadic }
+func (f *NativeFunction) Call(e *Evaluator, args []Object) (Object, error) { return f.handler(e, args) }
 
-var NativeFunctions = []Function{
-	{
+var NativeFunctions = []*NativeFunction{
+	&NativeFunction{
 		name:     "sleep",
 		arity:    1,
 		variadic: false,
 		handler:  sleepHandler,
 	},
-	{
+	&NativeFunction{
 		name:     "time",
 		arity:    0,
 		variadic: false,
 		handler:  timeHandler,
 	},
-	{
+	&NativeFunction{
 		name:     "abs",
 		arity:    1,
 		variadic: false,
 		handler:  absHandler,
 	},
-	{
+	&NativeFunction{
 		name:     "max",
 		arity:    2,
 		variadic: false,
 		handler:  maxHandler,
 	},
-	{
+	&NativeFunction{
 		name:     "min",
 		arity:    2,
 		variadic: false,
 		handler:  minHandler,
 	},
-	{
+	&NativeFunction{
 		name:     "avg",
 		arity:    1,
 		variadic: false,
 		handler:  avgHandler,
 	},
-	{
+	&NativeFunction{
 		name:     "sqrt",
 		arity:    1,
 		variadic: false,
 		handler:  sqrtHandler,
 	},
-	{
+	&NativeFunction{
 		name:     "type",
 		arity:    1,
 		variadic: false,
 		handler:  typeHandler,
 	},
-	{
+	&NativeFunction{
 		name:     "len",
 		arity:    1,
 		variadic: false,
 		handler:  lenHandler,
 	},
-	{
+	&NativeFunction{
 		name:     "print",
 		arity:    -1,
 		variadic: true,
 		handler:  printHandler,
 	},
-	{
+	&NativeFunction{
 		name:     "println",
 		arity:    -1,
 		variadic: true,

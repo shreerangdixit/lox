@@ -76,6 +76,8 @@ func (e *Evaluator) eval(node ast.Node) (Object, error) {
 		return e.evalCallNode(node)
 	case ast.IndexOfNode:
 		return e.evalIndexOfNode(node)
+	case ast.FunctionNode:
+		return e.evalFunctionNode(node)
 	}
 	return NIL, fmt.Errorf("invalid node: %T", node)
 }
@@ -357,6 +359,11 @@ func (e *Evaluator) evalIndexOfNode(node ast.IndexOfNode) (Object, error) {
 	}
 
 	return ItemAtIndex(seq, idx)
+}
+
+func (e *Evaluator) evalFunctionNode(node ast.FunctionNode) (Object, error) {
+	fun := NewUserFunction(node)
+	return NIL, e.env.Declare(fun.String(), fun)
 }
 
 func (e *Evaluator) evalNodes(argNodes []ast.Node) ([]Object, error) {

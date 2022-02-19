@@ -114,6 +114,12 @@ type IndexOfNode struct {
 	Index    Node
 }
 
+type FunctionNode struct {
+	Identifier IdentifierNode
+	Parameters []IdentifierNode
+	Body       BlockNode
+}
+
 func (n NilNode) String() string        { return "nil" }
 func (n ProgramNode) String() string    { return fmt.Sprintf("%s", n.Declarations) }
 func (n IdentifierNode) String() string { return n.Token.String() }
@@ -144,3 +150,6 @@ func (n StringNode) String() string     { return n.Token.String() }
 func (n CallNode) String() string       { return fmt.Sprintf("func %s(%s)", n.Callee, n.Arguments) }
 func (n ListNode) String() string       { return fmt.Sprintf("%s", n.Elements) }
 func (n IndexOfNode) String() string    { return fmt.Sprintf("%s[%s]", n.Sequence, n.Index) }
+func (n FunctionNode) String() string {
+	return fmt.Sprintf("fun %s(%s)%s", n.Identifier, n.Parameters, n.Body)
+}

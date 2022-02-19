@@ -52,13 +52,102 @@ func (a *Ast) program() (Node, error) {
 	}, nil
 }
 
-// declaration -> varDecl
+// declaration -> funDecl
+//             | varDecl
 //             | statement ;
 func (a *Ast) declaration() (Node, error) {
-	if a.consume(token.TT_VAR) {
+	if a.consume(token.TT_FUNCTION) {
+		return a.funDeclaration()
+	} else if a.consume(token.TT_VAR) {
 		return a.varDeclaration()
+	} else {
+		return a.statement()
 	}
-	return a.statement()
+}
+
+// funDecl  -> "fun" function ;
+// function -> IDENTIFIER "(" parameters? ")" block ;
+func (a *Ast) funDeclaration() (Node, error) {
+	identifier, err := a.atom()
+	if err != nil {
+		return nil, err
+	}
+
+	if _, ok := identifier.(IdentifierNode); !ok {
+		return nil, newSyntaxError("function name should be an identifier", a.curr)
+	}
+
+	parameters, err := a.parameters()
+	if err != nil {
+		return nil, err
+	}
+
+	if !a.consume(token.TT_LBRACE) {
+		return nil, newSyntaxError("expected opening '{' for function body", a.curr)
+	}
+
+	body, err := a.block()
+	if err != nil {
+		return nil, err
+	}
+
+	if _, ok := body.(BlockNode); !ok {
+		return nil, newSyntaxError("expected function body to be a block", a.curr)
+	}
+
+	return FunctionNode{
+		Identifier: identifier.(IdentifierNode),
+		Parameters: parameters,
+		Body:       body.(BlockNode),
+	}, nil
+}
+
+// parameters -> IDENTIFIER ("," IDENTIFIER)* ;
+func (a *Ast) parameters() ([]IdentifierNode, error) {
+	if !a.consume(token.TT_LPAREN) {
+		return nil, newSyntaxError("expected opening '(' for parameters", a.curr)
+	}
+
+	if a.consume(token.TT_RPAREN) { // Function arity = 0
+		return []IdentifierNode{}, nil
+	}
+
+	params := make([]IdentifierNode, 0, 255)
+
+	param, err := a.parameter()
+	if err != nil {
+		return nil, err
+	}
+
+	params = append(params, param)
+
+	for a.consume(token.TT_COMMA) {
+		param, err := a.parameter()
+		if err != nil {
+			return nil, err
+		}
+
+		params = append(params, param)
+	}
+
+	if !a.consume(token.TT_RPAREN) {
+		return nil, newSyntaxError("expected closing ')' for parameters", a.curr)
+	}
+
+	return params, nil
+}
+
+func (a *Ast) parameter() (IdentifierNode, error) {
+	param, err := a.atom()
+	if err != nil {
+		return IdentifierNode{}, err
+	}
+
+	if _, ok := param.(IdentifierNode); !ok {
+		return IdentifierNode{}, newSyntaxError("param should be an identifier", a.curr)
+	}
+
+	return param.(IdentifierNode), nil
 }
 
 // varDecl -> "var" IDENTIFIER ( "=" expression )? ";" ;
