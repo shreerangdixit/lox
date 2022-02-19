@@ -7,6 +7,17 @@ import (
 	"strconv"
 )
 
+type BreakError struct {
+}
+
+func (e BreakError) Error() string {
+	return "break"
+}
+
+func newBreakError() error {
+	return BreakError{}
+}
+
 type Evaluator struct {
 	env *Env
 }
@@ -33,6 +44,8 @@ func (e *Evaluator) eval(node ast.Node) (Object, error) {
 		return e.evalIfStmtNode(node)
 	case ast.WhileStmtNode:
 		return e.evalWhileStmtNode(node)
+	case ast.BreakStmtNode:
+		return e.evalBreakStmtNode(node)
 	case ast.AssignmentNode:
 		return e.evalAssignmentNode(node)
 	case ast.LogicalAndNode:
@@ -119,8 +132,10 @@ func (e *Evaluator) evalIfStmtNode(node ast.IfStmtNode) (Object, error) {
 
 	if IsTruthy(value) {
 		return e.eval(node.TrueStmt)
-	} else {
+	} else if node.FalseStmt != nil {
 		return e.eval(node.FalseStmt)
+	} else {
+		return NIL, nil
 	}
 }
 
@@ -137,10 +152,19 @@ func (e *Evaluator) evalWhileStmtNode(node ast.WhileStmtNode) (Object, error) {
 
 		_, err = e.eval(node.Body)
 		if err != nil {
-			return NIL, err
+			switch err := err.(type) {
+			case BreakError:
+				return NIL, nil
+			default:
+				return NIL, err
+			}
 		}
 	}
 	return NIL, nil
+}
+
+func (e *Evaluator) evalBreakStmtNode(node ast.BreakStmtNode) (Object, error) {
+	return NIL, newBreakError()
 }
 
 func (e *Evaluator) evalAssignmentNode(node ast.AssignmentNode) (Object, error) {

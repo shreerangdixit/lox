@@ -5,10 +5,12 @@ varDecl        -> "var" IDENTIFIER ( "=" expression )? ";" ;
 statement      -> exprStatement
                | ifStatement
                | whileStatement
+               | breakStatement
                | block ;
 exprStatement  -> expression ";" ;
 ifStatement    -> "if" "(" expression ")" statement ( "else" statement )? ;
 whileStatement -> "while" "(" expression ")" statement ;
+breakStatement -> "break" ;
 block          -> "{" declaration* "}" ;
 expression     -> assignment ( "?" assignment ":" assignment )? ;
 assignment     -> IDENTIFIER "=" assignment

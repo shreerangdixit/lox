@@ -49,6 +49,10 @@ type WhileStmtNode struct {
 	Body      Node
 }
 
+type BreakStmtNode struct {
+	Token token.Token
+}
+
 type BlockNode struct {
 	Declarations []Node
 }
@@ -118,9 +122,14 @@ func (n VarStmtNode) String() string    { return fmt.Sprintf("var %s=%s", n.Iden
 func (n BlockNode) String() string      { return fmt.Sprintf("{%s}", n.Declarations) }
 func (n ExpStmtNode) String() string    { return n.Exp.String() }
 func (n IfStmtNode) String() string {
-	return fmt.Sprintf("if(%s) %s else %s", n.Exp, n.TrueStmt, n.FalseStmt)
+	if n.FalseStmt != nil {
+		return fmt.Sprintf("if(%s) %s else %s", n.Exp, n.TrueStmt, n.FalseStmt)
+	} else {
+		return fmt.Sprintf("if(%s) %s", n.Exp, n.TrueStmt)
+	}
 }
 func (n WhileStmtNode) String() string { return fmt.Sprintf("while(%s)%s", n.Condition, n.Body) }
+func (n BreakStmtNode) String() string { return n.Token.String() }
 func (n ExpNode) String() string       { return n.Exp.String() }
 func (n TernaryOpNode) String() string {
 	return fmt.Sprintf("%s ? %s : %s", n.Exp, n.TrueExp, n.FalseExp)

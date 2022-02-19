@@ -101,12 +101,16 @@ func (a *Ast) varDeclaration() (Node, error) {
 
 // statement -> exprStatement
 //           | ifStatement
+//           | whileStatement
+//           | breakStatement
 //           | block ;
 func (a *Ast) statement() (Node, error) {
 	if a.consume(token.TT_IF) {
 		return a.ifStatement()
 	} else if a.consume(token.TT_WHILE) {
 		return a.whileStatement()
+	} else if a.consume(token.TT_BREAK) {
+		return a.breakStatement()
 	} else if a.consume(token.TT_LBRACE) {
 		return a.block()
 	}
@@ -171,6 +175,16 @@ func (a *Ast) whileStatement() (Node, error) {
 	return WhileStmtNode{
 		Condition: condition,
 		Body:      body,
+	}, nil
+}
+
+// breakStatement -> "break" ;
+func (a *Ast) breakStatement() (Node, error) {
+	if !a.consume(token.TT_SEMICOLON) {
+		return nil, newSyntaxError("expected ';' after 'break'", a.curr)
+	}
+	return BreakStmtNode{
+		Token: a.curr,
 	}, nil
 }
 
