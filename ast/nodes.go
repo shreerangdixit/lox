@@ -236,3 +236,20 @@ type FunctionNode struct {
 func (n FunctionNode) String() string {
 	return fmt.Sprintf("fun %s(%s)\n%s", n.Identifier, n.Parameters, n.Body)
 }
+
+type KeyValueNode struct {
+	Key   Node
+	Value Node
+}
+
+func (n KeyValueNode) String() string {
+	return fmt.Sprintf("%s:%s", n.Key.String(), n.Value.String())
+}
+
+type MapNode struct {
+	Elements []KeyValueNode
+}
+
+func (n MapNode) String() string {
+	return fmt.Sprintf("{%s}", n.Elements)
+}

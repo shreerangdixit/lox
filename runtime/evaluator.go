@@ -61,6 +61,8 @@ func (e *Evaluator) eval(node ast.Node) (Object, error) {
 		return e.evalStringNode(node)
 	case ast.ListNode:
 		return e.evalListNode(node)
+	case ast.MapNode:
+		return e.evalMapNode(node)
 	case ast.NilNode:
 		return e.evalNilNode(node)
 	case ast.CallNode:
@@ -303,6 +305,28 @@ func (e *Evaluator) evalListNode(node ast.ListNode) (Object, error) {
 	}
 
 	return NewList(elements), nil
+}
+
+func (e *Evaluator) evalMapNode(node ast.MapNode) (Object, error) {
+	m := NewMap()
+
+	for _, kvp := range node.Elements {
+		key, err := e.eval(kvp.Key)
+		if err != nil {
+			return NIL, err
+		}
+
+		value, err := e.eval(kvp.Value)
+		if err != nil {
+			return NIL, err
+		}
+
+		err = m.Add(key, value)
+		if err != nil {
+			return NIL, err
+		}
+	}
+	return m, nil
 }
 
 func (e *Evaluator) evalNilNode(node ast.NilNode) (Object, error) {

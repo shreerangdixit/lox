@@ -243,17 +243,28 @@ func GreaterThanEq(left Object, right Object) Bool {
 }
 
 func ItemAtIndex(o Object, idx Object) (Object, error) {
-	idxr, ok := o.(Indexer)
-	if !ok {
+	if _, ok := o.(Sequence); !ok {
+		return NIL, fmt.Errorf("cannot index type %s", idx.Type())
+	}
+
+	if idxr, ok := o.(Indexer); ok {
+		i, ok := idx.(Number)
+		if !ok {
+			return NIL, fmt.Errorf("index must be a number, was %s", idx.Type())
+		}
+
+		return idxr.Index(i)
+	} else if mapper, ok := o.(Mapper); ok {
+		key, ok := idx.(Hasher)
+		if !ok {
+			return NIL, fmt.Errorf("key must be hashable, was %s", idx.Type())
+		}
+
+		return mapper.Map(key)
+
+	} else {
 		return NIL, fmt.Errorf("%s is not indexable", o.Type())
 	}
-
-	i, ok := idx.(Number)
-	if !ok {
-		return NIL, fmt.Errorf("index must be a number, was %s", idx.Type())
-	}
-
-	return idxr.Index(i)
 }
 
 // ------------------------------------

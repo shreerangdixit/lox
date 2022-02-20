@@ -34,7 +34,9 @@ call            -> atom ( "(" arguments? ")" )*
 arguments       -> expression ( "," expression )* ;
 atom            -> NUMBER | STRING | "true" | "false" | "nil"
                 | "(" expression ")"
-                | "[" arguments? "]"
-                | "{" keyValuePairs? "}"
+                | list
+                | map
                 | IDENTIFIER ;
+list            -> "[" arguments? "]" ;
+map             -> "{" keyValuePairs? "}" ;
 keyValuePairs   -> expression ":" expression ( "," expression ":" expression )* ;
