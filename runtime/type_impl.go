@@ -197,7 +197,7 @@ func (f Map) Add(key Object, value Object) error {
 	return fmt.Errorf("key type %s is not hashable", key.Type())
 }
 
-func (f Map) Type() ObjectType { return TypeList }
+func (f Map) Type() ObjectType { return TypeMap }
 func (f Map) String() string   { return fmt.Sprintf("%v", f.Values) }
 func (f Map) Size() Number     { return NewNumber(float64(len(f.Values))) }
 func (f Map) Truthy() Bool     { return NewBool(f.Size().Value > 0) }

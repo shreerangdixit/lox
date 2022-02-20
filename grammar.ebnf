@@ -35,4 +35,6 @@ arguments       -> expression ( "," expression )* ;
 atom            -> NUMBER | STRING | "true" | "false" | "nil"
                 | "(" expression ")"
                 | "[" arguments? "]"
+                | "{" keyValuePairs? "}"
                 | IDENTIFIER ;
+keyValuePairs   -> expression ":" expression ( "," expression ":" expression )* ;
