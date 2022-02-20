@@ -62,7 +62,7 @@ func (f Number) Divide(other Object) (Object, error) {
 	return NewNumber(f.Value / other.(Number).Value), nil
 }
 
-func (f Number) Modulate(other Object) (Object, error) {
+func (f Number) Modulo(other Object) (Object, error) {
 	return NewNumber(float64(int(f.Value) % int(other.(Number).Value))), nil
 }
 
