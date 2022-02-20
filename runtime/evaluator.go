@@ -84,6 +84,10 @@ func (e *Evaluator) evalProgramNode(node ast.ProgramNode) (Object, error) {
 }
 
 func (e *Evaluator) evalBlockNode(node ast.BlockNode) (Object, error) {
+	return e.evalBlockNodeWithEnv(node, NewEnv().WithEnclosing(e.env))
+}
+
+func (e *Evaluator) evalBlockNodeWithEnv(node ast.BlockNode, env *Env) (Object, error) {
 	// Reset environment at the end of block scope
 	prev := e.env
 	defer func() {
@@ -91,7 +95,7 @@ func (e *Evaluator) evalBlockNode(node ast.BlockNode) (Object, error) {
 	}()
 
 	// New environment at the beginning of block scope
-	e.env = NewEnvWithEnclosing(e.env)
+	e.env = env
 	for _, node := range node.Declarations {
 		_, err := e.eval(node)
 		if err != nil {
@@ -311,14 +315,17 @@ func (e *Evaluator) evalCallNode(node ast.CallNode) (Object, error) {
 		return NIL, err
 	}
 
-	calleeValue, err := e.env.Get(calleeNode.String())
-	if err != nil {
-		return NIL, fmt.Errorf("%s is not callable", calleeNode.Type())
-	}
+	callable, ok := calleeNode.(Callable)
+	if !ok { // If the callee node itself isn't callable, check if it's value is callable
+		calleeValue, err := e.env.Get(calleeNode.String())
+		if err != nil {
+			return NIL, fmt.Errorf("%s is not callable", calleeNode.Type())
+		}
 
-	callable, ok := calleeValue.(Callable)
-	if !ok {
-		return NIL, fmt.Errorf("%s is not callable", calleeValue.Type())
+		callable, ok = calleeValue.(Callable)
+		if !ok {
+			return NIL, fmt.Errorf("%s is not callable", calleeValue.Type())
+		}
 	}
 
 	if !callable.Variadic() && callable.Arity() != len(node.Arguments) {
@@ -353,7 +360,7 @@ func (e *Evaluator) evalIndexOfNode(node ast.IndexOfNode) (Object, error) {
 }
 
 func (e *Evaluator) evalFunctionNode(node ast.FunctionNode) (Object, error) {
-	fun := NewUserFunction(node)
+	fun := NewUserFunction(node, e.env)
 	return NIL, e.env.Declare(fun.String(), fun)
 }
 

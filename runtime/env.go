@@ -39,11 +39,9 @@ func NewEnv() *Env {
 	return &env
 }
 
-func NewEnvWithEnclosing(env *Env) *Env {
-	return &Env{
-		scopeVariables: make(map[string]Object),
-		enclosing:      env,
-	}
+func (e *Env) WithEnclosing(env *Env) *Env {
+	e.enclosing = env
+	return e
 }
 
 func (e *Env) Declare(varName string, varValue Object) error {

@@ -12,12 +12,14 @@ import (
 // ------------------------------------
 
 type UserFunction struct {
-	node ast.FunctionNode
+	node    ast.FunctionNode
+	closure *Env
 }
 
-func NewUserFunction(node ast.FunctionNode) *UserFunction {
+func NewUserFunction(node ast.FunctionNode, closure *Env) *UserFunction {
 	return &UserFunction{
-		node: node,
+		node:    node,
+		closure: closure,
 	}
 }
 
@@ -26,23 +28,17 @@ func (f *UserFunction) String() string   { return f.node.Identifier.Token.Litera
 func (f *UserFunction) Arity() int       { return len(f.node.Parameters) }
 func (f *UserFunction) Variadic() bool   { return false }
 func (f *UserFunction) Call(e *Evaluator, args []Object) (Object, error) {
-	// Reset environment at the end of function call
-	prev := e.env
-	defer func() {
-		e.env = prev
-	}()
-
-	// New environment at the beginning of function call
-	e.env = NewEnvWithEnclosing(e.env)
+	// New environment for function call
+	env := NewEnv().WithEnclosing(f.closure)
 	for i := range args {
 		// Bind function arguments to values
-		err := e.env.Declare(f.node.Parameters[i].Token.Literal, args[i])
+		err := env.Declare(f.node.Parameters[i].Token.Literal, args[i])
 		if err != nil {
 			return NIL, err
 		}
 	}
 
-	val, err := e.eval(f.node.Body)
+	val, err := e.evalBlockNodeWithEnv(f.node.Body, env)
 	if err != nil {
 		switch err := err.(type) {
 		case ReturnError:
