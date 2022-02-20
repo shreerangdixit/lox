@@ -211,12 +211,11 @@ func (f Map) Elements() []Object {
 }
 
 func (f Map) Map(key Hasher) (Object, error) {
-	for k, v := range f.Values {
-		if k == key.Hash() {
-			return v, nil
-		}
+	if v, ok := f.Values[key.Hash()]; ok {
+		return v, nil
+	} else {
+		return NIL, nil
 	}
-	return NIL, nil
 }
 
 // Nil type
