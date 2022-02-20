@@ -138,12 +138,12 @@ func (e *Evaluator) evalIfStmtNode(node ast.IfStmtNode) (Object, error) {
 
 func (e *Evaluator) evalWhileStmtNode(node ast.WhileStmtNode) (Object, error) {
 	for {
-		result, err := e.eval(node.Condition)
+		condition, err := e.eval(node.Condition)
 		if err != nil {
 			return NIL, err
 		}
 
-		if !IsTruthy(result) {
+		if !IsTruthy(condition) {
 			break
 		}
 
