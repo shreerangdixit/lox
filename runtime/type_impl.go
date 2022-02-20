@@ -2,7 +2,20 @@ package runtime
 
 import (
 	"fmt"
+	"hash/fnv"
 )
+
+func hashNumber(n Number) uint32 {
+	h := fnv.New32a()
+	h.Write([]byte(fmt.Sprintf("%f", n.Value)))
+	return h.Sum32()
+}
+
+func hashString(s String) uint32 {
+	h := fnv.New32a()
+	h.Write([]byte(s.Value))
+	return h.Sum32()
+}
 
 // IEEE 754 floating point number type
 // Implements the following interfaces
@@ -17,6 +30,7 @@ import (
 // Multiplier
 // Divider
 // Modulator
+// Hasher
 type Number struct{ Value float64 }
 
 func NewNumber(value float64) Number           { return Number{Value: value} }
@@ -27,6 +41,7 @@ func (f Number) Negate() (Object, error)       { return f.Multiply(NewNumber(-1)
 func (f Number) LessThan(other Object) Bool    { return NewBool(f.Value < other.(Number).Value) }
 func (f Number) GreaterThan(other Object) Bool { return NewBool(f.Value > other.(Number).Value) }
 func (f Number) EqualTo(other Object) Bool     { return NewBool(f.Value == other.(Number).Value) }
+func (f Number) Hash() uint32                  { return hashNumber(f) }
 
 func (f Number) Add(other Object) (Object, error) {
 	return NewNumber(f.Value + other.(Number).Value), nil
@@ -73,11 +88,13 @@ func (f Bool) Not() (Object, error)      { return NewBool(!f.Value), nil }
 // Implements the following interfaces
 // Object
 // Sequence
+// Indexer
 // Truthifier
 // Adder
 // LessThanComparator
 // GreaterThanComparator
 // EqualToComparator
+// Hasher
 type String struct{ Value string }
 
 func NewString(value string) String            { return String{Value: value} }
@@ -88,6 +105,7 @@ func (f String) LessThan(other Object) Bool    { return NewBool(f.Value < other.
 func (f String) GreaterThan(other Object) Bool { return NewBool(f.Value > other.(String).Value) }
 func (f String) EqualTo(other Object) Bool     { return NewBool(f.Value == other.(String).Value) }
 func (f String) Size() Number                  { return NewNumber(float64(len(f.Value))) }
+func (f String) Hash() uint32                  { return hashString(f) }
 
 func (f String) Add(other Object) (Object, error) {
 	return NewString(f.Value + other.(String).Value), nil
@@ -126,6 +144,7 @@ func (f Type) EqualTo(other Object) Bool { return NewBool(f.Value == other.(Type
 // Implements the following interfaces
 // Object
 // Sequence
+// Indexer
 // Truthifier
 // Adder
 // TODO:
@@ -161,6 +180,45 @@ func (f List) Elements() []Object {
 	return f.Values
 }
 
+// Key-value map type
+// Implements the following interfaces
+// Object
+// Mapper/Sequence
+// Truthifier
+type Map struct{ Values map[uint32]Object }
+
+func NewMap() Map { return Map{Values: make(map[uint32]Object)} }
+
+func (f Map) Add(key Object, value Object) error {
+	if hasher, ok := key.(Hasher); ok {
+		f.Values[hasher.Hash()] = value
+		return nil
+	}
+	return fmt.Errorf("key type %s is not hashable", key.Type())
+}
+
+func (f Map) Type() ObjectType { return TypeList }
+func (f Map) String() string   { return fmt.Sprintf("%v", f.Values) }
+func (f Map) Size() Number     { return NewNumber(float64(len(f.Values))) }
+func (f Map) Truthy() Bool     { return NewBool(f.Size().Value > 0) }
+
+func (f Map) Elements() []Object {
+	values := make([]Object, 0, len(f.Values))
+	for _, v := range f.Values {
+		values = append(values, v)
+	}
+	return values
+}
+
+func (f Map) Map(key Hasher) (Object, error) {
+	for k, v := range f.Values {
+		if k == key.Hash() {
+			return v, nil
+		}
+	}
+	return NIL, nil
+}
+
 // Nil type
 // Implements the following interfaces
 // Object
@@ -168,6 +226,9 @@ func (f List) Elements() []Object {
 // EqualToComparator
 type Nil struct{}
 
+var NIL = NewNil()
+
+func NewNil() Nil                       { return Nil{} }
 func (f Nil) Type() ObjectType          { return TypeNil }
 func (f Nil) String() string            { return "nil" }
 func (f Nil) Truthy() Bool              { return FALSE }

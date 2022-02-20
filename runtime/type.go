@@ -4,8 +4,6 @@ import (
 	"fmt"
 )
 
-var NIL = Nil{}
-
 type ObjectType string
 
 const (
@@ -16,6 +14,7 @@ const (
 	TypeNil    ObjectType = "null"
 	TypeType   ObjectType = "type"
 	TypeList   ObjectType = "list"
+	TypeMap    ObjectType = "map"
 )
 
 // ------------------------------------
@@ -37,8 +36,22 @@ type Callable interface {
 type Sequence interface {
 	Object
 	Size() Number
-	Index(Number) (Object, error)
 	Elements() []Object
+}
+
+type Hasher interface {
+	Object
+	Hash() uint32
+}
+
+type Mapper interface {
+	Sequence
+	Map(key Hasher) (Object, error)
+}
+
+type Indexer interface {
+	Object
+	Index(Number) (Object, error)
 }
 
 type Truthifier interface {
@@ -230,9 +243,9 @@ func GreaterThanEq(left Object, right Object) Bool {
 }
 
 func ItemAtIndex(o Object, idx Object) (Object, error) {
-	seq, ok := o.(Sequence)
+	idxr, ok := o.(Indexer)
 	if !ok {
-		return NIL, fmt.Errorf("%s is not a sequence (non-indexable)", o.Type())
+		return NIL, fmt.Errorf("%s is not indexable", o.Type())
 	}
 
 	i, ok := idx.(Number)
@@ -240,7 +253,7 @@ func ItemAtIndex(o Object, idx Object) (Object, error) {
 		return NIL, fmt.Errorf("index must be a number, was %s", idx.Type())
 	}
 
-	return seq.Index(i)
+	return idxr.Index(i)
 }
 
 // ------------------------------------
