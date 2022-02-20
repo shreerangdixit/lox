@@ -8,11 +8,11 @@ import (
 )
 
 type Evaluator struct {
-	env *Env
+	env *Environment
 }
 
 func NewEvaluator() *Evaluator {
-	return &Evaluator{env: NewEnv()}
+	return &Evaluator{env: NewEnvironment()}
 }
 
 func (e *Evaluator) Evaluate(root ast.Node) (Object, error) {
@@ -84,10 +84,10 @@ func (e *Evaluator) evalProgramNode(node ast.ProgramNode) (Object, error) {
 }
 
 func (e *Evaluator) evalBlockNode(node ast.BlockNode) (Object, error) {
-	return e.evalBlockNodeWithEnv(node, NewEnv().WithEnclosing(e.env))
+	return e.evalBlockNodeWithEnv(node, NewEnvironment().WithEnclosing(e.env))
 }
 
-func (e *Evaluator) evalBlockNodeWithEnv(node ast.BlockNode, env *Env) (Object, error) {
+func (e *Evaluator) evalBlockNodeWithEnv(node ast.BlockNode, env *Environment) (Object, error) {
 	// Reset environment at the end of block scope
 	prev := e.env
 	defer func() {

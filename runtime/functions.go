@@ -13,10 +13,10 @@ import (
 
 type UserFunction struct {
 	node    ast.FunctionNode
-	closure *Env
+	closure *Environment
 }
 
-func NewUserFunction(node ast.FunctionNode, closure *Env) *UserFunction {
+func NewUserFunction(node ast.FunctionNode, closure *Environment) *UserFunction {
 	return &UserFunction{
 		node:    node,
 		closure: closure,
@@ -29,7 +29,7 @@ func (f *UserFunction) Arity() int       { return len(f.node.Parameters) }
 func (f *UserFunction) Variadic() bool   { return false }
 func (f *UserFunction) Call(e *Evaluator, args []Object) (Object, error) {
 	// New environment for function call
-	env := NewEnv().WithEnclosing(f.closure)
+	env := NewEnvironment().WithEnclosing(f.closure)
 	for i := range args {
 		// Bind function arguments to values
 		err := env.Declare(f.node.Parameters[i].Token.Literal, args[i])

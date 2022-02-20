@@ -13,25 +13,13 @@ func init() {
 	}
 }
 
-type EnvError struct {
-	msg string
-}
-
-func (e EnvError) Error() string {
-	return e.msg
-}
-
-func newEnvError(msg string) EnvError {
-	return EnvError{msg: msg}
-}
-
-type Env struct {
+type Environment struct {
 	scopeVariables map[string]Object
-	enclosing      *Env
+	enclosing      *Environment
 }
 
-func NewEnv() *Env {
-	env := Env{
+func NewEnvironment() *Environment {
+	env := Environment{
 		scopeVariables: make(map[string]Object),
 		enclosing:      nil,
 	}
@@ -39,31 +27,31 @@ func NewEnv() *Env {
 	return &env
 }
 
-func (e *Env) WithEnclosing(env *Env) *Env {
+func (e *Environment) WithEnclosing(env *Environment) *Environment {
 	e.enclosing = env
 	return e
 }
 
-func (e *Env) Declare(varName string, varValue Object) error {
+func (e *Environment) Declare(varName string, varValue Object) error {
 	if _, ok := e.scopeVariables[varName]; ok {
-		return newEnvError(fmt.Sprintf("cannot redeclare variable %s", varName))
+		return fmt.Errorf("cannot redeclare variable %s", varName)
 	}
 	e.scopeVariables[varName] = varValue
 	return nil
 }
 
-func (e *Env) Assign(varName string, varValue Object) error {
+func (e *Environment) Assign(varName string, varValue Object) error {
 	if _, ok := e.scopeVariables[varName]; !ok {
 		if e.enclosing != nil {
 			return e.enclosing.Assign(varName, varValue)
 		}
-		return newEnvError(fmt.Sprintf("variable not declared %s", varName))
+		return fmt.Errorf("variable not declared %s", varName)
 	}
 	e.scopeVariables[varName] = varValue
 	return nil
 }
 
-func (e *Env) Get(varName string) (Object, error) {
+func (e *Environment) Get(varName string) (Object, error) {
 	if val, ok := globals[varName]; ok {
 		return val, nil
 	}
@@ -72,7 +60,7 @@ func (e *Env) Get(varName string) (Object, error) {
 		if e.enclosing != nil {
 			return e.enclosing.Get(varName)
 		}
-		return NIL, newEnvError(fmt.Sprintf("variable not declared %s", varName))
+		return NIL, fmt.Errorf("variable not declared %s", varName)
 	}
 	return e.scopeVariables[varName], nil
 }
