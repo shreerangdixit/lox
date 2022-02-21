@@ -5,22 +5,22 @@ import (
 )
 
 var version = "<NOT SET>"
-var buildDate = "<NOT SET>"
-var buildOS = "<NOT SET>"
-var buildHost = "<NOT SET>"
-var buildArch = "<NOT SET>"
-var buildKernelVersion = "<NOT SET>"
+var date = "<NOT SET>"
+var os = "<NOT SET>"
+var host = "<NOT SET>"
+var arch = "<NOT SET>"
+var kernelVersion = "<NOT SET>"
 
 var Info *BuildInfo
 
 func init() {
 	Info = &BuildInfo{
 		Version:            version,
-		BuildDate:          buildDate,
-		BuildOS:            buildOS,
-		BuildHost:          buildHost,
-		BuildArch:          buildArch,
-		BuildKernelVersion: buildKernelVersion,
+		BuildDate:          date,
+		BuildOS:            os,
+		BuildHost:          host,
+		BuildArch:          arch,
+		BuildKernelVersion: kernelVersion,
 	}
 }
 
