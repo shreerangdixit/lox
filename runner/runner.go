@@ -39,13 +39,13 @@ func RunFile(file string) error {
 	return nil
 }
 
-func StartREPL(version string) {
-	startREPL(os.Stdin, os.Stdout, version)
+func StartREPL(buildInfo string) {
+	startREPL(os.Stdin, os.Stdout, buildInfo)
 }
 
-func startREPL(in io.Reader, out io.Writer, version string) {
+func startREPL(in io.Reader, out io.Writer, buildInfo string) {
 	fmt.Fprintf(out, "%s\n", Logo)
-	fmt.Fprintf(out, "Version: %s\n\n", version)
+	fmt.Fprintf(out, "%s", buildInfo)
 
 	scanner := bufio.NewScanner(in)
 	e := runtime.NewEvaluator()
