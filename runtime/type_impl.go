@@ -156,9 +156,6 @@ func (f Type) EqualTo(other Object) Bool { return NewBool(f.Value == other.(Type
 // Indexer
 // Truthifier
 // Adder
-// TODO:
-// LessThanComparator
-// GreaterThanComparator
 // EqualToComparator
 type List struct{ Values []Object }
 
@@ -225,6 +222,7 @@ func (f List) EqualTo(other Object) Bool {
 // Object
 // Mapper/Sequence
 // Truthifier
+// EqualToComparator
 type Map struct {
 	Mappings      map[uint32]Object
 	KeyValuePairs []MapKeyValuePair
@@ -291,6 +289,40 @@ func (f Map) Map(key Hasher) (Object, error) {
 	} else {
 		return NIL, nil
 	}
+}
+
+func (f Map) EqualTo(other Object) Bool {
+	if m, ok := other.(Map); ok {
+		if m.Size() != f.Size() {
+			return FALSE
+		}
+
+		for i := 0; i < int(f.Size().Value); i++ {
+			key1, ok := f.KeyValuePairs[i].Key.(EqualToComparator)
+			if !ok {
+				return FALSE
+			}
+			value1, ok := f.KeyValuePairs[i].Value.(EqualToComparator)
+			if !ok {
+				return FALSE
+			}
+
+			key2, ok := m.KeyValuePairs[i].Key.(EqualToComparator)
+			if !ok {
+				return FALSE
+			}
+			value2, ok := m.KeyValuePairs[i].Value.(EqualToComparator)
+			if !ok {
+				return FALSE
+			}
+
+			if !EqualTo(key1, key2).Value || !EqualTo(value1, value2).Value {
+				return FALSE
+			}
+		}
+		return TRUE
+	}
+	return FALSE
 }
 
 // Nil type
