@@ -37,6 +37,7 @@ type Sequence interface {
 	Object
 	Size() Number
 	Elements() []Object
+	Append(Object) (Sequence, error)
 }
 
 type Hasher interface {
@@ -46,7 +47,7 @@ type Hasher interface {
 
 type Mapper interface {
 	Sequence
-	Map(key Hasher) (Object, error)
+	Map(Hasher) (Object, error)
 }
 
 type Indexer interface {
@@ -244,7 +245,7 @@ func GreaterThanEq(left Object, right Object) Bool {
 
 func ItemAtIndex(o Object, idx Object) (Object, error) {
 	if _, ok := o.(Sequence); !ok {
-		return NIL, fmt.Errorf("cannot index type %s", idx.Type())
+		return NIL, fmt.Errorf("cannot index type %s", o.Type())
 	}
 
 	if idxr, ok := o.(Indexer); ok {

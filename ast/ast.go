@@ -497,19 +497,21 @@ func (a *Ast) call() (Node, error) {
 				return nil, err
 			}
 		}
-	} else if a.consume(token.TT_LBRACKET) {
-		indexExpr, err := a.expression()
-		if err != nil {
-			return nil, err
-		}
+	} else {
+		for a.consume(token.TT_LBRACKET) {
+			indexExpr, err := a.expression()
+			if err != nil {
+				return nil, err
+			}
 
-		if !a.consume(token.TT_RBRACKET) {
-			return nil, NewSyntaxError("expected closing ']' for index operation", a.curr)
-		}
+			if !a.consume(token.TT_RBRACKET) {
+				return nil, NewSyntaxError("expected closing ']' for index operation", a.curr)
+			}
 
-		expr = IndexOfNode{
-			Sequence: expr,
-			Index:    indexExpr,
+			expr = IndexOfNode{
+				Sequence: expr,
+				Index:    indexExpr,
+			}
 		}
 	}
 	return expr, nil

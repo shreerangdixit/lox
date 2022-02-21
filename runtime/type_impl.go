@@ -120,6 +120,14 @@ func (f String) Index(n Number) (Object, error) {
 	return NewString(string(f.Value[idx])), nil
 }
 
+func (f String) Append(o Object) (Sequence, error) {
+	if s, ok := o.(String); ok {
+		f.Value += s.Value
+		return f, nil
+	}
+	return f, fmt.Errorf("cannot append %s to %s", o.Type(), f.Type())
+}
+
 func (f String) Elements() []Object {
 	elems := make([]Object, 0, 500)
 	for _, i := range f.Value {
@@ -177,6 +185,11 @@ func (f List) Index(n Number) (Object, error) {
 	return f.Values[idx], nil
 }
 
+func (f List) Append(o Object) (Sequence, error) {
+	f.Values = append(f.Values, o)
+	return f, nil
+}
+
 func (f List) Elements() []Object {
 	return f.Values
 }
@@ -230,6 +243,20 @@ func (f Map) Elements() []Object {
 		values = append(values, kvp.Value)
 	}
 	return values
+}
+
+func (f Map) Append(o Object) (Sequence, error) {
+	var err error
+	if m, ok := o.(Map); ok {
+		for _, kvp := range m.KeyValuePairs {
+			f, err = f.Add(kvp.Key, kvp.Value)
+			if err != nil {
+				return f, err
+			}
+		}
+		return f, nil
+	}
+	return f, fmt.Errorf("cannot append %s to %s", o.Type(), f.Type())
 }
 
 func (f Map) Map(key Hasher) (Object, error) {

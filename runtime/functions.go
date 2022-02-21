@@ -79,17 +79,23 @@ func (f *NativeFunction) Variadic() bool                                   { ret
 func (f *NativeFunction) Call(e *Evaluator, args []Object) (Object, error) { return f.handler(e, args) }
 
 var NativeFunctions = []*NativeFunction{
+	// Time
 	NewNativeFunction("sleep", 1, false, sleepHandler),
 	NewNativeFunction("time", 0, false, timeHandler),
+	// Math
 	NewNativeFunction("abs", 1, false, absHandler),
 	NewNativeFunction("max", 2, false, maxHandler),
 	NewNativeFunction("min", 2, false, minHandler),
 	NewNativeFunction("avg", 1, false, avgHandler),
 	NewNativeFunction("sqrt", 1, false, sqrtHandler),
-	NewNativeFunction("type", 1, false, typeHandler),
+	// Collections
 	NewNativeFunction("len", 1, false, lenHandler),
+	NewNativeFunction("append", 2, false, appendHandler),
+	// IO
 	NewNativeFunction("print", 0, true, printHandler),
 	NewNativeFunction("println", 0, true, printlnHandler),
+	// Misc
+	NewNativeFunction("type", 1, false, typeHandler),
 }
 
 func sleepHandler(e *Evaluator, args []Object) (Object, error) {
@@ -180,6 +186,26 @@ func lenHandler(e *Evaluator, args []Object) (Object, error) {
 		return NIL, fmt.Errorf("len() expects a sequence")
 	}
 	return arg.Size(), nil
+}
+
+func appendHandler(e *Evaluator, args []Object) (Object, error) {
+	seq, ok := args[0].(Sequence)
+	if !ok {
+		return NIL, fmt.Errorf("append() expectes a sequence")
+	}
+	if list, ok := args[1].(List); ok {
+		retval := seq
+		var err error
+		for _, elem := range list.Elements() {
+			retval, err = retval.Append(elem)
+			if err != nil {
+				return retval, err
+			}
+		}
+		return retval, nil
+	} else {
+		return seq.Append(args[1])
+	}
 }
 
 func printHandler(e *Evaluator, args []Object) (Object, error) {
