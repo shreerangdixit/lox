@@ -12,11 +12,11 @@ default: build
 build:
 	@go build -ldflags="-X 'main.Version=$(VERSION)' \
 	                    -X 'main.BuildDate=$(BUILD_DATE)' \
-						-X 'main.BuildOS=$(BUILD_OS)' \
-						-X 'main.BuildHost=$(BUILD_HOST)' \
-						-X 'main.BuildArch=$(BUILD_ARCH)' \
-						-X 'main.BuildKernelVersion=$(BUILD_KERNEL_VERSION)'" \
-						.
+                        -X 'main.BuildOS=$(BUILD_OS)' \
+                        -X 'main.BuildHost=$(BUILD_HOST)' \
+                        -X 'main.BuildArch=$(BUILD_ARCH)' \
+                        -X 'main.BuildKernelVersion=$(BUILD_KERNEL_VERSION)'" \
+                        .
 
 fmt:
 	@go fmt ./...
