@@ -194,6 +194,32 @@ func (f List) Elements() []Object {
 	return f.Values
 }
 
+func (f List) EqualTo(other Object) Bool {
+	if l, ok := other.(List); ok {
+		if l.Size() != f.Size() {
+			return FALSE
+		}
+
+		for i := 0; i < int(f.Size().Value); i++ {
+			elem1, ok := f.Values[i].(EqualToComparator)
+			if !ok {
+				return FALSE
+			}
+
+			elem2, ok := l.Values[i].(EqualToComparator)
+			if !ok {
+				return FALSE
+			}
+
+			if !EqualTo(elem1, elem2).Value {
+				return FALSE
+			}
+		}
+		return TRUE
+	}
+	return FALSE
+}
+
 // Key-value map type
 // Implements the following interfaces
 // Object
