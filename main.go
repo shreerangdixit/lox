@@ -6,6 +6,8 @@ import (
 	"os"
 )
 
+var Version = "<NOT SET>"
+
 func main() {
 	if len(os.Args) > 1 {
 		err := runner.RunFile(os.Args[1])
@@ -13,6 +15,6 @@ func main() {
 			fmt.Fprintf(os.Stderr, "%s\n", err)
 		}
 	} else {
-		runner.StartREPL()
+		runner.StartREPL(Version)
 	}
 }

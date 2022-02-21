@@ -1,10 +1,11 @@
 GOLANGCI_LINT := $(shell command -v golangci-lint 2> /dev/null)
 GYCYCLO := $(shell command -v gocyclo 2> /dev/null)
+VERSION := $(shell git describe --always --dirty)
 
 default: build
 
 build:
-	@go build .
+	@go build -ldflags="-X 'main.Version=$(VERSION)'" .
 
 fmt:
 	@go fmt ./...
