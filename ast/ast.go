@@ -371,9 +371,9 @@ func (a *Ast) expression() (Node, error) {
 }
 
 // assignment -> IDENTIFIER "=" assignment
-//            | logical_or ;
+//            | logicalOr ;
 func (a *Ast) assignment() (Node, error) {
-	expr, err := a.logical_or()
+	expr, err := a.logicalOr()
 	if err != nil {
 		return nil, err
 	}
@@ -396,9 +396,9 @@ func (a *Ast) assignment() (Node, error) {
 	return expr, nil
 }
 
-// logical_or -> logical_and ( "||" logical_and )*
-func (a *Ast) logical_or() (Node, error) {
-	left, err := a.logical_and()
+// logicalOr -> logicalAnd ( "||" logicalAnd )*
+func (a *Ast) logicalOr() (Node, error) {
+	left, err := a.logicalAnd()
 	if err != nil {
 		return nil, err
 	}
@@ -417,8 +417,8 @@ func (a *Ast) logical_or() (Node, error) {
 	return left, nil
 }
 
-// logical_and -> equality ( "&&" equality )* ;
-func (a *Ast) logical_and() (Node, error) {
+// logicalAnd -> equality ( "&&" equality )* ;
+func (a *Ast) logicalAnd() (Node, error) {
 	left, err := a.equality()
 	if err != nil {
 		return nil, err
