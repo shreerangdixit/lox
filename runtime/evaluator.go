@@ -2,9 +2,10 @@ package runtime
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/shreerangdixit/lox/ast"
 	"github.com/shreerangdixit/lox/token"
-	"strconv"
 )
 
 type Evaluator struct {

@@ -3,11 +3,13 @@ package runner
 import (
 	"bufio"
 	"fmt"
-	"github.com/shreerangdixit/lox/ast"
-	"github.com/shreerangdixit/lox/lexer"
-	"github.com/shreerangdixit/lox/runtime"
 	"io"
 	"os"
+
+	"github.com/shreerangdixit/lox/ast"
+	"github.com/shreerangdixit/lox/build"
+	"github.com/shreerangdixit/lox/lexer"
+	"github.com/shreerangdixit/lox/runtime"
 )
 
 const Logo = `
@@ -39,13 +41,13 @@ func RunFile(file string) error {
 	return nil
 }
 
-func StartREPL(buildInfo string) {
-	startREPL(os.Stdin, os.Stdout, buildInfo)
+func StartREPL() {
+	startREPL(os.Stdin, os.Stdout)
 }
 
-func startREPL(in io.Reader, out io.Writer, buildInfo string) {
+func startREPL(in io.Reader, out io.Writer) {
 	fmt.Fprintf(out, "%s\n", Logo)
-	fmt.Fprintf(out, "%s", buildInfo)
+	fmt.Fprintf(out, "%s", build.Info)
 
 	scanner := bufio.NewScanner(in)
 	e := runtime.NewEvaluator()

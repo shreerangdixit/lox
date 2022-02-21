@@ -2,9 +2,10 @@ package runtime
 
 import (
 	"fmt"
-	"github.com/shreerangdixit/lox/ast"
 	"math"
 	"time"
+
+	"github.com/shreerangdixit/lox/ast"
 )
 
 // ------------------------------------

@@ -11,12 +11,12 @@ default: build
 
 build:
 	@go build -ldflags="\
-	                    -X 'main.Version=$(VERSION)' \
-	                    -X 'main.BuildDate=$(BUILD_DATE)' \
-	                    -X 'main.BuildOS=$(BUILD_OS)' \
-	                    -X 'main.BuildHost=$(BUILD_HOST)' \
-	                    -X 'main.BuildArch=$(BUILD_ARCH)' \
-	                    -X 'main.BuildKernelVersion=$(BUILD_KERNEL_VERSION)' \
+	                    -X 'github.com/shreerangdixit/lox/build.version=$(VERSION)' \
+	                    -X 'github.com/shreerangdixit/lox/build.buildDate=$(BUILD_DATE)' \
+	                    -X 'github.com/shreerangdixit/lox/build.buildOS=$(BUILD_OS)' \
+	                    -X 'github.com/shreerangdixit/lox/build.buildHost=$(BUILD_HOST)' \
+	                    -X 'github.com/shreerangdixit/lox/build.buildArch=$(BUILD_ARCH)' \
+	                    -X 'github.com/shreerangdixit/lox/build.buildKernelVersion=$(BUILD_KERNEL_VERSION)' \
 	                    " \
 	                    .
 
