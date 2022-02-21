@@ -30,7 +30,7 @@ type Callable interface {
 	Object
 	Arity() int
 	Variadic() bool
-	Call(e *Evaluator, args []Object) (Object, error)
+	Call(*Evaluator, []Object) (Object, error)
 }
 
 type Sequence interface {
@@ -62,22 +62,22 @@ type Truthifier interface {
 
 type Adder interface {
 	Object
-	Add(other Object) (Object, error)
+	Add(Object) (Object, error)
 }
 
 type Subtractor interface {
 	Object
-	Subtract(other Object) (Object, error)
+	Subtract(Object) (Object, error)
 }
 
 type Multiplier interface {
 	Object
-	Multiply(other Object) (Object, error)
+	Multiply(Object) (Object, error)
 }
 
 type Modulator interface {
 	Object
-	Modulo(other Object) (Object, error)
+	Modulo(Object) (Object, error)
 }
 
 type Notter interface {
@@ -92,22 +92,22 @@ type Negator interface {
 
 type Divider interface {
 	Object
-	Divide(other Object) (Object, error)
+	Divide(Object) (Object, error)
 }
 
 type LessThanComparator interface {
 	Object
-	LessThan(other Object) Bool
+	LessThan(Object) Bool
 }
 
 type GreaterThanComparator interface {
 	Object
-	GreaterThan(other Object) Bool
+	GreaterThan(Object) Bool
 }
 
 type EqualToComparator interface {
 	Object
-	EqualTo(other Object) Bool
+	EqualTo(Object) Bool
 }
 
 // ------------------------------------
