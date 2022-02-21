@@ -3,6 +3,7 @@ package runtime
 import (
 	"fmt"
 	"hash/fnv"
+	"strings"
 )
 
 func hashNumber(n Number) uint32 {
@@ -185,33 +186,54 @@ func (f List) Elements() []Object {
 // Object
 // Mapper/Sequence
 // Truthifier
-type Map struct{ Values map[uint32]Object }
+type Map struct {
+	Mappings      map[uint32]Object
+	KeyValuePairs []MapKeyValuePair
+}
 
-func NewMap() Map { return Map{Values: make(map[uint32]Object)} }
+type MapKeyValuePair struct {
+	Key   Object
+	Value Object
+}
 
-func (f Map) Add(key Object, value Object) error {
-	if hasher, ok := key.(Hasher); ok {
-		f.Values[hasher.Hash()] = value
-		return nil
+func NewMap() Map {
+	return Map{
+		Mappings:      make(map[uint32]Object),
+		KeyValuePairs: make([]MapKeyValuePair, 0, 255),
 	}
-	return fmt.Errorf("key type %s is not hashable", key.Type())
+}
+
+func (f Map) Add(key Object, value Object) (Map, error) {
+	if hasher, ok := key.(Hasher); ok {
+		f.Mappings[hasher.Hash()] = value
+		f.KeyValuePairs = append(f.KeyValuePairs, MapKeyValuePair{Key: key, Value: value})
+		return f, nil
+	}
+	return f, fmt.Errorf("key type '%s' is not hashable", key.Type())
 }
 
 func (f Map) Type() ObjectType { return TypeMap }
-func (f Map) String() string   { return fmt.Sprintf("%v", f.Values) }
-func (f Map) Size() Number     { return NewNumber(float64(len(f.Values))) }
+func (f Map) Size() Number     { return NewNumber(float64(len(f.Mappings))) }
 func (f Map) Truthy() Bool     { return NewBool(f.Size().Value > 0) }
 
+func (f Map) String() string {
+	kvps := make([]string, 0, len(f.KeyValuePairs))
+	for _, kvp := range f.KeyValuePairs {
+		kvps = append(kvps, fmt.Sprintf("%s:%s", kvp.Key, kvp.Value))
+	}
+	return fmt.Sprintf("{%s}", strings.Join(kvps, ", "))
+}
+
 func (f Map) Elements() []Object {
-	values := make([]Object, 0, len(f.Values))
-	for _, v := range f.Values {
-		values = append(values, v)
+	values := make([]Object, 0, len(f.KeyValuePairs))
+	for _, kvp := range f.KeyValuePairs {
+		values = append(values, kvp.Value)
 	}
 	return values
 }
 
 func (f Map) Map(key Hasher) (Object, error) {
-	if v, ok := f.Values[key.Hash()]; ok {
+	if v, ok := f.Mappings[key.Hash()]; ok {
 		return v, nil
 	} else {
 		return NIL, nil

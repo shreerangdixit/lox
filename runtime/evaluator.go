@@ -321,7 +321,7 @@ func (e *Evaluator) evalMapNode(node ast.MapNode) (Object, error) {
 			return NIL, err
 		}
 
-		err = m.Add(key, value)
+		m, err = m.Add(key, value)
 		if err != nil {
 			return NIL, err
 		}
