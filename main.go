@@ -32,6 +32,6 @@ func buildInfo() string {
 	info += fmt.Sprintf("  OS: %s\n", BuildOS)
 	info += fmt.Sprintf("  Host: %s\n", BuildHost)
 	info += fmt.Sprintf("  Arch: %s\n", BuildArch)
-	info += fmt.Sprintf("  Kernel Version : %s\n", BuildKernelVersion)
+	info += fmt.Sprintf("  Kernel Version: %s\n", BuildKernelVersion)
 	return info
 }
