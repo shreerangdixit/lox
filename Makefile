@@ -16,7 +16,7 @@ build:
 	                    -X 'main.BuildOS=$(BUILD_OS)' \
 	                    -X 'main.BuildHost=$(BUILD_HOST)' \
 	                    -X 'main.BuildArch=$(BUILD_ARCH)' \
-	                    -X 'main.BuildKernelVersion=$(BUILD_KERNEL_VERSION)'\
+	                    -X 'main.BuildKernelVersion=$(BUILD_KERNEL_VERSION)' \
 	                    " \
 	                    .
 
