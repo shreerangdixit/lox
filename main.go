@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/shreerangdixit/lox/runner"
 	"os"
@@ -13,8 +14,19 @@ var BuildHost = "<NOT SET>"
 var BuildArch = "<NOT SET>"
 var BuildKernelVersion = "<NOT SET>"
 
+var flagVer bool
+
+func init() {
+	flag.BoolVar(&flagVer, "v", false, "Display version/build info")
+}
+
 func main() {
-	if len(os.Args) > 1 {
+	flag.Parse()
+
+	if flagVer {
+		fmt.Fprint(os.Stdout, buildInfo())
+		os.Exit(0)
+	} else if len(os.Args) > 1 {
 		err := runner.RunFile(os.Args[1])
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%s\n", err)
@@ -27,7 +39,7 @@ func main() {
 func buildInfo() string {
 	info := ""
 	info += fmt.Sprintf("Version: %s\n", Version)
-	info += fmt.Sprintf("Build Info:\n")
+	info += "Build Info:\n"
 	info += fmt.Sprintf("  Date: %s\n", BuildDate)
 	info += fmt.Sprintf("  OS: %s\n", BuildOS)
 	info += fmt.Sprintf("  Host: %s\n", BuildHost)
