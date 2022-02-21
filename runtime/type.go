@@ -244,10 +244,6 @@ func GreaterThanEq(left Object, right Object) Bool {
 }
 
 func ItemAtIndex(o Object, idx Object) (Object, error) {
-	if _, ok := o.(Sequence); !ok {
-		return NIL, fmt.Errorf("cannot index type %s", o.Type())
-	}
-
 	if idxr, ok := o.(Indexer); ok {
 		i, ok := idx.(Number)
 		if !ok {
