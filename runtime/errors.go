@@ -9,6 +9,15 @@ func NewBreakError() error {
 
 func (e BreakError) Error() string { return "break" }
 
+// Loop control continue
+type ContinueError struct{}
+
+func NewContinueError() error {
+	return ContinueError{}
+}
+
+func (e ContinueError) Error() string { return "continue" }
+
 // Function control flow exit due to `return <exp>;`
 type ReturnError struct {
 	Value Object

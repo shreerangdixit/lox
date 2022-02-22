@@ -36,6 +36,8 @@ func (e *Evaluator) eval(node ast.Node) (Object, error) {
 		return e.evalWhileStmtNode(node)
 	case ast.BreakStmtNode:
 		return e.evalBreakStmtNode(node)
+	case ast.ContinueStmtNode:
+		return e.evalContinueStmtNode(node)
 	case ast.ReturnStmtNode:
 		return e.evalReturnStmtNode(node)
 	case ast.AssignmentNode:
@@ -155,6 +157,8 @@ func (e *Evaluator) evalWhileStmtNode(node ast.WhileStmtNode) (Object, error) {
 			switch err := err.(type) {
 			case BreakError:
 				return NIL, nil
+			case ContinueError:
+				continue
 			default:
 				return NIL, err
 			}
@@ -165,6 +169,10 @@ func (e *Evaluator) evalWhileStmtNode(node ast.WhileStmtNode) (Object, error) {
 
 func (e *Evaluator) evalBreakStmtNode(node ast.BreakStmtNode) (Object, error) {
 	return NIL, NewBreakError()
+}
+
+func (e *Evaluator) evalContinueStmtNode(node ast.ContinueStmtNode) (Object, error) {
+	return NIL, NewContinueError()
 }
 
 func (e *Evaluator) evalAssignmentNode(node ast.AssignmentNode) (Object, error) {

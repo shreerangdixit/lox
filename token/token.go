@@ -5,16 +5,17 @@ import (
 )
 
 var keywords = map[string]TokenType{
-	"var":    TT_VAR,
-	"fun":    TT_FUNCTION,
-	"if":     TT_IF,
-	"else":   TT_ELSE,
-	"true":   TT_TRUE,
-	"false":  TT_FALSE,
-	"return": TT_RETURN,
-	"while":  TT_WHILE,
-	"nil":    TT_NIL,
-	"break":  TT_BREAK,
+	"var":      TT_VAR,
+	"fun":      TT_FUNCTION,
+	"if":       TT_IF,
+	"else":     TT_ELSE,
+	"true":     TT_TRUE,
+	"false":    TT_FALSE,
+	"return":   TT_RETURN,
+	"while":    TT_WHILE,
+	"nil":      TT_NIL,
+	"break":    TT_BREAK,
+	"continue": TT_CONTINUE,
 }
 
 func LookupIdentifierType(v string) TokenType {
@@ -88,6 +89,7 @@ const (
 	TT_RETURN
 	TT_WHILE
 	TT_BREAK
+	TT_CONTINUE
 	TT_NIL
 
 	// Misc
@@ -176,6 +178,8 @@ func (t TokenType) String() string {
 		return "while"
 	case TT_BREAK:
 		return "break"
+	case TT_CONTINUE:
+		return "continue"
 	case TT_NIL:
 		return "nil"
 	default:

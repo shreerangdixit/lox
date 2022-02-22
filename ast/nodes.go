@@ -99,6 +99,14 @@ func (n BreakStmtNode) String() string {
 	return n.Token.String()
 }
 
+type ContinueStmtNode struct {
+	Token token.Token
+}
+
+func (n ContinueStmtNode) String() string {
+	return n.Token.String()
+}
+
 type ReturnStmtNode struct {
 	Exp Node
 }

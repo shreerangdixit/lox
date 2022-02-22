@@ -1,42 +1,44 @@
-program         -> declaration* EOF ;
-declaration     -> funDecl
-                |  varDecl
-                |  statement ;
-funDecl         -> "fun" function ;
-function        -> IDENTIFIER "(" parameters? ")" block ;
-parameters      -> IDENTIFIER ("," IDENTIFIER)* ;
-varDecl         -> "var" IDENTIFIER ( "=" expression )? ";" ;
-statement       -> exprStatement
-                | ifStatement
-                | whileStatement
-                | breakStatement
-                | returnStatement
-                | block ;
-exprStatement   -> expression ";" ;
-ifStatement     -> "if" "(" expression ")" statement ( "else" statement )? ;
-whileStatement  -> "while" "(" expression ")" statement ;
-breakStatement  -> "break" ";" ;
-returnStatement -> "return" expression? ";" ;
-block           -> "{" declaration* "}" ;
-expression      -> assignment ( "?" assignment ":" assignment )? ;
-assignment      -> IDENTIFIER "=" assignment
-                | logicalOr ;
-logicalOr       -> logicalAnd ( "||" logicalAnd )* ;
-logicalAnd      -> equality ( "&&" equality )* ;
-equality        -> comparison ( ( "!=" | "==" ) comparison )* ;
-comparison      -> term ( ( "<" | "<=" | ">" | ">=" ) term )* ;
-term            -> factor ( ( "+" | "-" ) factor )* ;
-factor          -> unary ( ( "/" | "*" | "%" ) unary )* ;
-unary           -> ( "!" | "-" ) unary
-                 | call ;
-call            -> atom ( "(" arguments? ")" )*
-                 | atom ( "[" expression "]" )* ;
-arguments       -> expression ( "," expression )* ;
-atom            -> NUMBER | STRING | "true" | "false" | "nil"
-                | "(" expression ")"
-                | list
-                | map
-                | IDENTIFIER ;
-list            -> "[" arguments? "]" ;
-map             -> "{" keyValuePairs? "}" ;
-keyValuePairs   -> expression ":" expression ( "," expression ":" expression )* ;
+program           -> declaration* EOF ;
+declaration       -> funDecl
+                  |  varDecl
+                  |  statement ;
+funDecl           -> "fun" function ;
+function          -> IDENTIFIER "(" parameters? ")" block ;
+parameters        -> IDENTIFIER ("," IDENTIFIER)* ;
+varDecl           -> "var" IDENTIFIER ( "=" expression )? ";" ;
+statement         -> exprStatement
+                  | ifStatement
+                  | whileStatement
+                  | breakStatement
+                  | continueStatement
+                  | returnStatement
+                  | block ;
+exprStatement     -> expression ";" ;
+ifStatement       -> "if" "(" expression ")" statement ( "else" statement )? ;
+whileStatement    -> "while" "(" expression ")" statement ;
+breakStatement    -> "break" ";" ;
+continueStatement -> "continue" ";" ;
+returnStatement   -> "return" expression? ";" ;
+block             -> "{" declaration* "}" ;
+expression        -> assignment ( "?" assignment ":" assignment )? ;
+assignment        -> IDENTIFIER "=" assignment
+                  | logicalOr ;
+logicalOr         -> logicalAnd ( "||" logicalAnd )* ;
+logicalAnd        -> equality ( "&&" equality )* ;
+equality          -> comparison ( ( "!=" | "==" ) comparison )* ;
+comparison        -> term ( ( "<" | "<=" | ">" | ">=" ) term )* ;
+term              -> factor ( ( "+" | "-" ) factor )* ;
+factor            -> unary ( ( "/" | "*" | "%" ) unary )* ;
+unary             -> ( "!" | "-" ) unary
+                  | call ;
+call              -> atom ( "(" arguments? ")" )*
+                  | atom ( "[" expression "]" )* ;
+arguments         -> expression ( "," expression )* ;
+atom              -> NUMBER | STRING | "true" | "false" | "nil"
+                  | "(" expression ")"
+                  | list
+                  | map
+                  | IDENTIFIER ;
+list              -> "[" arguments? "]" ;
+map               -> "{" mapItems? "}" ;
+mapItems          -> expression ":" expression ( "," expression ":" expression )* ;

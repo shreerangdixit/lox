@@ -192,6 +192,7 @@ func (a *Ast) varDeclaration() (Node, error) {
 //           | ifStatement
 //           | whileStatement
 //           | breakStatement
+//           | continueStatement
 //           | returnStatement
 //           | block ;
 func (a *Ast) statement() (Node, error) {
@@ -201,6 +202,8 @@ func (a *Ast) statement() (Node, error) {
 		return a.whileStatement()
 	} else if a.consume(token.TT_BREAK) {
 		return a.breakStatement()
+	} else if a.consume(token.TT_CONTINUE) {
+		return a.continueStatement()
 	} else if a.consume(token.TT_RETURN) {
 		return a.returnStatement()
 	} else if a.consume(token.TT_LBRACE) {
@@ -276,6 +279,16 @@ func (a *Ast) breakStatement() (Node, error) {
 		return nil, NewSyntaxError("expected ';' after 'break'", a.curr)
 	}
 	return BreakStmtNode{
+		Token: a.curr,
+	}, nil
+}
+
+// continueStatement -> "continue" ;
+func (a *Ast) continueStatement() (Node, error) {
+	if !a.consume(token.TT_SEMICOLON) {
+		return nil, NewSyntaxError("expected ';' after 'continue'", a.curr)
+	}
+	return ContinueStmtNode{
 		Token: a.curr,
 	}, nil
 }
