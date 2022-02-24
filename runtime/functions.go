@@ -25,7 +25,8 @@ func NewUserFunction(node ast.FunctionNode, closure *Environment) *UserFunction 
 }
 
 func (f *UserFunction) Type() ObjectType { return TypeFunc }
-func (f *UserFunction) String() string   { return f.node.Identifier.Token.Literal }
+func (f *UserFunction) Name() string     { return f.node.Identifier.Token.Literal }
+func (f *UserFunction) String() string   { return "<fun-" + f.Name() + ">" }
 func (f *UserFunction) Arity() int       { return len(f.node.Parameters) }
 func (f *UserFunction) Variadic() bool   { return false }
 func (f *UserFunction) Call(e *Evaluator, args []Object) (Object, error) {
@@ -74,7 +75,8 @@ func NewNativeFunction(name string, arity int, variadic bool, handler NativeFunc
 }
 
 func (f *NativeFunction) Type() ObjectType                                 { return TypeFunc }
-func (f *NativeFunction) String() string                                   { return f.name }
+func (f *NativeFunction) Name() string                                     { return f.name }
+func (f *NativeFunction) String() string                                   { return "<native-" + f.name + ">" }
 func (f *NativeFunction) Arity() int                                       { return f.arity }
 func (f *NativeFunction) Variadic() bool                                   { return f.variadic }
 func (f *NativeFunction) Call(e *Evaluator, args []Object) (Object, error) { return f.handler(e, args) }

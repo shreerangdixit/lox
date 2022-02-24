@@ -9,7 +9,7 @@ var globals map[string]Object = make(map[string]Object)
 func init() {
 	// Declare native functions
 	for _, f := range NativeFunctions {
-		globals[f.String()] = f
+		globals[f.Name()] = f
 	}
 }
 

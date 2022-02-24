@@ -28,6 +28,7 @@ type Object interface {
 
 type Callable interface {
 	Object
+	Name() string
 	Arity() int
 	Variadic() bool
 	Call(*Evaluator, []Object) (Object, error)
