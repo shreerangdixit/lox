@@ -15,7 +15,7 @@ func TestLexer_NextToken(t *testing.T) {
 	}{
 		{
 			name:  "operators_paren",
-			input: "= / + - * , ; ( ) { } == ! != < <= > >= && ||",
+			input: "= / + - * , ( ) { } == ! != < <= > >= && ||",
 			want: []token.Token{
 				token.Token{Type: token.TT_ASSIGN, Literal: "="},
 				token.Token{Type: token.TT_DIVIDE, Literal: "/"},
@@ -23,7 +23,6 @@ func TestLexer_NextToken(t *testing.T) {
 				token.Token{Type: token.TT_MINUS, Literal: "-"},
 				token.Token{Type: token.TT_MULTIPLY, Literal: "*"},
 				token.Token{Type: token.TT_COMMA, Literal: ","},
-				token.Token{Type: token.TT_SEMICOLON, Literal: ";"},
 				token.Token{Type: token.TT_LPAREN, Literal: "("},
 				token.Token{Type: token.TT_RPAREN, Literal: ")"},
 				token.Token{Type: token.TT_LBRACE, Literal: "{"},
@@ -85,7 +84,7 @@ func TestLexer_NextToken(t *testing.T) {
 		},
 		{
 			name:  "mixed",
-			input: " {(a = b * 5); (c = 10.5 / z);} ",
+			input: " {(a = b * 5) (c = 10.5 / z)} ",
 			want: []token.Token{
 				token.Token{Type: token.TT_LBRACE, Literal: "{"},
 				token.Token{Type: token.TT_LPAREN, Literal: "("},
@@ -95,7 +94,6 @@ func TestLexer_NextToken(t *testing.T) {
 				token.Token{Type: token.TT_MULTIPLY, Literal: "*"},
 				token.Token{Type: token.TT_NUMBER, Literal: "5"},
 				token.Token{Type: token.TT_RPAREN, Literal: ")"},
-				token.Token{Type: token.TT_SEMICOLON, Literal: ";"},
 				token.Token{Type: token.TT_LPAREN, Literal: "("},
 				token.Token{Type: token.TT_IDENTIFIER, Literal: "c"},
 				token.Token{Type: token.TT_ASSIGN, Literal: "="},
@@ -103,20 +101,18 @@ func TestLexer_NextToken(t *testing.T) {
 				token.Token{Type: token.TT_DIVIDE, Literal: "/"},
 				token.Token{Type: token.TT_IDENTIFIER, Literal: "z"},
 				token.Token{Type: token.TT_RPAREN, Literal: ")"},
-				token.Token{Type: token.TT_SEMICOLON, Literal: ";"},
 				token.Token{Type: token.TT_RBRACE, Literal: "}"},
 				token.Token{Type: token.TT_EOF, Literal: "0"},
 			},
 		},
 		{
 			name:  "keywords",
-			input: "var x = 10; y = fun foo(){} if else true false return",
+			input: "var x = 10 y = fun foo(){} if else true false return",
 			want: []token.Token{
 				token.Token{Type: token.TT_VAR, Literal: "var"},
 				token.Token{Type: token.TT_IDENTIFIER, Literal: "x"},
 				token.Token{Type: token.TT_ASSIGN, Literal: "="},
 				token.Token{Type: token.TT_NUMBER, Literal: "10"},
-				token.Token{Type: token.TT_SEMICOLON, Literal: ";"},
 				token.Token{Type: token.TT_IDENTIFIER, Literal: "y"},
 				token.Token{Type: token.TT_ASSIGN, Literal: "="},
 				token.Token{Type: token.TT_FUNCTION, Literal: "fun"},

@@ -5,8 +5,8 @@ declaration       -> funDecl
 funDecl           -> "fun" function ;
 function          -> IDENTIFIER? "(" parameters? ")" block ( funcCall )? ;
 parameters        -> IDENTIFIER ("," IDENTIFIER)* ;
-varDecl           -> "var" IDENTIFIER ( "=" expression )? ";" ;
-statement         -> exprStatement
+varDecl           -> "var" IDENTIFIER ( "=" expression )? ;
+statement         -> expression
                   | ifStatement
                   | whileStatement
                   | breakStatement
@@ -14,12 +14,11 @@ statement         -> exprStatement
                   | returnStatement
                   | deferStatement
                   | block ;
-exprStatement     -> expression ";" ;
 ifStatement       -> "if" "(" expression ")" statement ( "else" statement )? ;
 whileStatement    -> "while" "(" expression ")" statement ;
-breakStatement    -> "break" ";" ;
-continueStatement -> "continue" ";" ;
-returnStatement   -> "return" expression? ";" ;
+breakStatement    -> "break" ;
+continueStatement -> "continue" ;
+returnStatement   -> "return" expression ;
 deferStatement    -> "defer" funcCall ;
 block             -> "{" declaration* "}" ;
 expression        -> assignment ( "?" assignment ":" assignment )? ;

@@ -106,7 +106,7 @@ func (e *Evaluator) evalBlockNodeWithEnv(node ast.BlockNode, env *Environment) (
 		e.deferred = make([]ast.CallNode, 0, 20)
 
 		for _, call := range deferred {
-			e.eval(call)
+			_, _ = e.eval(call)
 		}
 
 		e.env = prev

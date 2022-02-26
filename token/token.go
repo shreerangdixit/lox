@@ -68,7 +68,6 @@ const (
 
 	// Delimiters
 	TT_COMMA
-	TT_SEMICOLON
 	TT_COLON
 	TT_QUESTION
 
@@ -142,8 +141,6 @@ func (t TokenType) String() string {
 		return "%"
 	case TT_COMMA:
 		return ","
-	case TT_SEMICOLON:
-		return ";"
 	case TT_QUESTION:
 		return "?"
 	case TT_COLON:

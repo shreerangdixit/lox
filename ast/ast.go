@@ -176,7 +176,7 @@ func (a *Ast) parameter() (IdentifierNode, error) {
 	return param.(IdentifierNode), nil
 }
 
-// varDecl -> "var" IDENTIFIER ( "=" expression )? ";" ;
+// varDecl -> "var" IDENTIFIER ( "=" expression )? ;
 func (a *Ast) varDeclaration() (Node, error) {
 	atom, err := a.atom()
 	if err != nil {
@@ -189,10 +189,6 @@ func (a *Ast) varDeclaration() (Node, error) {
 	}
 
 	if !a.consume(token.TT_ASSIGN) {
-		if !a.consume(token.TT_SEMICOLON) {
-			return nil, NewSyntaxError("expected a ; at the end of a declaration", a.curr)
-		}
-
 		return VarStmtNode{
 			Identifier: identifier,
 			Value:      NilNode{},
@@ -204,17 +200,13 @@ func (a *Ast) varDeclaration() (Node, error) {
 		return nil, err
 	}
 
-	if !a.consume(token.TT_SEMICOLON) {
-		return nil, NewSyntaxError("expected a ; at the end of a declaration", a.curr)
-	}
-
 	return VarStmtNode{
 		Identifier: identifier,
 		Value:      value,
 	}, nil
 }
 
-// statement -> exprStatement
+// statement -> expression
 //           | ifStatement
 //           | whileStatement
 //           | breakStatement
@@ -238,7 +230,7 @@ func (a *Ast) statement() (Node, error) {
 	} else if a.consume(token.TT_LBRACE) {
 		return a.block()
 	}
-	return a.exprStatement()
+	return a.expression()
 }
 
 // ifStatement -> "if" "(" expression ")" statement ( "else" statement )? ;
@@ -304,9 +296,6 @@ func (a *Ast) whileStatement() (Node, error) {
 
 // breakStatement -> "break" ;
 func (a *Ast) breakStatement() (Node, error) {
-	if !a.consume(token.TT_SEMICOLON) {
-		return nil, NewSyntaxError("expected ';' after 'break'", a.curr)
-	}
 	return BreakStmtNode{
 		Token: a.curr,
 	}, nil
@@ -314,29 +303,16 @@ func (a *Ast) breakStatement() (Node, error) {
 
 // continueStatement -> "continue" ;
 func (a *Ast) continueStatement() (Node, error) {
-	if !a.consume(token.TT_SEMICOLON) {
-		return nil, NewSyntaxError("expected ';' after 'continue'", a.curr)
-	}
 	return ContinueStmtNode{
 		Token: a.curr,
 	}, nil
 }
 
-// returnStatement -> "return" expression? ";" ;
+// returnStatement -> "return" expression ;
 func (a *Ast) returnStatement() (Node, error) {
-	if a.consume(token.TT_SEMICOLON) {
-		return ReturnStmtNode{
-			Exp: nil,
-		}, nil
-	}
-
 	exp, err := a.expression()
 	if err != nil {
 		return nil, err
-	}
-
-	if !a.consume(token.TT_SEMICOLON) {
-		return nil, NewSyntaxError("expected ';' after return expression", a.curr)
 	}
 
 	return ReturnStmtNode{
@@ -385,19 +361,6 @@ func (a *Ast) block() (Node, error) {
 	return BlockNode{
 		Declarations: declarations,
 	}, nil
-}
-
-// exprStatement -> expression ";" ;
-func (a *Ast) exprStatement() (Node, error) {
-	expr, err := a.expression()
-	if err != nil {
-		return nil, err
-	}
-
-	if a.consume(token.TT_SEMICOLON) {
-		return ExpStmtNode{Exp: expr}, nil
-	}
-	return nil, NewSyntaxError("expected a ; at the end of an expression statement", a.curr)
 }
 
 // expression -> assignment ( "?" assignment ":" assignment )? ;
