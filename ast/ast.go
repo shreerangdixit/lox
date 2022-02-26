@@ -495,8 +495,8 @@ func (a *Ast) unary() (Node, error) {
 	return a.call()
 }
 
-// call -> atom ( "(" arguments? ")" )*
-//      | atom ( "[" expression "]" )* ;
+// call -> funcCall
+//      | indexCall ;
 func (a *Ast) call() (Node, error) {
 	expr, err := a.atom()
 	if err != nil {
@@ -504,27 +504,48 @@ func (a *Ast) call() (Node, error) {
 	}
 
 	if a.check(token.TT_LPAREN) {
-		for a.consume(token.TT_LPAREN) {
-			expr, err = a.finishCall(expr)
-			if err != nil {
-				return nil, err
-			}
+		expr, err = a.funcCall(expr)
+		if err != nil {
+			return nil, err
 		}
-	} else {
-		for a.consume(token.TT_LBRACKET) {
-			indexExpr, err := a.expression()
-			if err != nil {
-				return nil, err
-			}
+	} else if a.check(token.TT_LBRACKET) {
+		expr, err = a.indexCall(expr)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return expr, nil
+}
 
-			if !a.consume(token.TT_RBRACKET) {
-				return nil, NewSyntaxError("expected closing ']' for index operation", a.curr)
-			}
+// funcCall -> atom ( "(" arguments? ")" )* ;
+func (a *Ast) funcCall(atom Node) (Node, error) {
+	exp := atom
+	var err error
+	for a.consume(token.TT_LPAREN) {
+		exp, err = a.finishCall(exp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return exp, nil
+}
 
-			expr = IndexOfNode{
-				Sequence: expr,
-				Index:    indexExpr,
-			}
+// indexCall -> atom ( "[" expression "]" )* ;
+func (a *Ast) indexCall(atom Node) (Node, error) {
+	expr := atom
+	for a.consume(token.TT_LBRACKET) {
+		indexExpr, err := a.expression()
+		if err != nil {
+			return nil, err
+		}
+
+		if !a.consume(token.TT_RBRACKET) {
+			return nil, NewSyntaxError("expected closing ']' for index operation", a.curr)
+		}
+
+		expr = IndexOfNode{
+			Sequence: expr,
+			Index:    indexExpr,
 		}
 	}
 	return expr, nil

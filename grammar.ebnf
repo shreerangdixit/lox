@@ -31,8 +31,10 @@ term              -> factor ( ( "+" | "-" ) factor )* ;
 factor            -> unary ( ( "/" | "*" | "%" ) unary )* ;
 unary             -> ( "!" | "-" ) unary
                   | call ;
-call              -> atom ( "(" arguments? ")" )*
-                  | atom ( "[" expression "]" )* ;
+call              -> funcCall
+                  | indexCall ;
+funcCall          -> atom ( "(" arguments? ")" )* ;
+indexCall         -> atom ( "[" expression "]" )* ;
 arguments         -> expression ( "," expression )* ;
 atom              -> NUMBER | STRING | "true" | "false" | "nil"
                   | "(" expression ")"
