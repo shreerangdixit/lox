@@ -1,6 +1,8 @@
 package ast
 
 import (
+	"fmt"
+
 	"github.com/shreerangdixit/lox/token"
 )
 
@@ -66,11 +68,23 @@ func (a *Ast) declaration() (Node, error) {
 }
 
 // funDecl  -> "fun" function ;
-// function -> IDENTIFIER "(" parameters? ")" block ;
+// function -> IDENTIFIER? "(" parameters? ")" block ;
 func (a *Ast) funDeclaration() (Node, error) {
-	identifier, err := a.atom()
-	if err != nil {
-		return nil, err
+	var identifier Node
+	var err error
+
+	if a.check(token.TT_LPAREN) { // Anonymous function (generate identifier)
+		identifier = IdentifierNode{
+			Token: token.Token{
+				Type:    token.TT_IDENTIFIER,
+				Literal: fmt.Sprintf("anon-%s", RandStringBytes(8)),
+			},
+		}
+	} else {
+		identifier, err = a.atom()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if _, ok := identifier.(IdentifierNode); !ok {
@@ -530,27 +544,6 @@ func (a *Ast) funcCall(atom Node) (Node, error) {
 	return exp, nil
 }
 
-// indexCall -> atom ( "[" expression "]" )* ;
-func (a *Ast) indexCall(atom Node) (Node, error) {
-	expr := atom
-	for a.consume(token.TT_LBRACKET) {
-		indexExpr, err := a.expression()
-		if err != nil {
-			return nil, err
-		}
-
-		if !a.consume(token.TT_RBRACKET) {
-			return nil, NewSyntaxError("expected closing ']' for index operation", a.curr)
-		}
-
-		expr = IndexOfNode{
-			Sequence: expr,
-			Index:    indexExpr,
-		}
-	}
-	return expr, nil
-}
-
 func (a *Ast) finishCall(callee Node) (Node, error) {
 	arguments := []Node{}
 	var err error
@@ -570,6 +563,27 @@ func (a *Ast) finishCall(callee Node) (Node, error) {
 		Callee:    callee,
 		Arguments: arguments,
 	}, nil
+}
+
+// indexCall -> atom ( "[" expression "]" )* ;
+func (a *Ast) indexCall(atom Node) (Node, error) {
+	expr := atom
+	for a.consume(token.TT_LBRACKET) {
+		indexExpr, err := a.expression()
+		if err != nil {
+			return nil, err
+		}
+
+		if !a.consume(token.TT_RBRACKET) {
+			return nil, NewSyntaxError("expected closing ']' for index operation", a.curr)
+		}
+
+		expr = IndexOfNode{
+			Sequence: expr,
+			Index:    indexExpr,
+		}
+	}
+	return expr, nil
 }
 
 // arguments -> expression ( "," expression )* ;
@@ -611,21 +625,27 @@ func (a *Ast) atom() (Node, error) {
 	} else if a.consume(token.TT_NIL) {
 		return NilNode{}, nil
 	} else if a.consume(token.TT_LPAREN) {
-		exp, err := a.expression()
-		if err != nil {
-			return nil, err
-		}
-
-		if a.consume(token.TT_RPAREN) {
-			return ExpNode{Exp: exp}, nil
-		}
-		return nil, NewSyntaxError("expected closing ')' after expression", a.curr)
+		return a.nestedExpressionNode()
 	} else if a.consume(token.TT_LBRACE) {
 		return a.mapNode()
 	} else if a.consume(token.TT_LBRACKET) {
 		return a.listNode()
+	} else if a.consume(token.TT_FUNCTION) {
+		return a.funDeclaration()
 	}
 	return nil, NewSyntaxError("expected a literal or an expression", a.curr)
+}
+
+func (a *Ast) nestedExpressionNode() (Node, error) {
+	exp, err := a.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	if a.consume(token.TT_RPAREN) {
+		return ExpNode{Exp: exp}, nil
+	}
+	return nil, NewSyntaxError("expected closing ')' after expression", a.curr)
 }
 
 // map -> "{" keyValuePairs? "}" ;

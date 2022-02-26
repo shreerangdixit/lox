@@ -394,7 +394,7 @@ func (e *Evaluator) evalIndexOfNode(node ast.IndexOfNode) (Object, error) {
 
 func (e *Evaluator) evalFunctionNode(node ast.FunctionNode) (Object, error) {
 	fun := NewUserFunction(node, e.env)
-	return NIL, e.env.Declare(fun.Name(), fun)
+	return fun, e.env.Declare(fun.Name(), fun)
 }
 
 func (e *Evaluator) evalReturnStmtNode(node ast.ReturnStmtNode) (Object, error) {

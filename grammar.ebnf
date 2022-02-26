@@ -3,7 +3,7 @@ declaration       -> funDecl
                   |  varDecl
                   |  statement ;
 funDecl           -> "fun" function ;
-function          -> IDENTIFIER "(" parameters? ")" block ;
+function          -> IDENTIFIER? "(" parameters? ")" block ;
 parameters        -> IDENTIFIER ("," IDENTIFIER)* ;
 varDecl           -> "var" IDENTIFIER ( "=" expression )? ";" ;
 statement         -> exprStatement
@@ -40,6 +40,7 @@ atom              -> NUMBER | STRING | "true" | "false" | "nil"
                   | "(" expression ")"
                   | list
                   | map
+                  | funDecl
                   | IDENTIFIER ;
 list              -> "[" arguments? "]" ;
 map               -> "{" mapItems? "}" ;
