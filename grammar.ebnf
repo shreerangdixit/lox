@@ -13,6 +13,7 @@ statement         -> exprStatementNode
                   | continueStatement
                   | returnStatement
                   | deferStatement
+                  | assertStatement
                   | block ;
 exprStatementNode -> expression
 ifStatement       -> "if" "(" expression ")" statement ( "else" statement )? ;
@@ -21,6 +22,7 @@ breakStatement    -> "break" ;
 continueStatement -> "continue" ;
 returnStatement   -> "return" expression ;
 deferStatement    -> "defer" funcCall ;
+assertStatement   -> "assert" expression ;
 block             -> "{" declaration* "}" ;
 expression        -> assignment ( "?" assignment ":" assignment )? ;
 assignment        -> IDENTIFIER "=" assignment

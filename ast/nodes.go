@@ -118,6 +118,22 @@ func (n ReturnStmtNode) String() string {
 	return "return"
 }
 
+type DeferStmtNode struct {
+	Call CallNode
+}
+
+func (n DeferStmtNode) String() string {
+	return fmt.Sprintf("defer %s", n.Call)
+}
+
+type AssertStmtNode struct {
+	Exp Node
+}
+
+func (n AssertStmtNode) String() string {
+	return fmt.Sprintf("assert %s", n.Exp)
+}
+
 type BlockNode struct {
 	Declarations []Node
 }
@@ -261,12 +277,4 @@ type MapNode struct {
 
 func (n MapNode) String() string {
 	return fmt.Sprintf("{%s}", n.Elements)
-}
-
-type DeferStmtNode struct {
-	Call CallNode
-}
-
-func (n DeferStmtNode) String() string {
-	return fmt.Sprintf("defer %s", n.Call)
 }

@@ -1,5 +1,11 @@
 package evaluator
 
+import (
+	"fmt"
+
+	"github.com/shreerangdixit/lox/ast"
+)
+
 // Loop control flow exit due to `break;`
 type BreakError struct{}
 
@@ -30,3 +36,18 @@ func NewReturnError(value Object) error {
 }
 
 func (e ReturnError) Error() string { return "return" }
+
+// Assertion error
+type AssertError struct {
+	Exp ast.Node
+}
+
+func NewAssertError(exp ast.Node) error {
+	return AssertError{
+		Exp: exp,
+	}
+}
+
+func (e AssertError) Error() string {
+	return fmt.Sprintf("assert failed: %s", e.Exp)
+}

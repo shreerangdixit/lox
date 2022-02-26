@@ -213,6 +213,7 @@ func (a *Ast) varDeclaration() (Node, error) {
 //           | continueStatement
 //           | returnStatement
 //           | deferStatement
+//           | assertStatement
 //           | block ;
 func (a *Ast) statement() (Node, error) {
 	if a.consume(token.TT_IF) {
@@ -227,6 +228,8 @@ func (a *Ast) statement() (Node, error) {
 		return a.returnStatement()
 	} else if a.consume(token.TT_DEFER) {
 		return a.deferStatement()
+	} else if a.consume(token.TT_ASSERT) {
+		return a.assertStatement()
 	} else if a.consume(token.TT_LBRACE) {
 		return a.block()
 	} else {
@@ -352,6 +355,18 @@ func (a *Ast) deferStatement() (Node, error) {
 
 	return DeferStmtNode{
 		Call: call.(CallNode),
+	}, nil
+}
+
+// assertStatement -> "assert" expression ;
+func (a *Ast) assertStatement() (Node, error) {
+	exp, err := a.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	return AssertStmtNode{
+		Exp: exp,
 	}, nil
 }
 
