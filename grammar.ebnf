@@ -3,7 +3,7 @@ declaration       -> funDecl
                   |  varDecl
                   |  statement ;
 funDecl           -> "fun" function ;
-function          -> IDENTIFIER? "(" parameters? ")" block ;
+function          -> IDENTIFIER? "(" parameters? ")" block ( funcCall ";" )? ;
 parameters        -> IDENTIFIER ("," IDENTIFIER)* ;
 varDecl           -> "var" IDENTIFIER ( "=" expression )? ";" ;
 statement         -> exprStatement

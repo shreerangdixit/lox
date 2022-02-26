@@ -68,7 +68,7 @@ func (a *Ast) declaration() (Node, error) {
 }
 
 // funDecl  -> "fun" function ;
-// function -> IDENTIFIER? "(" parameters? ")" block ;
+// function -> IDENTIFIER? "(" parameters? ")" block ( funcCall ";" )? ;
 func (a *Ast) funDeclaration() (Node, error) {
 	var identifier Node
 	var err error
@@ -109,11 +109,26 @@ func (a *Ast) funDeclaration() (Node, error) {
 		return nil, NewSyntaxError("expected function body to be a block", a.curr)
 	}
 
-	return FunctionNode{
+	funcNode := FunctionNode{
 		Identifier: identifier.(IdentifierNode),
 		Parameters: parameters,
 		Body:       body.(BlockNode),
-	}, nil
+	}
+
+	// Function evalutaion call directly follows declaration
+	if a.check(token.TT_LPAREN) {
+		funcResult, err := a.funcCall(funcNode)
+		if err != nil {
+			return nil, err
+		}
+		if !a.consume(token.TT_SEMICOLON) {
+			return nil, NewSyntaxError("expected ';' at the end of a function call", a.curr)
+		}
+
+		return funcResult, nil
+	} else {
+		return funcNode, nil
+	}
 }
 
 // parameters -> IDENTIFIER ("," IDENTIFIER)* ;
