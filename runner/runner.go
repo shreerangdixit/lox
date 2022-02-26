@@ -8,8 +8,8 @@ import (
 
 	"github.com/shreerangdixit/lox/ast"
 	"github.com/shreerangdixit/lox/build"
+	"github.com/shreerangdixit/lox/evaluator"
 	"github.com/shreerangdixit/lox/lexer"
-	"github.com/shreerangdixit/lox/runtime"
 )
 
 const Logo = `
@@ -32,7 +32,7 @@ func RunFile(file string) error {
 		return err
 	}
 
-	e := runtime.NewEvaluator()
+	e := evaluator.NewEvaluator()
 	_, err = e.Evaluate(root)
 	if err != nil {
 		return err
@@ -50,7 +50,7 @@ func startREPL(in io.Reader, out io.Writer) {
 	fmt.Fprintf(out, "%s", build.Info)
 
 	scanner := bufio.NewScanner(in)
-	e := runtime.NewEvaluator()
+	e := evaluator.NewEvaluator()
 	for {
 		fmt.Printf("lox >>> ")
 
@@ -82,7 +82,7 @@ func startREPL(in io.Reader, out io.Writer) {
 			val, err := e.Evaluate(exp)
 			if err != nil {
 				fmt.Fprintf(out, "%s\n", err)
-			} else if val != runtime.NIL {
+			} else if val != evaluator.NIL {
 				fmt.Fprintf(out, "%s\n", val)
 			}
 		}

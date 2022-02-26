@@ -1,4 +1,4 @@
-package runtime
+package evaluator
 
 // Loop control flow exit due to `break;`
 type BreakError struct{}
