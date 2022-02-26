@@ -262,3 +262,11 @@ type MapNode struct {
 func (n MapNode) String() string {
 	return fmt.Sprintf("{%s}", n.Elements)
 }
+
+type DeferStmtNode struct {
+	Call CallNode
+}
+
+func (n DeferStmtNode) String() string {
+	return fmt.Sprintf("defer %s", n.Call)
+}

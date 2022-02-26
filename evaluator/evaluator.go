@@ -9,11 +9,15 @@ import (
 )
 
 type Evaluator struct {
-	env *Environment
+	env      *Environment
+	deferred []ast.CallNode
 }
 
 func NewEvaluator() *Evaluator {
-	return &Evaluator{env: NewEnvironment()}
+	return &Evaluator{
+		env:      NewEnvironment(),
+		deferred: make([]ast.CallNode, 0, 20),
+	}
 }
 
 func (e *Evaluator) Evaluate(root ast.Node) (Object, error) {
@@ -74,6 +78,8 @@ func (e *Evaluator) eval(node ast.Node) (Object, error) {
 		return e.evalIndexOfNode(node)
 	case ast.FunctionNode:
 		return e.evalFunctionNode(node)
+	case ast.DeferStmtNode:
+		return e.evalDeferStmtNode(node)
 	}
 	return NIL, fmt.Errorf("invalid node: %T", node)
 }
@@ -93,9 +99,16 @@ func (e *Evaluator) evalBlockNode(node ast.BlockNode) (Object, error) {
 }
 
 func (e *Evaluator) evalBlockNodeWithEnv(node ast.BlockNode, env *Environment) (Object, error) {
-	// Reset environment at the end of block scope
 	prev := e.env
+	// Reset environment at the end of block scope and executed deferred calls
 	defer func() {
+		deferred := e.deferred
+		e.deferred = make([]ast.CallNode, 0, 20)
+
+		for _, call := range deferred {
+			e.eval(call)
+		}
+
 		e.env = prev
 	}()
 
@@ -404,6 +417,11 @@ func (e *Evaluator) evalReturnStmtNode(node ast.ReturnStmtNode) (Object, error) 
 	}
 
 	return NIL, NewReturnError(val)
+}
+
+func (e *Evaluator) evalDeferStmtNode(node ast.DeferStmtNode) (Object, error) {
+	e.deferred = append(e.deferred, node.Call)
+	return NIL, nil
 }
 
 func (e *Evaluator) evalNodes(argNodes []ast.Node) ([]Object, error) {

@@ -121,9 +121,6 @@ func (a *Ast) funDeclaration() (Node, error) {
 		if err != nil {
 			return nil, err
 		}
-		if !a.consume(token.TT_SEMICOLON) {
-			return nil, NewSyntaxError("expected ';' at the end of a function call", a.curr)
-		}
 
 		return funcResult, nil
 	} else {
@@ -223,6 +220,7 @@ func (a *Ast) varDeclaration() (Node, error) {
 //           | breakStatement
 //           | continueStatement
 //           | returnStatement
+//           | deferStatement
 //           | block ;
 func (a *Ast) statement() (Node, error) {
 	if a.consume(token.TT_IF) {
@@ -235,6 +233,8 @@ func (a *Ast) statement() (Node, error) {
 		return a.continueStatement()
 	} else if a.consume(token.TT_RETURN) {
 		return a.returnStatement()
+	} else if a.consume(token.TT_DEFER) {
+		return a.deferStatement()
 	} else if a.consume(token.TT_LBRACE) {
 		return a.block()
 	}
@@ -341,6 +341,27 @@ func (a *Ast) returnStatement() (Node, error) {
 
 	return ReturnStmtNode{
 		Exp: exp,
+	}, nil
+}
+
+// deferStatement -> "defer" funcCall ;
+func (a *Ast) deferStatement() (Node, error) {
+	node, err := a.atom()
+	if err != nil {
+		return nil, err
+	}
+
+	call, err := a.funcCall(node)
+	if err != nil {
+		return nil, err
+	}
+
+	if _, ok := call.(CallNode); !ok {
+		return nil, NewSyntaxError("invalid call node", a.curr)
+	}
+
+	return DeferStmtNode{
+		Call: call.(CallNode),
 	}, nil
 }
 
@@ -648,6 +669,7 @@ func (a *Ast) atom() (Node, error) {
 	} else if a.consume(token.TT_FUNCTION) {
 		return a.funDeclaration()
 	}
+
 	return nil, NewSyntaxError("expected a literal or an expression", a.curr)
 }
 

@@ -16,6 +16,7 @@ var keywords = map[string]TokenType{
 	"nil":      TT_NIL,
 	"break":    TT_BREAK,
 	"continue": TT_CONTINUE,
+	"defer":    TT_DEFER,
 }
 
 func LookupIdentifierType(v string) TokenType {
@@ -91,6 +92,7 @@ const (
 	TT_BREAK
 	TT_CONTINUE
 	TT_NIL
+	TT_DEFER
 
 	// Misc
 	TT_COMMENT
@@ -182,6 +184,8 @@ func (t TokenType) String() string {
 		return "continue"
 	case TT_NIL:
 		return "nil"
+	case TT_DEFER:
+		return "defer"
 	default:
 		return "<UNKNOWN>"
 	}
