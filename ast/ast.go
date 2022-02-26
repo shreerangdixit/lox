@@ -206,7 +206,7 @@ func (a *Ast) varDeclaration() (Node, error) {
 	}, nil
 }
 
-// statement -> expression
+// statement -> exprStatementNode
 //           | ifStatement
 //           | whileStatement
 //           | breakStatement
@@ -229,8 +229,22 @@ func (a *Ast) statement() (Node, error) {
 		return a.deferStatement()
 	} else if a.consume(token.TT_LBRACE) {
 		return a.block()
+	} else {
+		return a.expStatement()
 	}
-	return a.expression()
+
+}
+
+// exprStatementNode -> expression
+func (a *Ast) expStatement() (Node, error) {
+	exp, err := a.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	return ExpStmtNode{
+		Exp: exp,
+	}, nil
 }
 
 // ifStatement -> "if" "(" expression ")" statement ( "else" statement )? ;

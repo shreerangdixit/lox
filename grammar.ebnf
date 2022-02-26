@@ -6,7 +6,7 @@ funDecl           -> "fun" function ;
 function          -> IDENTIFIER? "(" parameters? ")" block ( funcCall )? ;
 parameters        -> IDENTIFIER ("," IDENTIFIER)* ;
 varDecl           -> "var" IDENTIFIER ( "=" expression )? ;
-statement         -> expression
+statement         -> exprStatementNode
                   | ifStatement
                   | whileStatement
                   | breakStatement
@@ -14,6 +14,7 @@ statement         -> expression
                   | returnStatement
                   | deferStatement
                   | block ;
+exprStatementNode -> expression
 ifStatement       -> "if" "(" expression ")" statement ( "else" statement )? ;
 whileStatement    -> "while" "(" expression ")" statement ;
 breakStatement    -> "break" ;
