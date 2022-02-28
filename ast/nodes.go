@@ -278,3 +278,11 @@ type MapNode struct {
 func (n MapNode) String() string {
 	return fmt.Sprintf("{%s}", n.Elements)
 }
+
+type CommentNode struct {
+	Token token.Token
+}
+
+func (n CommentNode) String() string {
+	return n.Token.String()
+}

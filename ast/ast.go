@@ -660,6 +660,8 @@ func (a *Ast) atom() (Node, error) {
 		return a.listNode()
 	} else if a.consume(token.TT_FUNCTION) {
 		return a.funDeclaration()
+	} else if a.consume(token.TT_COMMENT) {
+		return CommentNode{Token: a.curr}, nil
 	}
 
 	return nil, NewSyntaxError("expected a literal or an expression", a.curr)
@@ -831,8 +833,5 @@ func (a *Ast) advance() {
 		a.prev = a.curr
 		a.curr = a.next
 		a.next = a.tok.NextToken()
-	}
-	if a.next.Type == token.TT_COMMENT {
-		a.advance()
 	}
 }

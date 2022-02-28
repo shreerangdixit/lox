@@ -27,18 +27,29 @@ func LookupIdentifierType(v string) TokenType {
 	return TT_IDENTIFIER
 }
 
+type Position struct {
+	Line   int
+	Column int
+}
+
+func (p Position) String() string {
+	return fmt.Sprintf("Pos %d:%d", p.Line, p.Column)
+}
+
 type TokenType int
 
 type Token struct {
-	Type    TokenType
-	Literal string
+	Type          TokenType
+	Literal       string
+	BeginPosition Position
+	EndPosition   Position
 }
 
 func (t Token) String() string {
 	if t.Type == TT_IDENTIFIER || t.Type == TT_NUMBER {
-		return fmt.Sprintf("%s:%s", t.Type, t.Literal)
+		return fmt.Sprintf("%s:%s (%s - %s)", t.Type, t.Literal, t.BeginPosition, t.EndPosition)
 	}
-	return t.Literal
+	return fmt.Sprintf("%s (%s - %s)", t.Literal, t.BeginPosition, t.EndPosition)
 }
 
 const (

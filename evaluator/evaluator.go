@@ -82,6 +82,8 @@ func (e *Evaluator) eval(node ast.Node) (Object, error) {
 		return e.evalDeferStmtNode(node)
 	case ast.AssertStmtNode:
 		return e.evalAssertStmtNode(node)
+	case ast.CommentNode:
+		return e.evalCommentNode(node)
 	}
 	return NIL, fmt.Errorf("invalid node: %T", node)
 }
@@ -435,6 +437,10 @@ func (e *Evaluator) evalAssertStmtNode(node ast.AssertStmtNode) (Object, error) 
 	if !IsTruthy(exp) {
 		return NIL, NewAssertError(node.Exp)
 	}
+	return NIL, nil
+}
+
+func (e *Evaluator) evalCommentNode(node ast.CommentNode) (Object, error) {
 	return NIL, nil
 }
 
