@@ -1,9 +1,5 @@
 package lexer
 
-import (
-	"github.com/shreerangdixit/lox/token"
-)
-
 type Lexer struct {
 	input      string
 	readPos    int
@@ -11,8 +7,8 @@ type Lexer struct {
 	ch         byte
 	line       int
 	col        int
-	tokBegin   token.Position
-	tokEnd     token.Position
+	tokBegin   Position
+	tokEnd     Position
 }
 
 func New(input string) *Lexer {
@@ -25,9 +21,9 @@ func New(input string) *Lexer {
 	return &lexer
 }
 
-func (l *Lexer) NextToken() token.Token {
+func (l *Lexer) NextToken() Token {
 	l.skipWhitespace()
-	var tok token.Token
+	var tok Token
 	switch l.ch {
 	case '=':
 		l.tokenBegin()
@@ -35,9 +31,9 @@ func (l *Lexer) NextToken() token.Token {
 			ch := l.ch
 			l.advance()
 			literal := string(ch) + string(l.ch)
-			tok = newToken(token.TT_EQ, literal)
+			tok = newToken(TT_EQ, literal)
 		} else {
-			tok = newToken(token.TT_ASSIGN, string(l.ch))
+			tok = newToken(TT_ASSIGN, string(l.ch))
 		}
 		l.tokenEnd()
 	case '!':
@@ -46,9 +42,9 @@ func (l *Lexer) NextToken() token.Token {
 			ch := l.ch
 			l.advance()
 			literal := string(ch) + string(l.ch)
-			tok = newToken(token.TT_NEQ, literal)
+			tok = newToken(TT_NEQ, literal)
 		} else {
-			tok = newToken(token.TT_NOT, string(l.ch))
+			tok = newToken(TT_NOT, string(l.ch))
 		}
 		l.tokenEnd()
 	case '<':
@@ -57,9 +53,9 @@ func (l *Lexer) NextToken() token.Token {
 			ch := l.ch
 			l.advance()
 			literal := string(ch) + string(l.ch)
-			tok = newToken(token.TT_LTE, literal)
+			tok = newToken(TT_LTE, literal)
 		} else {
-			tok = newToken(token.TT_LT, string(l.ch))
+			tok = newToken(TT_LT, string(l.ch))
 		}
 		l.tokenEnd()
 	case '>':
@@ -68,9 +64,9 @@ func (l *Lexer) NextToken() token.Token {
 			ch := l.ch
 			l.advance()
 			literal := string(ch) + string(l.ch)
-			tok = newToken(token.TT_GTE, literal)
+			tok = newToken(TT_GTE, literal)
 		} else {
-			tok = newToken(token.TT_GT, string(l.ch))
+			tok = newToken(TT_GT, string(l.ch))
 		}
 		l.tokenEnd()
 	case '&':
@@ -79,9 +75,9 @@ func (l *Lexer) NextToken() token.Token {
 			ch := l.ch
 			l.advance()
 			literal := string(ch) + string(l.ch)
-			tok = newToken(token.TT_LOGICAL_AND, literal)
+			tok = newToken(TT_LOGICAL_AND, literal)
 		} else {
-			tok = newToken(token.TT_ILLEGAL, string(l.ch))
+			tok = newToken(TT_ILLEGAL, string(l.ch))
 		}
 		l.tokenEnd()
 	case '|':
@@ -90,73 +86,73 @@ func (l *Lexer) NextToken() token.Token {
 			ch := l.ch
 			l.advance()
 			literal := string(ch) + string(l.ch)
-			tok = newToken(token.TT_LOGICAL_OR, literal)
+			tok = newToken(TT_LOGICAL_OR, literal)
 		} else {
-			tok = newToken(token.TT_ILLEGAL, string(l.ch))
+			tok = newToken(TT_ILLEGAL, string(l.ch))
 		}
 		l.tokenEnd()
 	case '+':
 		l.tokenBegin()
-		tok = newToken(token.TT_PLUS, string(l.ch))
+		tok = newToken(TT_PLUS, string(l.ch))
 		l.tokenEnd()
 	case '-':
 		l.tokenBegin()
-		tok = newToken(token.TT_MINUS, string(l.ch))
+		tok = newToken(TT_MINUS, string(l.ch))
 		l.tokenEnd()
 	case '/':
 		l.tokenBegin()
 		if l.peek() == '/' {
 			tok = l.readCommentToken()
 		} else {
-			tok = newToken(token.TT_DIVIDE, string(l.ch))
+			tok = newToken(TT_DIVIDE, string(l.ch))
 		}
 		l.tokenEnd()
 	case '*':
 		l.tokenBegin()
-		tok = newToken(token.TT_MULTIPLY, string(l.ch))
+		tok = newToken(TT_MULTIPLY, string(l.ch))
 		l.tokenEnd()
 	case '%':
 		l.tokenBegin()
-		tok = newToken(token.TT_MODULO, string(l.ch))
+		tok = newToken(TT_MODULO, string(l.ch))
 		l.tokenEnd()
 	case ',':
 		l.tokenBegin()
-		tok = newToken(token.TT_COMMA, string(l.ch))
+		tok = newToken(TT_COMMA, string(l.ch))
 		l.tokenEnd()
 	case '(':
 		l.tokenBegin()
-		tok = newToken(token.TT_LPAREN, string(l.ch))
+		tok = newToken(TT_LPAREN, string(l.ch))
 		l.tokenEnd()
 	case ')':
 		l.tokenBegin()
-		tok = newToken(token.TT_RPAREN, string(l.ch))
+		tok = newToken(TT_RPAREN, string(l.ch))
 		l.tokenEnd()
 	case '{':
 		l.tokenBegin()
-		tok = newToken(token.TT_LBRACE, string(l.ch))
+		tok = newToken(TT_LBRACE, string(l.ch))
 		l.tokenEnd()
 	case '}':
 		l.tokenBegin()
-		tok = newToken(token.TT_RBRACE, string(l.ch))
+		tok = newToken(TT_RBRACE, string(l.ch))
 		l.tokenEnd()
 	case '[':
 		l.tokenBegin()
-		tok = newToken(token.TT_LBRACKET, string(l.ch))
+		tok = newToken(TT_LBRACKET, string(l.ch))
 		l.tokenEnd()
 	case ']':
 		l.tokenBegin()
-		tok = newToken(token.TT_RBRACKET, string(l.ch))
+		tok = newToken(TT_RBRACKET, string(l.ch))
 		l.tokenEnd()
 	case '?':
 		l.tokenBegin()
-		tok = newToken(token.TT_QUESTION, string(l.ch))
+		tok = newToken(TT_QUESTION, string(l.ch))
 		l.tokenEnd()
 	case ':':
 		l.tokenBegin()
-		tok = newToken(token.TT_COLON, string(l.ch))
+		tok = newToken(TT_COLON, string(l.ch))
 		l.tokenEnd()
 	case 0:
-		tok = newToken(token.TT_EOF, "0")
+		tok = newToken(TT_EOF, "0")
 	default:
 		if isDigit(l.ch) {
 			l.tokenBegin()
@@ -172,7 +168,7 @@ func (l *Lexer) NextToken() token.Token {
 			l.tokenEnd()
 		} else {
 			l.tokenBegin()
-			tok = newToken(token.TT_ILLEGAL, string(l.ch))
+			tok = newToken(TT_ILLEGAL, string(l.ch))
 			l.tokenEnd()
 		}
 	}
@@ -183,14 +179,14 @@ func (l *Lexer) NextToken() token.Token {
 }
 
 func (l *Lexer) tokenBegin() {
-	l.tokBegin = token.Position{
+	l.tokBegin = Position{
 		Line:   l.line,
 		Column: l.col,
 	}
 }
 
 func (l *Lexer) tokenEnd() {
-	l.tokEnd = token.Position{
+	l.tokEnd = Position{
 		Line:   l.line,
 		Column: l.col,
 	}
@@ -220,7 +216,7 @@ func (l *Lexer) peek() byte {
 	return l.input[l.readPos]
 }
 
-func (l *Lexer) readNumberToken() token.Token {
+func (l *Lexer) readNumberToken() Token {
 	defer l.rewind()
 	startPos := l.currentPos
 	decimalCount := 0
@@ -229,42 +225,42 @@ func (l *Lexer) readNumberToken() token.Token {
 			decimalCount += 1
 		}
 		if decimalCount > 1 {
-			return newToken(token.TT_ILLEGAL, string(l.ch))
+			return newToken(TT_ILLEGAL, string(l.ch))
 		}
 		l.advance()
 	}
 	numStr := l.input[startPos:l.currentPos]
-	return newToken(token.TT_NUMBER, numStr)
+	return newToken(TT_NUMBER, numStr)
 }
 
-func (l *Lexer) readIdentifierToken() token.Token {
+func (l *Lexer) readIdentifierToken() Token {
 	defer l.rewind()
 	startPos := l.currentPos
 	for isLetter(l.ch) || isDigit(l.ch) {
 		l.advance()
 	}
 	value := l.input[startPos:l.currentPos]
-	return newToken(token.LookupIdentifierType(value), value)
+	return newToken(LookupIdentifierType(value), value)
 }
 
-func (l *Lexer) readStringToken() token.Token {
+func (l *Lexer) readStringToken() Token {
 	l.advance()
 	startPos := l.currentPos
 	for l.ch != '"' {
 		l.advance()
 	}
 	value := l.input[startPos:l.currentPos]
-	return newToken(token.TT_STRING, value)
+	return newToken(TT_STRING, value)
 }
 
-func (l *Lexer) readCommentToken() token.Token {
+func (l *Lexer) readCommentToken() Token {
 	defer l.rewind()
 	startPos := l.currentPos
 	for !isNewline(l.ch) && l.ch != 0 {
 		l.advance()
 	}
 	value := l.input[startPos:l.currentPos]
-	return newToken(token.TT_COMMENT, value)
+	return newToken(TT_COMMENT, value)
 }
 
 func (l *Lexer) skipWhitespace() {
@@ -281,8 +277,8 @@ func (l *Lexer) lineFeed() {
 	l.line += 1
 }
 
-func newToken(tokenType token.TokenType, literal string) token.Token {
-	return token.Token{
+func newToken(tokenType TokenType, literal string) Token {
+	return Token{
 		Type:    tokenType,
 		Literal: literal,
 	}

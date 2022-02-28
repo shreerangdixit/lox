@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/shreerangdixit/lox/ast"
-	"github.com/shreerangdixit/lox/token"
+	"github.com/shreerangdixit/lox/lexer"
 )
 
 type Evaluator struct {
@@ -257,27 +257,27 @@ func (e *Evaluator) evalBinaryOpNode(node ast.BinaryOpNode) (Object, error) {
 	}
 
 	switch node.Op.Type {
-	case token.TT_PLUS:
+	case lexer.TT_PLUS:
 		return Add(left, right)
-	case token.TT_MINUS:
+	case lexer.TT_MINUS:
 		return Subtract(left, right)
-	case token.TT_DIVIDE:
+	case lexer.TT_DIVIDE:
 		return Divide(left, right)
-	case token.TT_MULTIPLY:
+	case lexer.TT_MULTIPLY:
 		return Multiply(left, right)
-	case token.TT_MODULO:
+	case lexer.TT_MODULO:
 		return Modulo(left, right)
-	case token.TT_EQ:
+	case lexer.TT_EQ:
 		return EqualTo(left, right), nil
-	case token.TT_NEQ:
+	case lexer.TT_NEQ:
 		return NotEqualTo(left, right), nil
-	case token.TT_LT:
+	case lexer.TT_LT:
 		return LessThan(left, right), nil
-	case token.TT_LTE:
+	case lexer.TT_LTE:
 		return LessThanEq(left, right), nil
-	case token.TT_GT:
+	case lexer.TT_GT:
 		return GreaterThan(left, right), nil
-	case token.TT_GTE:
+	case lexer.TT_GTE:
 		return GreaterThanEq(left, right), nil
 	}
 	return NIL, fmt.Errorf("invalid binary op: %s", node.Op.Type)
@@ -289,9 +289,9 @@ func (e *Evaluator) evalUnaryOpNode(node ast.UnaryOpNode) (Object, error) {
 		return NIL, err
 	}
 
-	if node.Op.Type == token.TT_MINUS {
+	if node.Op.Type == lexer.TT_MINUS {
 		return Negate(val)
-	} else if node.Op.Type == token.TT_NOT {
+	} else if node.Op.Type == lexer.TT_NOT {
 		return Not(val)
 	}
 
