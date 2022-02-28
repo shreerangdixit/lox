@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/shreerangdixit/lox/build"
-	"github.com/shreerangdixit/lox/runner"
+	"github.com/shreerangdixit/lox/run"
 )
 
 var flagVer bool
@@ -22,11 +22,11 @@ func main() {
 		fmt.Fprint(os.Stdout, build.Info)
 		os.Exit(0)
 	} else if len(os.Args) > 1 {
-		err := runner.RunFile(os.Args[1])
+		err := run.RunFile(os.Args[1])
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%s\n", err)
 		}
 	} else {
-		runner.StartREPL()
+		run.StartREPL()
 	}
 }

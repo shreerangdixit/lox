@@ -1,4 +1,4 @@
-package lexer
+package lex
 
 type Lexer struct {
 	input      string
@@ -12,13 +12,13 @@ type Lexer struct {
 }
 
 func New(input string) *Lexer {
-	lexer := Lexer{
+	lex := Lexer{
 		input: input,
 		line:  1,
 		col:   0,
 	}
-	lexer.advance()
-	return &lexer
+	lex.advance()
+	return &lex
 }
 
 func (l *Lexer) NextToken() Token {

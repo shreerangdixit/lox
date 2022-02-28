@@ -1,4 +1,4 @@
-package runner
+package run
 
 import (
 	"bufio"
@@ -8,8 +8,8 @@ import (
 
 	"github.com/shreerangdixit/lox/ast"
 	"github.com/shreerangdixit/lox/build"
-	"github.com/shreerangdixit/lox/evaluator"
-	"github.com/shreerangdixit/lox/lexer"
+	"github.com/shreerangdixit/lox/evaluate"
+	"github.com/shreerangdixit/lox/lex"
 )
 
 const Logo = `
@@ -27,12 +27,12 @@ func RunFile(file string) error {
 		return err
 	}
 
-	root, err := ast.New(lexer.New(string(script))).RootNode()
+	root, err := ast.New(lex.New(string(script))).RootNode()
 	if err != nil {
 		return err
 	}
 
-	e := evaluator.NewEvaluator()
+	e := evaluate.NewEvaluator()
 	_, err = e.Evaluate(root)
 	if err != nil {
 		return err
@@ -50,7 +50,7 @@ func startREPL(in io.Reader, out io.Writer) {
 	fmt.Fprintf(out, "%s", build.Info)
 
 	scanner := bufio.NewScanner(in)
-	e := evaluator.NewEvaluator()
+	e := evaluate.NewEvaluator()
 	for {
 		fmt.Printf("lox >>> ")
 
@@ -64,7 +64,7 @@ func startREPL(in io.Reader, out io.Writer) {
 			break
 		}
 
-		root, err := ast.New(lexer.New(txt)).RootNode()
+		root, err := ast.New(lex.New(txt)).RootNode()
 		if err != nil {
 			fmt.Fprintf(out, "%s\n", err)
 			continue
@@ -82,7 +82,7 @@ func startREPL(in io.Reader, out io.Writer) {
 			val, err := e.Evaluate(exp)
 			if err != nil {
 				fmt.Fprintf(out, "%s\n", err)
-			} else if val != evaluator.NIL {
+			} else if val != evaluate.NIL {
 				fmt.Fprintf(out, "%s\n", val)
 			}
 		}

@@ -3,28 +3,28 @@ package ast
 import (
 	"fmt"
 
-	"github.com/shreerangdixit/lox/lexer"
+	"github.com/shreerangdixit/lox/lex"
 )
 
 type ProductionRuleHandler func() (Node, error)
 
 type Tokenizer interface {
-	NextToken() lexer.Token
+	NextToken() lex.Token
 }
 
 type Ast struct {
 	tok  Tokenizer
-	curr lexer.Token
-	prev lexer.Token
-	next lexer.Token
+	curr lex.Token
+	prev lex.Token
+	next lex.Token
 }
 
 func New(tok Tokenizer) *Ast {
 	a := Ast{
 		tok:  tok,
-		curr: lexer.Token{Type: lexer.TT_ILLEGAL, Literal: "0"},
-		prev: lexer.Token{Type: lexer.TT_ILLEGAL, Literal: "0"},
-		next: lexer.Token{Type: lexer.TT_ILLEGAL, Literal: "0"},
+		curr: lex.Token{Type: lex.TT_ILLEGAL, Literal: "0"},
+		prev: lex.Token{Type: lex.TT_ILLEGAL, Literal: "0"},
+		next: lex.Token{Type: lex.TT_ILLEGAL, Literal: "0"},
 	}
 	a.advance()
 	return &a
@@ -41,7 +41,7 @@ func (a *Ast) RootNode() (Node, error) {
 // program -> declaration* EOF ;
 func (a *Ast) program() (Node, error) {
 	declarations := make([]Node, 0, 100)
-	for !a.consume(lexer.TT_EOF) {
+	for !a.consume(lex.TT_EOF) {
 		decl, err := a.declaration()
 		if err != nil {
 			return nil, err
@@ -58,9 +58,9 @@ func (a *Ast) program() (Node, error) {
 //             | varDecl
 //             | statement ;
 func (a *Ast) declaration() (Node, error) {
-	if a.consume(lexer.TT_FUNCTION) {
+	if a.consume(lex.TT_FUNCTION) {
 		return a.funDeclaration()
-	} else if a.consume(lexer.TT_VAR) {
+	} else if a.consume(lex.TT_VAR) {
 		return a.varDeclaration()
 	} else {
 		return a.statement()
@@ -73,10 +73,10 @@ func (a *Ast) funDeclaration() (Node, error) {
 	var identifier Node
 	var err error
 
-	if a.check(lexer.TT_LPAREN) { // Anonymous function (generate identifier)
+	if a.check(lex.TT_LPAREN) { // Anonymous function (generate identifier)
 		identifier = IdentifierNode{
-			Token: lexer.Token{
-				Type:    lexer.TT_IDENTIFIER,
+			Token: lex.Token{
+				Type:    lex.TT_IDENTIFIER,
 				Literal: fmt.Sprintf("anon-%s", RandStringBytes(8)),
 			},
 		}
@@ -96,7 +96,7 @@ func (a *Ast) funDeclaration() (Node, error) {
 		return nil, err
 	}
 
-	if !a.consume(lexer.TT_LBRACE) {
+	if !a.consume(lex.TT_LBRACE) {
 		return nil, NewSyntaxError("expected opening '{' for function body", a.curr)
 	}
 
@@ -116,7 +116,7 @@ func (a *Ast) funDeclaration() (Node, error) {
 	}
 
 	// Function evalutaion call directly follows declaration
-	if a.check(lexer.TT_LPAREN) {
+	if a.check(lex.TT_LPAREN) {
 		funcResult, err := a.funcCall(funcNode)
 		if err != nil {
 			return nil, err
@@ -130,11 +130,11 @@ func (a *Ast) funDeclaration() (Node, error) {
 
 // parameters -> IDENTIFIER ("," IDENTIFIER)* ;
 func (a *Ast) parameters() ([]IdentifierNode, error) {
-	if !a.consume(lexer.TT_LPAREN) {
+	if !a.consume(lex.TT_LPAREN) {
 		return nil, NewSyntaxError("expected opening '(' for parameters", a.curr)
 	}
 
-	if a.consume(lexer.TT_RPAREN) { // Function arity = 0
+	if a.consume(lex.TT_RPAREN) { // Function arity = 0
 		return []IdentifierNode{}, nil
 	}
 
@@ -147,7 +147,7 @@ func (a *Ast) parameters() ([]IdentifierNode, error) {
 
 	params = append(params, param)
 
-	for a.consume(lexer.TT_COMMA) {
+	for a.consume(lex.TT_COMMA) {
 		param, err := a.parameter()
 		if err != nil {
 			return nil, err
@@ -156,7 +156,7 @@ func (a *Ast) parameters() ([]IdentifierNode, error) {
 		params = append(params, param)
 	}
 
-	if !a.consume(lexer.TT_RPAREN) {
+	if !a.consume(lex.TT_RPAREN) {
 		return nil, NewSyntaxError("expected closing ')' for parameters", a.curr)
 	}
 
@@ -188,7 +188,7 @@ func (a *Ast) varDeclaration() (Node, error) {
 		return nil, NewSyntaxError("Expected identifier after var", a.curr)
 	}
 
-	if !a.consume(lexer.TT_ASSIGN) {
+	if !a.consume(lex.TT_ASSIGN) {
 		return VarStmtNode{
 			Identifier: identifier,
 			Value:      NilNode{},
@@ -216,21 +216,21 @@ func (a *Ast) varDeclaration() (Node, error) {
 //           | assertStatement
 //           | block ;
 func (a *Ast) statement() (Node, error) {
-	if a.consume(lexer.TT_IF) {
+	if a.consume(lex.TT_IF) {
 		return a.ifStatement()
-	} else if a.consume(lexer.TT_WHILE) {
+	} else if a.consume(lex.TT_WHILE) {
 		return a.whileStatement()
-	} else if a.consume(lexer.TT_BREAK) {
+	} else if a.consume(lex.TT_BREAK) {
 		return a.breakStatement()
-	} else if a.consume(lexer.TT_CONTINUE) {
+	} else if a.consume(lex.TT_CONTINUE) {
 		return a.continueStatement()
-	} else if a.consume(lexer.TT_RETURN) {
+	} else if a.consume(lex.TT_RETURN) {
 		return a.returnStatement()
-	} else if a.consume(lexer.TT_DEFER) {
+	} else if a.consume(lex.TT_DEFER) {
 		return a.deferStatement()
-	} else if a.consume(lexer.TT_ASSERT) {
+	} else if a.consume(lex.TT_ASSERT) {
 		return a.assertStatement()
-	} else if a.consume(lexer.TT_LBRACE) {
+	} else if a.consume(lex.TT_LBRACE) {
 		return a.block()
 	} else {
 		return a.expStatement()
@@ -252,7 +252,7 @@ func (a *Ast) expStatement() (Node, error) {
 
 // ifStatement -> "if" "(" expression ")" statement ( "else" statement )? ;
 func (a *Ast) ifStatement() (Node, error) {
-	if !a.consume(lexer.TT_LPAREN) {
+	if !a.consume(lex.TT_LPAREN) {
 		return nil, NewSyntaxError("expected opening '(' for if condition", a.curr)
 	}
 
@@ -261,7 +261,7 @@ func (a *Ast) ifStatement() (Node, error) {
 		return nil, err
 	}
 
-	if !a.consume(lexer.TT_RPAREN) {
+	if !a.consume(lex.TT_RPAREN) {
 		return nil, NewSyntaxError("expected closing ')' for if condition", a.curr)
 	}
 
@@ -271,7 +271,7 @@ func (a *Ast) ifStatement() (Node, error) {
 	}
 
 	var falseStmt Node = nil
-	if a.consume(lexer.TT_ELSE) {
+	if a.consume(lex.TT_ELSE) {
 		falseStmt, err = a.statement()
 		if err != nil {
 			return nil, err
@@ -287,7 +287,7 @@ func (a *Ast) ifStatement() (Node, error) {
 
 // whileStatement -> "while" "(" expression ")" statement ;
 func (a *Ast) whileStatement() (Node, error) {
-	if !a.consume(lexer.TT_LPAREN) {
+	if !a.consume(lex.TT_LPAREN) {
 		return nil, NewSyntaxError("expected opening '(' for 'while' condition", a.curr)
 	}
 
@@ -296,7 +296,7 @@ func (a *Ast) whileStatement() (Node, error) {
 		return nil, err
 	}
 
-	if !a.consume(lexer.TT_RPAREN) {
+	if !a.consume(lex.TT_RPAREN) {
 		return nil, NewSyntaxError("expected closing ')' for 'while' condition", a.curr)
 	}
 
@@ -374,7 +374,7 @@ func (a *Ast) assertStatement() (Node, error) {
 func (a *Ast) block() (Node, error) {
 	declarations := make([]Node, 0, 100)
 
-	for !a.check(lexer.TT_RBRACE) && !a.check(lexer.TT_EOF) {
+	for !a.check(lex.TT_RBRACE) && !a.check(lex.TT_EOF) {
 		decl, err := a.declaration()
 		if err != nil {
 			return nil, err
@@ -383,7 +383,7 @@ func (a *Ast) block() (Node, error) {
 		declarations = append(declarations, decl)
 	}
 
-	if !a.consume(lexer.TT_RBRACE) {
+	if !a.consume(lex.TT_RBRACE) {
 		return nil, NewSyntaxError("expected closing '}'", a.curr)
 	}
 
@@ -400,13 +400,13 @@ func (a *Ast) expression() (Node, error) {
 	}
 
 	// Check ternary operator: <assignment> ? <assignment> : <assignment>
-	if a.consume(lexer.TT_QUESTION) {
+	if a.consume(lex.TT_QUESTION) {
 		trueExp, err := a.assignment()
 		if err != nil {
 			return nil, err
 		}
 
-		if !a.consume(lexer.TT_COLON) {
+		if !a.consume(lex.TT_COLON) {
 			return nil, NewSyntaxError("expected ':'", a.curr)
 		}
 
@@ -433,7 +433,7 @@ func (a *Ast) assignment() (Node, error) {
 		return nil, err
 	}
 
-	if a.consume(lexer.TT_ASSIGN) {
+	if a.consume(lex.TT_ASSIGN) {
 		if _, ok := expr.(IdentifierNode); !ok {
 			return nil, NewSyntaxError("expected an identifier for assignment", a.curr)
 		}
@@ -458,7 +458,7 @@ func (a *Ast) logicalOr() (Node, error) {
 		return nil, err
 	}
 
-	for a.consume(lexer.TT_LOGICAL_OR) {
+	for a.consume(lex.TT_LOGICAL_OR) {
 		right, err := a.equality()
 		if err != nil {
 			return nil, err
@@ -479,7 +479,7 @@ func (a *Ast) logicalAnd() (Node, error) {
 		return nil, err
 	}
 
-	for a.consume(lexer.TT_LOGICAL_AND) {
+	for a.consume(lex.TT_LOGICAL_AND) {
 		right, err := a.equality()
 		if err != nil {
 			return nil, err
@@ -495,29 +495,29 @@ func (a *Ast) logicalAnd() (Node, error) {
 
 // equality -> comparison ( ( "!=" | "==" ) comparison )* ;
 func (a *Ast) equality() (Node, error) {
-	return a.binaryOp([]lexer.TokenType{lexer.TT_EQ, lexer.TT_NEQ}, a.comparison)
+	return a.binaryOp([]lex.TokenType{lex.TT_EQ, lex.TT_NEQ}, a.comparison)
 }
 
 // comparison -> term ( ( "<" | "<=" | ">" | ">=" ) term )* ;
 func (a *Ast) comparison() (Node, error) {
-	return a.binaryOp([]lexer.TokenType{lexer.TT_LT, lexer.TT_LTE, lexer.TT_GT, lexer.TT_GTE}, a.term)
+	return a.binaryOp([]lex.TokenType{lex.TT_LT, lex.TT_LTE, lex.TT_GT, lex.TT_GTE}, a.term)
 }
 
 // term -> factor ( ( "+" | "-" ) factor )* ;
 func (a *Ast) term() (Node, error) {
-	return a.binaryOp([]lexer.TokenType{lexer.TT_PLUS, lexer.TT_MINUS}, a.factor)
+	return a.binaryOp([]lex.TokenType{lex.TT_PLUS, lex.TT_MINUS}, a.factor)
 }
 
 // factor -> unary ( ( "/" | "*" | "%" ) unary )* ;
 func (a *Ast) factor() (Node, error) {
-	return a.binaryOp([]lexer.TokenType{lexer.TT_DIVIDE, lexer.TT_MULTIPLY, lexer.TT_MODULO}, a.unary)
+	return a.binaryOp([]lex.TokenType{lex.TT_DIVIDE, lex.TT_MULTIPLY, lex.TT_MODULO}, a.unary)
 }
 
 // unary -> ( "!" | "-" ) unary
 //       | call ;
 func (a *Ast) unary() (Node, error) {
 	var node Node
-	for a.consumeAny([]lexer.TokenType{lexer.TT_NOT, lexer.TT_MINUS}) {
+	for a.consumeAny([]lex.TokenType{lex.TT_NOT, lex.TT_MINUS}) {
 		tok := a.curr
 
 		n, err := a.unary()
@@ -545,12 +545,12 @@ func (a *Ast) call() (Node, error) {
 		return nil, err
 	}
 
-	if a.check(lexer.TT_LPAREN) {
+	if a.check(lex.TT_LPAREN) {
 		expr, err = a.funcCall(expr)
 		if err != nil {
 			return nil, err
 		}
-	} else if a.check(lexer.TT_LBRACKET) {
+	} else if a.check(lex.TT_LBRACKET) {
 		expr, err = a.indexCall(expr)
 		if err != nil {
 			return nil, err
@@ -563,7 +563,7 @@ func (a *Ast) call() (Node, error) {
 func (a *Ast) funcCall(atom Node) (Node, error) {
 	exp := atom
 	var err error
-	for a.consume(lexer.TT_LPAREN) {
+	for a.consume(lex.TT_LPAREN) {
 		exp, err = a.finishCall(exp)
 		if err != nil {
 			return nil, err
@@ -576,14 +576,14 @@ func (a *Ast) finishCall(callee Node) (Node, error) {
 	arguments := []Node{}
 	var err error
 
-	for !a.check(lexer.TT_RPAREN) {
+	for !a.check(lex.TT_RPAREN) {
 		arguments, err = a.arguments()
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	if !a.consume(lexer.TT_RPAREN) {
+	if !a.consume(lex.TT_RPAREN) {
 		return nil, NewSyntaxError("expected closing ')' for function call", a.curr)
 	}
 
@@ -596,13 +596,13 @@ func (a *Ast) finishCall(callee Node) (Node, error) {
 // indexCall -> atom ( "[" expression "]" )* ;
 func (a *Ast) indexCall(atom Node) (Node, error) {
 	expr := atom
-	for a.consume(lexer.TT_LBRACKET) {
+	for a.consume(lex.TT_LBRACKET) {
 		indexExpr, err := a.expression()
 		if err != nil {
 			return nil, err
 		}
 
-		if !a.consume(lexer.TT_RBRACKET) {
+		if !a.consume(lex.TT_RBRACKET) {
 			return nil, NewSyntaxError("expected closing ']' for index operation", a.curr)
 		}
 
@@ -624,7 +624,7 @@ func (a *Ast) arguments() ([]Node, error) {
 	}
 
 	arguments = append(arguments, arg)
-	for a.consume(lexer.TT_COMMA) {
+	for a.consume(lex.TT_COMMA) {
 		arg, err := a.expression()
 		if err != nil {
 			return nil, err
@@ -642,25 +642,25 @@ func (a *Ast) arguments() ([]Node, error) {
 //      | map
 //      | IDENTIFIER ;
 func (a *Ast) atom() (Node, error) {
-	if a.consume(lexer.TT_NUMBER) {
+	if a.consume(lex.TT_NUMBER) {
 		return NumberNode{Token: a.curr}, nil
-	} else if a.consume(lexer.TT_STRING) {
+	} else if a.consume(lex.TT_STRING) {
 		return StringNode{Token: a.curr}, nil
-	} else if a.consumeAny([]lexer.TokenType{lexer.TT_TRUE, lexer.TT_FALSE}) {
+	} else if a.consumeAny([]lex.TokenType{lex.TT_TRUE, lex.TT_FALSE}) {
 		return BooleanNode{Token: a.curr}, nil
-	} else if a.consume(lexer.TT_IDENTIFIER) {
+	} else if a.consume(lex.TT_IDENTIFIER) {
 		return IdentifierNode{Token: a.curr}, nil
-	} else if a.consume(lexer.TT_NIL) {
+	} else if a.consume(lex.TT_NIL) {
 		return NilNode{}, nil
-	} else if a.consume(lexer.TT_LPAREN) {
+	} else if a.consume(lex.TT_LPAREN) {
 		return a.nestedExpressionNode()
-	} else if a.consume(lexer.TT_LBRACE) {
+	} else if a.consume(lex.TT_LBRACE) {
 		return a.mapNode()
-	} else if a.consume(lexer.TT_LBRACKET) {
+	} else if a.consume(lex.TT_LBRACKET) {
 		return a.listNode()
-	} else if a.consume(lexer.TT_FUNCTION) {
+	} else if a.consume(lex.TT_FUNCTION) {
 		return a.funDeclaration()
-	} else if a.consume(lexer.TT_COMMENT) {
+	} else if a.consume(lex.TT_COMMENT) {
 		return CommentNode{Token: a.curr}, nil
 	}
 
@@ -673,7 +673,7 @@ func (a *Ast) nestedExpressionNode() (Node, error) {
 		return nil, err
 	}
 
-	if a.consume(lexer.TT_RPAREN) {
+	if a.consume(lex.TT_RPAREN) {
 		return ExpNode{Exp: exp}, nil
 	}
 	return nil, NewSyntaxError("expected closing ')' after expression", a.curr)
@@ -681,7 +681,7 @@ func (a *Ast) nestedExpressionNode() (Node, error) {
 
 // map -> "{" keyValuePairs? "}" ;
 func (a *Ast) mapNode() (Node, error) {
-	if a.consume(lexer.TT_RBRACE) { // Map is empty {}
+	if a.consume(lex.TT_RBRACE) { // Map is empty {}
 		return MapNode{
 			Elements: make([]KeyValueNode, 0),
 		}, nil
@@ -691,7 +691,7 @@ func (a *Ast) mapNode() (Node, error) {
 			return nil, err
 		}
 
-		if !a.consume(lexer.TT_RBRACE) {
+		if !a.consume(lex.TT_RBRACE) {
 			return nil, NewSyntaxError("expected closing '}' for map", a.curr)
 		}
 
@@ -712,7 +712,7 @@ func (a *Ast) keyValuePairs() ([]KeyValueNode, error) {
 
 	kvps = append(kvps, kvp)
 
-	for a.consume(lexer.TT_COMMA) {
+	for a.consume(lex.TT_COMMA) {
 		kvp, err := a.keyValuePair()
 		if err != nil {
 			return nil, err
@@ -732,7 +732,7 @@ func (a *Ast) keyValuePair() (KeyValueNode, error) {
 		return KeyValueNode{}, err
 	}
 
-	if !a.consume(lexer.TT_COLON) {
+	if !a.consume(lex.TT_COLON) {
 		return KeyValueNode{}, NewSyntaxError("expected ':' for map key-value pair", a.curr)
 	}
 
@@ -750,7 +750,7 @@ func (a *Ast) keyValuePair() (KeyValueNode, error) {
 
 // list -> "[" arguments? "]" ;
 func (a *Ast) listNode() (Node, error) {
-	if a.consume(lexer.TT_RBRACKET) { // List is empty []
+	if a.consume(lex.TT_RBRACKET) { // List is empty []
 		return ListNode{
 			Elements: make([]Node, 0),
 		}, nil
@@ -760,7 +760,7 @@ func (a *Ast) listNode() (Node, error) {
 			return nil, err
 		}
 
-		if !a.consume(lexer.TT_RBRACKET) {
+		if !a.consume(lex.TT_RBRACKET) {
 			return nil, NewSyntaxError("expected closing ']' for list", a.curr)
 		}
 
@@ -774,7 +774,7 @@ func (a *Ast) listNode() (Node, error) {
 // Helpers
 // ------------------------------------
 
-func (a *Ast) binaryOp(tokenTypes []lexer.TokenType, fun ProductionRuleHandler) (Node, error) {
+func (a *Ast) binaryOp(tokenTypes []lex.TokenType, fun ProductionRuleHandler) (Node, error) {
 	left, err := fun()
 	if err != nil {
 		return nil, err
@@ -798,12 +798,12 @@ func (a *Ast) binaryOp(tokenTypes []lexer.TokenType, fun ProductionRuleHandler) 
 }
 
 // check checks the next token if it matches the given type and returns true, otherwise it returns false
-func (a *Ast) check(tokType lexer.TokenType) bool {
-	return a.checkAny([]lexer.TokenType{tokType})
+func (a *Ast) check(tokType lex.TokenType) bool {
+	return a.checkAny([]lex.TokenType{tokType})
 }
 
 // checkAny checks the next token if it matches any of the given types and returns true, otherwise it returns false
-func (a *Ast) checkAny(tokTypes []lexer.TokenType) bool {
+func (a *Ast) checkAny(tokTypes []lex.TokenType) bool {
 	for _, straw := range tokTypes {
 		if a.next.Type == straw {
 			return true
@@ -813,12 +813,12 @@ func (a *Ast) checkAny(tokTypes []lexer.TokenType) bool {
 }
 
 // consume consumes the next token if it matches the given type and returns true, otherwise it returns false
-func (a *Ast) consume(tokType lexer.TokenType) bool {
-	return a.consumeAny([]lexer.TokenType{tokType})
+func (a *Ast) consume(tokType lex.TokenType) bool {
+	return a.consumeAny([]lex.TokenType{tokType})
 }
 
 // consumeAny consumes the next token if it matches any of the given types and returns true, otherwise it returns false
-func (a *Ast) consumeAny(tokTypes []lexer.TokenType) bool {
+func (a *Ast) consumeAny(tokTypes []lex.TokenType) bool {
 	for _, straw := range tokTypes {
 		if a.next.Type == straw {
 			a.advance()
@@ -829,7 +829,7 @@ func (a *Ast) consumeAny(tokTypes []lexer.TokenType) bool {
 }
 
 func (a *Ast) advance() {
-	if a.curr.Type != lexer.TT_EOF {
+	if a.curr.Type != lex.TT_EOF {
 		a.prev = a.curr
 		a.curr = a.next
 		a.next = a.tok.NextToken()

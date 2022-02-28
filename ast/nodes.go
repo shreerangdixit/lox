@@ -3,7 +3,7 @@ package ast
 import (
 	"fmt"
 
-	"github.com/shreerangdixit/lox/lexer"
+	"github.com/shreerangdixit/lox/lex"
 )
 
 // ------------------------------------
@@ -35,7 +35,7 @@ func (n ProgramNode) String() string {
 }
 
 type IdentifierNode struct {
-	Token lexer.Token
+	Token lex.Token
 }
 
 func (n IdentifierNode) String() string {
@@ -92,7 +92,7 @@ func (n WhileStmtNode) String() string {
 }
 
 type BreakStmtNode struct {
-	Token lexer.Token
+	Token lex.Token
 }
 
 func (n BreakStmtNode) String() string {
@@ -100,7 +100,7 @@ func (n BreakStmtNode) String() string {
 }
 
 type ContinueStmtNode struct {
-	Token lexer.Token
+	Token lex.Token
 }
 
 func (n ContinueStmtNode) String() string {
@@ -162,7 +162,7 @@ func (n TernaryOpNode) String() string {
 
 type BinaryOpNode struct {
 	LeftExp  Node
-	Op       lexer.Token
+	Op       lex.Token
 	RightExp Node
 }
 
@@ -171,7 +171,7 @@ func (n BinaryOpNode) String() string {
 }
 
 type UnaryOpNode struct {
-	Op      lexer.Token
+	Op      lex.Token
 	Operand Node
 }
 
@@ -198,7 +198,7 @@ func (n LogicalOrNode) String() string {
 }
 
 type BooleanNode struct {
-	Token lexer.Token
+	Token lex.Token
 }
 
 func (n BooleanNode) String() string {
@@ -206,7 +206,7 @@ func (n BooleanNode) String() string {
 }
 
 type NumberNode struct {
-	Token lexer.Token
+	Token lex.Token
 }
 
 func (n NumberNode) String() string {
@@ -214,7 +214,7 @@ func (n NumberNode) String() string {
 }
 
 type StringNode struct {
-	Token lexer.Token
+	Token lex.Token
 }
 
 func (n StringNode) String() string {
@@ -280,7 +280,7 @@ func (n MapNode) String() string {
 }
 
 type CommentNode struct {
-	Token lexer.Token
+	Token lex.Token
 }
 
 func (n CommentNode) String() string {

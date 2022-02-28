@@ -3,15 +3,15 @@ package ast
 import (
 	"fmt"
 
-	"github.com/shreerangdixit/lox/lexer"
+	"github.com/shreerangdixit/lox/lex"
 )
 
 type SyntaxError struct {
 	err string
-	tok lexer.Token
+	tok lex.Token
 }
 
-func NewSyntaxError(err string, tok lexer.Token) SyntaxError {
+func NewSyntaxError(err string, tok lex.Token) SyntaxError {
 	return SyntaxError{
 		err: err,
 		tok: tok,
