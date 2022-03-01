@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/shreerangdixit/lox/ast"
 	"github.com/shreerangdixit/lox/build"
@@ -22,22 +23,26 @@ const Logo = `
 `
 
 func RunFile(file string) error {
+	file, err := filepath.Abs(file)
+	if err != nil {
+		return err
+	}
+
 	script, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}
 
-	scriptStr := string(script) + "\n"
-	root, err := ast.New(lex.New(scriptStr)).RootNode()
+	root, err := ast.New(lex.New(string(script))).RootNode()
 	if err != nil {
-		HighlightError(err, scriptStr)
+		HighlightError(err, file)
 		return err
 	}
 
 	e := evaluate.NewEvaluator()
 	_, err = e.Evaluate(root)
 	if err != nil {
-		HighlightError(err, scriptStr)
+		HighlightError(err, file)
 		return err
 	}
 
