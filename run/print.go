@@ -5,28 +5,20 @@ import (
 	"os"
 	"strings"
 
-	"github.com/shreerangdixit/lox/ast"
-	"github.com/shreerangdixit/lox/evaluate"
 	"github.com/shreerangdixit/lox/lex"
 )
 
+type PositionError interface {
+	error
+	ErrorType() string
+	Begin() lex.Position
+	End() lex.Position
+}
+
 func PrintError(err error, file string) {
-	var begin lex.Position
-	var end lex.Position
-	var errtype string
-	switch err := err.(type) {
-	case ast.SyntaxError:
-		begin = err.Token.BeginPosition
-		end = err.Token.EndPosition
-		errtype = "syntax"
-	case evaluate.EvalError:
-		begin = err.Node.Begin()
-		end = err.Node.End()
-		errtype = "runtime"
-	default:
-		return
+	if err, ok := err.(PositionError); ok {
+		print(err.Begin(), err.End(), err.ErrorType(), file, err)
 	}
-	print(begin, end, errtype, file, err)
 }
 
 func print(begin lex.Position, end lex.Position, errtype string, file string, err error) {

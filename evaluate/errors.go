@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/shreerangdixit/lox/ast"
+	"github.com/shreerangdixit/lox/lex"
 )
 
 type EvalError struct {
@@ -20,6 +21,18 @@ func NewEvalError(node ast.Node, err error) EvalError {
 
 func (e EvalError) Error() string {
 	return fmt.Sprintf("%v", e.Err)
+}
+
+func (e EvalError) ErrorType() string {
+	return "runtime"
+}
+
+func (e EvalError) Begin() lex.Position {
+	return e.Node.Begin()
+}
+
+func (e EvalError) End() lex.Position {
+	return e.Node.End()
 }
 
 // Loop control flow exit due to `break;`
