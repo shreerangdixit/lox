@@ -34,7 +34,7 @@ func (e *Environment) WithEnclosing(env *Environment) *Environment {
 
 func (e *Environment) Declare(varName string, varValue Object) error {
 	if _, ok := e.scopeVariables[varName]; ok {
-		return fmt.Errorf("cannot redeclare variable %s", varName)
+		return fmt.Errorf("cannot redeclare symbol %s", varName)
 	}
 	e.scopeVariables[varName] = varValue
 	return nil
@@ -45,7 +45,7 @@ func (e *Environment) Assign(varName string, varValue Object) error {
 		if e.enclosing != nil {
 			return e.enclosing.Assign(varName, varValue)
 		}
-		return fmt.Errorf("variable not declared %s", varName)
+		return fmt.Errorf("symbol not declared %s", varName)
 	}
 	e.scopeVariables[varName] = varValue
 	return nil
@@ -60,7 +60,7 @@ func (e *Environment) Get(varName string) (Object, error) {
 		if e.enclosing != nil {
 			return e.enclosing.Get(varName)
 		}
-		return NIL, fmt.Errorf("variable not declared %s", varName)
+		return NIL, fmt.Errorf("symbol not declared %s", varName)
 	}
 	return e.scopeVariables[varName], nil
 }

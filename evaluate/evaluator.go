@@ -319,9 +319,11 @@ func (e *Evaluator) evalUnaryOpNode(node ast.UnaryOpNode) (Object, error) {
 	}
 
 	if node.Op.Type == lex.TT_MINUS {
-		return Negate(val)
+		o, err := Negate(val)
+		return e.wrapResult(node, o, err)
 	} else if node.Op.Type == lex.TT_NOT {
-		return Not(val)
+		o, err := Not(val)
+		return e.wrapResult(node, o, err)
 	}
 
 	return e.wrapResult(node, NIL, fmt.Errorf("invalid unary op: %s", node.Op.Type))
