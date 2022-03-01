@@ -26,7 +26,7 @@ func print(begin lex.Position, end lex.Position, errtype string, file string, er
 		os.Exit(1)
 	}()
 
-	fmt.Printf("%s:%d:%d %s error: %v\n", file, end.Line, end.Column, errtype, err)
+	fmt.Printf("\n%s:%d:%d %s error: %v\n", file, end.Line, end.Column, errtype, err)
 	lines := readLines(file)
 	fmt.Println(lines[end.Line-1])
 	markColumns(begin.Column, end.Column)

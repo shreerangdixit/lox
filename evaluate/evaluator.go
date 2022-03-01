@@ -94,7 +94,6 @@ func (e *Evaluator) wrapResult(node ast.Node, obj Object, err error) (Object, er
 		case BreakError:
 		case ContinueError:
 		case ReturnError:
-		case AssertError:
 			return obj, err
 		default:
 			return obj, NewEvalError(node, err)
@@ -474,7 +473,7 @@ func (e *Evaluator) evalAssertStmtNode(node ast.AssertStmtNode) (Object, error) 
 	}
 
 	if !IsTruthy(exp) {
-		return NIL, NewAssertError(node.Exp)
+		return e.wrapResult(node, NIL, NewAssertError(node.Exp))
 	}
 	return NIL, nil
 }

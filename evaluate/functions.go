@@ -213,8 +213,7 @@ func appendHandler(e *Evaluator, args []Object) (Object, error) {
 
 func printHandler(e *Evaluator, args []Object) (Object, error) {
 	for _, obj := range args {
-		fmt.Printf("%v", obj)
-		fmt.Printf(" ")
+		fmt.Print(obj)
 	}
 	return NIL, nil
 }
