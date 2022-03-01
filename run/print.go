@@ -13,25 +13,28 @@ import (
 func PrintError(err error, file string) {
 	var begin lex.Position
 	var end lex.Position
+	var errtype string
 	switch err := err.(type) {
 	case ast.SyntaxError:
 		begin = err.Token.BeginPosition
 		end = err.Token.EndPosition
+		errtype = "syntax"
 	case evaluate.EvalError:
 		begin = err.Node.Begin()
 		end = err.Node.End()
+		errtype = "runtime"
 	default:
 		return
 	}
-	print(begin, end, file, err)
+	print(begin, end, errtype, file, err)
 }
 
-func print(begin lex.Position, end lex.Position, file string, err error) {
+func print(begin lex.Position, end lex.Position, errtype string, file string, err error) {
 	defer func() {
 		os.Exit(1)
 	}()
 
-	fmt.Printf("%s:%d:%d %v\n", file, end.Line, end.Column, err)
+	fmt.Printf("%s:%d:%d %s error: %v\n", file, end.Line, end.Column, errtype, err)
 	lines := readLines(file)
 	fmt.Println(lines[end.Line-1])
 	markColumns(begin.Column, end.Column)

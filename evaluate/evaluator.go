@@ -309,7 +309,7 @@ func (e *Evaluator) evalBinaryOpNode(node ast.BinaryOpNode) (Object, error) {
 	case lex.TT_GTE:
 		return GreaterThanEq(left, right), nil
 	}
-	return NIL, fmt.Errorf("invalid binary op: %s", node.Op.Type)
+	return e.wrapResult(node, NIL, fmt.Errorf("invalid binary op: %s", node.Op.Type))
 }
 
 func (e *Evaluator) evalUnaryOpNode(node ast.UnaryOpNode) (Object, error) {
