@@ -1,0 +1,12 @@
+{
+    print("TEST while...")
+    var x = []
+    var i = 0
+    while(i < 10){
+        x = append(x, i)
+        i = i + 1
+    }
+
+    assert x == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    println("OK")
+}

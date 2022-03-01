@@ -54,6 +54,10 @@ func (a *Ast) program() (Node, error) {
 
 	end := a.curr.EndPosition
 
+	if len(declarations) == 0 {
+		return nil, NewSyntaxError("no declarations found", a.curr)
+	}
+
 	return ProgramNode{
 		Declarations: declarations,
 		BeginPos:     begin,
@@ -402,6 +406,9 @@ func (a *Ast) deferStatement() (Node, error) {
 	}
 
 	if _, ok := call.(CallNode); !ok {
+		if _, ok := call.(FunctionNode); ok {
+			return nil, NewSyntaxError("function must be invoked after 'defer' statement", a.curr)
+		}
 		return nil, NewSyntaxError("invalid call node", a.curr)
 	}
 

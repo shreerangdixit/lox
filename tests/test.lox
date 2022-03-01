@@ -1,0 +1,386 @@
+// Truthiness check for empty lists
+{
+    print("TEST TRUTHINESS...")
+
+    var a = []
+    if(a){
+        println("Empty list cannot be is truthy")
+        assert false
+    } 
+
+    a = [1, 2, 3]
+    if(a){
+        
+    } else{
+        println("Non-Empty list cannot be falsy")
+        assert false
+    }
+
+    if(nil){
+        println("nil cannot be truthy")
+        assert false
+    } 
+
+    if(1){
+        
+    } else{
+        println("1 cannot be falsy")
+        assert false
+    }
+
+    if(0){
+        println("0 cannot be truthy")
+        assert false
+    } 
+
+    println("OK")
+}
+
+// List concatenation
+{
+    print("TEST LIST CONCATENATION...")
+    var l1 = [1, 2, 3]
+    var l2 = ["one", "two", "three"]
+    assert l1 + l2 == [1, 2, 3, "one", "two", "three"]
+    println("OK")
+}
+
+{
+    print("TEST MATH...")
+    var num1 = 123.45
+    var num2 = 3543
+
+    assert 1 + 2 == 3
+    assert 1 - 2 == -1
+    assert 2 * 3.5 == 7
+    assert 16 / 2 == 8
+    assert 16 % 2 == 0
+    assert 16 % 3 == 1
+
+    assert max(10, 11) == 11
+    assert min(10, 11) == 10
+    assert avg([1, 2, 5, 6.7, 9, 12]) == 5.95
+    assert sqrt(1) == 1
+    assert sqrt(4) == 2
+    assert sqrt(12) == 3.4641016151377544
+    println("OK")
+}
+
+{
+    print("TEST STRING CONCAT...")
+    var s1 = "hello"
+    var s2 = "world"
+    assert s1 + s2 == "helloworld"
+    println("OK")
+}
+
+{
+    print("TEST INDEXING...")
+
+    var l = [1,2,3]
+    assert l[0] == 1
+    assert [1, 2, 3, true][3] == true
+
+    var ll = [[3, 4, 5, 6]]
+    assert ll[0] == [3, 4, 5, 6]
+    assert ll[0][0] == 3
+    assert ll[0][1] == 4
+    assert ll[0][2] == 5
+    assert ll[0][3] == 6
+
+    assert "hello world"[3] == "l"
+    
+    var s = "hello world"
+    assert s[4] == "o"
+
+    println("OK")
+}
+
+// Break statements
+{
+    print("TEST BREAK...")
+    
+    var i = 1
+    while(i < 20){
+        if (i % 2 == 0){
+            break
+        }
+        i = i + 1
+    }
+
+    assert i == 2
+    println("OK")
+}
+
+// Continue statements
+{
+    print("TEST CONTINUE...")
+
+    var i = 0
+    var evens = []
+    while (i < 20){
+        i = i + 1
+
+        if (i % 2 == 0) {
+            evens = append(evens, i)
+            continue
+        }
+    }
+
+    assert evens == [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+
+    println("OK")
+}
+
+// Function declarations
+{
+    print("TEST FUNCTIONS")
+
+    fun adder(a, b) {
+        return a + b
+    }
+
+    assert adder(1,2) == 3
+
+    var counts = []
+    fun count(n) {
+        if (n > 1) count(n - 1)
+        counts = append(counts, n)
+    }
+    count(3)
+
+    assert counts == [1, 2, 3]
+    
+    println("OK")
+}
+
+// Closures
+{
+    print("TEST CLOSURES...")
+
+    fun makeCounter() {
+        var i = 0
+        fun count() {
+            i = i + 1
+            return i
+        }
+
+        return count
+    }
+
+    var counter = makeCounter()
+    assert counter() == 1
+    assert counter() == 2
+    println("OK")
+}
+
+// Maps
+{
+    print("TEST MAP...")
+
+    var e = {}
+    assert len(e) == 0
+
+    var m = {"foo": 1, "bar": "baz", 42: "Life universe and everything"}
+
+    assert len(m) == 3
+    assert m["unknown"] ==  nil
+    assert m["foo"] ==  1
+    assert m["bar"] ==  "baz"
+    assert m[42] ==  "Life universe and everything"
+    assert m[40+2] ==  "Life universe and everything"
+
+    println("OK")
+}
+
+// Append list
+{
+    print("TEST APPEND() LIST...")
+
+    var l = []
+
+    assert len(l) == 0
+
+    l = append(l, 1)
+    assert len(l) == 1
+    assert l == [1]
+
+    l = append(l, [2, 3, 4, "YO"])
+    assert len(l) == 5
+    assert l == [1, 2, 3, 4, "YO"]
+
+    l = append(l, "foo")
+    assert len(l) == 6
+    assert l == [1, 2, 3, 4, "YO", "foo"]
+
+    l = append(l, ["bar", "baz"])
+
+    assert len(l) == 8
+    assert l == [1, 2, 3, 4, "YO", "foo", "bar", "baz"]
+
+    println("OK")
+}
+
+// Append string
+{
+    print("TEST APPEND() STRING...")
+
+    var s = ""
+    assert len(s) == 0
+
+    s = append(s, "foo")
+    assert len(s) == 3
+    assert s == "foo"
+
+    s = append(s, ["bar", "baz"])
+    assert len(s) == 9
+    assert s == "foobarbaz"
+
+    println("OK")
+}
+
+// Append map
+{
+    print("TEST APPEND() MAP...")
+
+    var m = {}
+    assert len(m) == 0
+
+    m = append(m, {"name":"bozo"})
+    assert len(m) == 1
+    assert m == {"name": "bozo"}
+
+    m = append(m, [{"l1": "newstr", "l2": 42}])
+    assert len(m) == 3
+    assert m == {"name": "bozo", "l1": "newstr", "l2": 42}
+
+    println("OK")
+}
+
+// List of map elements
+{
+    print("TEST LIST OF MAPS...")
+
+    var m = []
+    assert len(m) == 0
+
+    m = append(m, {"name":"bozo"})
+    assert len(m) == 1
+    assert m == [{"name":"bozo"}]
+    assert m[0] == {"name":"bozo"}
+    assert m[0]["name"] == "bozo"
+
+    println("OK")
+}
+
+// List comparison
+{
+    print("TEST LIST COMPARE...")
+
+    var l1 = []
+    var l2 = []
+    assert l1 == l2
+
+    l1 = [1, 2, 3, 4]
+    l2 = [1, 2, 3, 4]
+    assert l1 == l2
+
+    l1 = [1, 2, 3, 4]
+    l2 = [1, 2, 3, "foo"]
+    assert l1 != l2
+
+    l1 = [1, 2, 3, 4]
+    l2 = [1, 2, 3, 5]
+    assert l1 != l2
+
+    l1 = [1, 2, 3, 4]
+    l2 = [1, 2, 3]
+    assert l1 != l2
+
+    println("OK")
+}
+
+// Map comparison
+{
+    print("TEST MAP COMPARE...")
+
+    var m1 = {}
+    var m2 = {}
+    assert m1 == m2
+
+    m1 = {"foo": 1, "bar": true, "baz": "bozo"}
+    m2 = {"foo": 1, "bar": true, "baz": "bozo"}
+    assert m1 == m2
+
+    m1 = {"foo": 1, "bar": true, "baz": "bozo"}
+    m2 = {"foo": 2, "bar": true, "baz": "bozo"}
+    assert m1 != m2
+
+    m1 = {"foo": 1, "bar": true, "baz": "bozo"}
+    m2 = {"foo": "nope", "bar": true, "baz": "bozo"}
+    assert m1 != m2
+
+    m1 = {}
+    m2 = {"foo": "nope"}
+    assert m1 != m2
+
+    println("OK")
+}
+
+// Anonymous functions
+{
+    print("TEST ANONYMOUS FUNCTIONS...")
+
+    fun caller(f){
+        return f()
+    }
+
+    assert caller(
+        fun (){
+            return "called"
+        }
+    ) == "called"
+
+
+    var plus1 = fun (n){
+        return n + 1 
+    }
+    assert plus1(1) == 2
+
+    assert fun (one, two, three){
+        return one + two + three
+    }("anon", "called", "directly") == "anoncalleddirectly"
+
+    println("OK")
+}
+
+// Deferred calls
+{
+    print("TEST DEFER...")
+
+    var defer1 = false
+    var defer2 = false
+
+    fun testDeferredCalls(){
+        defer fun (){
+            defer1 = true
+        }()
+
+        defer fun (){
+            defer2 = true
+        }()
+
+        assert defer1 == false
+        assert defer1 == false
+    }
+
+    assert defer1 == false
+    assert defer1 == false
+
+    testDeferredCalls()
+
+    assert defer1 == true
+    assert defer1 == true
+
+    println("OK")
+}

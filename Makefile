@@ -12,6 +12,7 @@ BUILD_FLAGS := "-X 'github.com/shreerangdixit/lox/build.version=$(VERSION)' \
 	            -X 'github.com/shreerangdixit/lox/build.host=$(BUILD_HOST)' \
 	            -X 'github.com/shreerangdixit/lox/build.arch=$(BUILD_ARCH)' \
 	            -X 'github.com/shreerangdixit/lox/build.kernelVersion=$(BUILD_KERNEL_VERSION)'"
+LOX_TEST_FILES := $(sort $(shell find ./tests -type f -name '*.lox' -print))
 
 default: build
 
@@ -21,8 +22,15 @@ build:
 fmt:
 	@go fmt ./...
 
-test:
+test: test.lox
 	@go test -v ./...
+
+test.lox:
+	@make
+	@for file in $(LOX_TEST_FILES); do \
+		set -e ; \
+		./lox $$file; \
+	done
 
 lint: lint.deps
 # TODO: Fixme

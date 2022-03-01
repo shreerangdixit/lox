@@ -428,7 +428,8 @@ func (e *Evaluator) evalCallNode(node ast.CallNode) (Object, error) {
 		return NIL, err
 	}
 
-	return callable.Call(e, argValues)
+	o, err := callable.Call(e, argValues)
+	return e.wrapResult(node, o, err)
 }
 
 func (e *Evaluator) evalIndexOfNode(node ast.IndexOfNode) (Object, error) {
@@ -448,7 +449,8 @@ func (e *Evaluator) evalIndexOfNode(node ast.IndexOfNode) (Object, error) {
 
 func (e *Evaluator) evalFunctionNode(node ast.FunctionNode) (Object, error) {
 	fun := NewUserFunction(node, e.env)
-	return fun, e.env.Declare(fun.Name(), fun)
+	err := e.env.Declare(fun.Name(), fun)
+	return e.wrapResult(node, fun, err)
 }
 
 func (e *Evaluator) evalReturnStmtNode(node ast.ReturnStmtNode) (Object, error) {
