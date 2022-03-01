@@ -29,7 +29,7 @@ func highlight(begin lex.Position, end lex.Position, file string, err error) {
 		panic(e)
 	}
 
-	script := string(fstr) + "\n"
+	script := string(fstr) + "\n" // Hack to ensure we can highlight errors on the last line
 
 	lineNumber := 0
 	fmt.Printf("%s:%d:%d %v\n", file, end.Line, end.Column, err)
