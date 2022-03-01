@@ -22,7 +22,7 @@ build:
 fmt:
 	@go fmt ./...
 
-test: test.lox
+test:
 	@go test -v ./...
 
 test.lox:
@@ -50,4 +50,4 @@ ifndef GYCYCLO
 	@go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
 endif
 
-.PHONY: build fmt test lint lint.fix lint.deps
+.PHONY: build fmt test test.lox lint lint.fix lint.deps
