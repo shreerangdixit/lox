@@ -40,6 +40,8 @@ func (a *Ast) RootNode() (Node, error) {
 
 // program -> declaration* EOF ;
 func (a *Ast) program() (Node, error) {
+	begin := a.curr.BeginPosition
+
 	declarations := make([]Node, 0, 100)
 	for !a.consume(lex.TT_EOF) {
 		decl, err := a.declaration()
@@ -49,8 +51,13 @@ func (a *Ast) program() (Node, error) {
 
 		declarations = append(declarations, decl)
 	}
+
+	end := a.curr.EndPosition
+
 	return ProgramNode{
 		Declarations: declarations,
+		BeginPos:     begin,
+		EndPos:       end,
 	}, nil
 }
 
@@ -72,6 +79,8 @@ func (a *Ast) declaration() (Node, error) {
 func (a *Ast) funDeclaration() (Node, error) {
 	var identifier Node
 	var err error
+
+	begin := a.curr.BeginPosition
 
 	if a.check(lex.TT_LPAREN) { // Anonymous function (generate identifier)
 		identifier = IdentifierNode{
@@ -109,10 +118,14 @@ func (a *Ast) funDeclaration() (Node, error) {
 		return nil, NewSyntaxError("expected function body to be a block", a.curr)
 	}
 
+	end := a.curr.BeginPosition
+
 	funcNode := FunctionNode{
 		Identifier: identifier.(IdentifierNode),
 		Parameters: parameters,
 		Body:       body.(BlockNode),
+		BeginPos:   begin,
+		EndPos:     end,
 	}
 
 	// Function evalutaion call directly follows declaration
@@ -178,6 +191,8 @@ func (a *Ast) parameter() (IdentifierNode, error) {
 
 // varDecl -> "var" IDENTIFIER ( "=" expression )? ;
 func (a *Ast) varDeclaration() (Node, error) {
+	begin := a.curr.BeginPosition
+
 	atom, err := a.atom()
 	if err != nil {
 		return nil, err
@@ -189,9 +204,12 @@ func (a *Ast) varDeclaration() (Node, error) {
 	}
 
 	if !a.consume(lex.TT_ASSIGN) {
+		end := a.curr.BeginPosition
 		return VarStmtNode{
 			Identifier: identifier,
 			Value:      NilNode{},
+			BeginPos:   begin,
+			EndPos:     end,
 		}, nil
 	}
 
@@ -200,9 +218,13 @@ func (a *Ast) varDeclaration() (Node, error) {
 		return nil, err
 	}
 
+	end := a.curr.BeginPosition
+
 	return VarStmtNode{
 		Identifier: identifier,
 		Value:      value,
+		BeginPos:   begin,
+		EndPos:     end,
 	}, nil
 }
 
@@ -240,13 +262,19 @@ func (a *Ast) statement() (Node, error) {
 
 // exprStatementNode -> expression
 func (a *Ast) expStatement() (Node, error) {
+	begin := a.curr.BeginPosition
+
 	exp, err := a.expression()
 	if err != nil {
 		return nil, err
 	}
 
+	end := a.curr.BeginPosition
+
 	return ExpStmtNode{
-		Exp: exp,
+		Exp:      exp,
+		BeginPos: begin,
+		EndPos:   end,
 	}, nil
 }
 
@@ -255,6 +283,8 @@ func (a *Ast) ifStatement() (Node, error) {
 	if !a.consume(lex.TT_LPAREN) {
 		return nil, NewSyntaxError("expected opening '(' for if condition", a.curr)
 	}
+
+	begin := a.curr.BeginPosition
 
 	condExp, err := a.expression()
 	if err != nil {
@@ -278,10 +308,14 @@ func (a *Ast) ifStatement() (Node, error) {
 		}
 	}
 
+	end := a.curr.BeginPosition
+
 	return IfStmtNode{
 		Exp:       condExp,
 		TrueStmt:  trueStmt,
 		FalseStmt: falseStmt,
+		BeginPos:  begin,
+		EndPos:    end,
 	}, nil
 }
 
@@ -290,6 +324,8 @@ func (a *Ast) whileStatement() (Node, error) {
 	if !a.consume(lex.TT_LPAREN) {
 		return nil, NewSyntaxError("expected opening '(' for 'while' condition", a.curr)
 	}
+
+	begin := a.curr.BeginPosition
 
 	condition, err := a.expression()
 	if err != nil {
@@ -305,40 +341,56 @@ func (a *Ast) whileStatement() (Node, error) {
 		return nil, err
 	}
 
+	end := a.curr.BeginPosition
+
 	return WhileStmtNode{
 		Condition: condition,
 		Body:      body,
+		BeginPos:  begin,
+		EndPos:    end,
 	}, nil
 }
 
 // breakStatement -> "break" ;
 func (a *Ast) breakStatement() (Node, error) {
 	return BreakStmtNode{
-		Token: a.curr,
+		Token:    a.curr,
+		BeginPos: a.curr.BeginPosition,
+		EndPos:   a.curr.EndPosition,
 	}, nil
 }
 
 // continueStatement -> "continue" ;
 func (a *Ast) continueStatement() (Node, error) {
 	return ContinueStmtNode{
-		Token: a.curr,
+		Token:    a.curr,
+		BeginPos: a.curr.BeginPosition,
+		EndPos:   a.curr.EndPosition,
 	}, nil
 }
 
 // returnStatement -> "return" expression ;
 func (a *Ast) returnStatement() (Node, error) {
+	begin := a.curr.BeginPosition
+
 	exp, err := a.expression()
 	if err != nil {
 		return nil, err
 	}
 
+	end := a.curr.BeginPosition
+
 	return ReturnStmtNode{
-		Exp: exp,
+		Exp:      exp,
+		BeginPos: begin,
+		EndPos:   end,
 	}, nil
 }
 
 // deferStatement -> "defer" funcCall ;
 func (a *Ast) deferStatement() (Node, error) {
+	begin := a.curr.BeginPosition
+
 	node, err := a.atom()
 	if err != nil {
 		return nil, err
@@ -353,25 +405,37 @@ func (a *Ast) deferStatement() (Node, error) {
 		return nil, NewSyntaxError("invalid call node", a.curr)
 	}
 
+	end := a.curr.BeginPosition
+
 	return DeferStmtNode{
-		Call: call.(CallNode),
+		Call:     call.(CallNode),
+		BeginPos: begin,
+		EndPos:   end,
 	}, nil
 }
 
 // assertStatement -> "assert" expression ;
 func (a *Ast) assertStatement() (Node, error) {
+	begin := a.curr.BeginPosition
+
 	exp, err := a.expression()
 	if err != nil {
 		return nil, err
 	}
 
+	end := a.curr.BeginPosition
+
 	return AssertStmtNode{
-		Exp: exp,
+		Exp:      exp,
+		BeginPos: begin,
+		EndPos:   end,
 	}, nil
 }
 
 // block -> "{" declaration* "}" ;
 func (a *Ast) block() (Node, error) {
+	begin := a.curr.BeginPosition
+
 	declarations := make([]Node, 0, 100)
 
 	for !a.check(lex.TT_RBRACE) && !a.check(lex.TT_EOF) {
@@ -387,13 +451,19 @@ func (a *Ast) block() (Node, error) {
 		return nil, NewSyntaxError("expected closing '}'", a.curr)
 	}
 
+	end := a.curr.BeginPosition
+
 	return BlockNode{
 		Declarations: declarations,
+		BeginPos:     begin,
+		EndPos:       end,
 	}, nil
 }
 
 // expression -> assignment ( "?" assignment ":" assignment )? ;
 func (a *Ast) expression() (Node, error) {
+	begin := a.curr.BeginPosition
+
 	exp, err := a.assignment()
 	if err != nil {
 		return nil, err
@@ -415,10 +485,14 @@ func (a *Ast) expression() (Node, error) {
 			return nil, err
 		}
 
+		end := a.curr.BeginPosition
+
 		return TernaryOpNode{
 			Exp:      exp,
 			TrueExp:  trueExp,
 			FalseExp: falseExp,
+			BeginPos: begin,
+			EndPos:   end,
 		}, nil
 	}
 
@@ -428,6 +502,8 @@ func (a *Ast) expression() (Node, error) {
 // assignment -> IDENTIFIER "=" assignment
 //            | logicalOr ;
 func (a *Ast) assignment() (Node, error) {
+	begin := a.curr.BeginPosition
+
 	expr, err := a.logicalOr()
 	if err != nil {
 		return nil, err
@@ -443,9 +519,13 @@ func (a *Ast) assignment() (Node, error) {
 			return nil, err
 		}
 
+		end := a.curr.BeginPosition
+
 		return AssignmentNode{
 			Identifier: expr.(IdentifierNode),
 			Value:      assign,
+			BeginPos:   begin,
+			EndPos:     end,
 		}, nil
 	}
 	return expr, nil
@@ -453,6 +533,8 @@ func (a *Ast) assignment() (Node, error) {
 
 // logicalOr -> logicalAnd ( "||" logicalAnd )*
 func (a *Ast) logicalOr() (Node, error) {
+	begin := a.curr.BeginPosition
+
 	left, err := a.logicalAnd()
 	if err != nil {
 		return nil, err
@@ -464,9 +546,13 @@ func (a *Ast) logicalOr() (Node, error) {
 			return nil, err
 		}
 
+		end := a.curr.BeginPosition
+
 		left = LogicalOrNode{
-			LHS: left,
-			RHS: right,
+			LHS:      left,
+			RHS:      right,
+			BeginPos: begin,
+			EndPos:   end,
 		}
 	}
 	return left, nil
@@ -474,6 +560,8 @@ func (a *Ast) logicalOr() (Node, error) {
 
 // logicalAnd -> equality ( "&&" equality )* ;
 func (a *Ast) logicalAnd() (Node, error) {
+	begin := a.curr.BeginPosition
+
 	left, err := a.equality()
 	if err != nil {
 		return nil, err
@@ -485,9 +573,13 @@ func (a *Ast) logicalAnd() (Node, error) {
 			return nil, err
 		}
 
+		end := a.curr.BeginPosition
+
 		left = LogicalAndNode{
-			LHS: left,
-			RHS: right,
+			LHS:      left,
+			RHS:      right,
+			BeginPos: begin,
+			EndPos:   end,
 		}
 	}
 	return left, nil
@@ -516,6 +608,8 @@ func (a *Ast) factor() (Node, error) {
 // unary -> ( "!" | "-" ) unary
 //       | call ;
 func (a *Ast) unary() (Node, error) {
+	begin := a.curr.BeginPosition
+
 	var node Node
 	for a.consumeAny([]lex.TokenType{lex.TT_NOT, lex.TT_MINUS}) {
 		tok := a.curr
@@ -525,9 +619,13 @@ func (a *Ast) unary() (Node, error) {
 			return nil, err
 		}
 
+		end := a.curr.BeginPosition
+
 		node = UnaryOpNode{
-			Op:      tok,
-			Operand: n,
+			Op:       tok,
+			Operand:  n,
+			BeginPos: begin,
+			EndPos:   end,
 		}
 	}
 
@@ -576,6 +674,8 @@ func (a *Ast) finishCall(callee Node) (Node, error) {
 	arguments := []Node{}
 	var err error
 
+	begin := a.curr.BeginPosition
+
 	for !a.check(lex.TT_RPAREN) {
 		arguments, err = a.arguments()
 		if err != nil {
@@ -587,14 +687,19 @@ func (a *Ast) finishCall(callee Node) (Node, error) {
 		return nil, NewSyntaxError("expected closing ')' for function call", a.curr)
 	}
 
+	end := a.curr.BeginPosition
+
 	return CallNode{
 		Callee:    callee,
 		Arguments: arguments,
+		BeginPos:  begin,
+		EndPos:    end,
 	}, nil
 }
 
 // indexCall -> atom ( "[" expression "]" )* ;
 func (a *Ast) indexCall(atom Node) (Node, error) {
+	begin := a.curr.BeginPosition
 	expr := atom
 	for a.consume(lex.TT_LBRACKET) {
 		indexExpr, err := a.expression()
@@ -606,9 +711,13 @@ func (a *Ast) indexCall(atom Node) (Node, error) {
 			return nil, NewSyntaxError("expected closing ']' for index operation", a.curr)
 		}
 
+		end := a.curr.BeginPosition
+
 		expr = IndexOfNode{
 			Sequence: expr,
 			Index:    indexExpr,
+			BeginPos: begin,
+			EndPos:   end,
 		}
 	}
 	return expr, nil
@@ -643,15 +752,34 @@ func (a *Ast) arguments() ([]Node, error) {
 //      | IDENTIFIER ;
 func (a *Ast) atom() (Node, error) {
 	if a.consume(lex.TT_NUMBER) {
-		return NumberNode{Token: a.curr}, nil
+		return NumberNode{
+			Token:    a.curr,
+			BeginPos: a.curr.BeginPosition,
+			EndPos:   a.curr.EndPosition,
+		}, nil
 	} else if a.consume(lex.TT_STRING) {
-		return StringNode{Token: a.curr}, nil
+		return StringNode{
+			Token:    a.curr,
+			BeginPos: a.curr.BeginPosition,
+			EndPos:   a.curr.EndPosition,
+		}, nil
 	} else if a.consumeAny([]lex.TokenType{lex.TT_TRUE, lex.TT_FALSE}) {
-		return BooleanNode{Token: a.curr}, nil
+		return BooleanNode{
+			Token:    a.curr,
+			BeginPos: a.curr.BeginPosition,
+			EndPos:   a.curr.EndPosition,
+		}, nil
 	} else if a.consume(lex.TT_IDENTIFIER) {
-		return IdentifierNode{Token: a.curr}, nil
+		return IdentifierNode{
+			Token:    a.curr,
+			BeginPos: a.curr.BeginPosition,
+			EndPos:   a.curr.EndPosition,
+		}, nil
 	} else if a.consume(lex.TT_NIL) {
-		return NilNode{}, nil
+		return NilNode{
+			BeginPos: a.curr.BeginPosition,
+			EndPos:   a.curr.EndPosition,
+		}, nil
 	} else if a.consume(lex.TT_LPAREN) {
 		return a.nestedExpressionNode()
 	} else if a.consume(lex.TT_LBRACE) {
@@ -661,29 +789,43 @@ func (a *Ast) atom() (Node, error) {
 	} else if a.consume(lex.TT_FUNCTION) {
 		return a.funDeclaration()
 	} else if a.consume(lex.TT_COMMENT) {
-		return CommentNode{Token: a.curr}, nil
+		return CommentNode{
+			Token:    a.curr,
+			BeginPos: a.curr.BeginPosition,
+			EndPos:   a.curr.EndPosition,
+		}, nil
 	}
 
 	return nil, NewSyntaxError("expected a literal or an expression", a.curr)
 }
 
 func (a *Ast) nestedExpressionNode() (Node, error) {
+	begin := a.curr.BeginPosition
 	exp, err := a.expression()
 	if err != nil {
 		return nil, err
 	}
 
 	if a.consume(lex.TT_RPAREN) {
-		return ExpNode{Exp: exp}, nil
+		end := a.curr.BeginPosition
+		return ExpNode{
+			Exp:      exp,
+			BeginPos: begin,
+			EndPos:   end,
+		}, nil
 	}
 	return nil, NewSyntaxError("expected closing ')' after expression", a.curr)
 }
 
 // map -> "{" keyValuePairs? "}" ;
 func (a *Ast) mapNode() (Node, error) {
+	begin := a.curr.BeginPosition
 	if a.consume(lex.TT_RBRACE) { // Map is empty {}
+		end := a.curr.BeginPosition
 		return MapNode{
 			Elements: make([]KeyValueNode, 0),
+			BeginPos: begin,
+			EndPos:   end,
 		}, nil
 	} else {
 		kvps, err := a.keyValuePairs()
@@ -695,8 +837,12 @@ func (a *Ast) mapNode() (Node, error) {
 			return nil, NewSyntaxError("expected closing '}' for map", a.curr)
 		}
 
+		end := a.curr.BeginPosition
+
 		return MapNode{
 			Elements: kvps,
+			BeginPos: begin,
+			EndPos:   end,
 		}, nil
 	}
 }
@@ -726,6 +872,8 @@ func (a *Ast) keyValuePairs() ([]KeyValueNode, error) {
 
 // expression ":" expression
 func (a *Ast) keyValuePair() (KeyValueNode, error) {
+	begin := a.curr.BeginPosition
+
 	key, err := a.expression()
 
 	if err != nil {
@@ -742,17 +890,25 @@ func (a *Ast) keyValuePair() (KeyValueNode, error) {
 		return KeyValueNode{}, err
 	}
 
+	end := a.curr.BeginPosition
+
 	return KeyValueNode{
-		Key:   key,
-		Value: value,
+		Key:      key,
+		Value:    value,
+		BeginPos: begin,
+		EndPos:   end,
 	}, nil
 }
 
 // list -> "[" arguments? "]" ;
 func (a *Ast) listNode() (Node, error) {
+	begin := a.curr.BeginPosition
 	if a.consume(lex.TT_RBRACKET) { // List is empty []
+		end := a.curr.BeginPosition
 		return ListNode{
 			Elements: make([]Node, 0),
+			BeginPos: begin,
+			EndPos:   end,
 		}, nil
 	} else {
 		arguments, err := a.arguments()
@@ -764,8 +920,12 @@ func (a *Ast) listNode() (Node, error) {
 			return nil, NewSyntaxError("expected closing ']' for list", a.curr)
 		}
 
+		end := a.curr.BeginPosition
+
 		return ListNode{
 			Elements: arguments,
+			BeginPos: begin,
+			EndPos:   end,
 		}, nil
 	}
 }
@@ -775,6 +935,8 @@ func (a *Ast) listNode() (Node, error) {
 // ------------------------------------
 
 func (a *Ast) binaryOp(tokenTypes []lex.TokenType, fun ProductionRuleHandler) (Node, error) {
+	begin := a.curr.BeginPosition
+
 	left, err := fun()
 	if err != nil {
 		return nil, err
@@ -788,10 +950,14 @@ func (a *Ast) binaryOp(tokenTypes []lex.TokenType, fun ProductionRuleHandler) (N
 			return nil, err
 		}
 
+		end := a.curr.BeginPosition
+
 		left = BinaryOpNode{
 			LeftExp:  left,
 			Op:       tok,
 			RightExp: right,
+			BeginPos: begin,
+			EndPos:   end,
 		}
 	}
 	return left, nil

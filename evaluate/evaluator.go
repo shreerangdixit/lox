@@ -88,6 +88,21 @@ func (e *Evaluator) eval(node ast.Node) (Object, error) {
 	return NIL, fmt.Errorf("invalid node: %T", node)
 }
 
+func (e *Evaluator) wrapResult(node ast.Node, obj Object, err error) (Object, error) {
+	if err != nil {
+		switch err := err.(type) {
+		case BreakError:
+		case ContinueError:
+		case ReturnError:
+		case AssertError:
+			return obj, err
+		default:
+			return obj, NewEvalError(node, err)
+		}
+	}
+	return obj, err
+}
+
 func (e *Evaluator) evalProgramNode(node ast.ProgramNode) (Object, error) {
 	for _, node := range node.Declarations {
 		_, err := e.eval(node)
@@ -134,7 +149,7 @@ func (e *Evaluator) evalVarStmtNode(node ast.VarStmtNode) (Object, error) {
 	}
 
 	if err := e.env.Declare(node.Identifier.Token.Literal, value); err != nil {
-		return NIL, err
+		return e.wrapResult(node, NIL, err)
 	}
 	return NIL, nil
 }
@@ -197,7 +212,9 @@ func (e *Evaluator) evalAssignmentNode(node ast.AssignmentNode) (Object, error) 
 	if err != nil {
 		return NIL, err
 	}
-	return NIL, e.env.Assign(node.Identifier.Token.Literal, value)
+
+	err = e.env.Assign(node.Identifier.Token.Literal, value)
+	return e.wrapResult(node, NIL, err)
 }
 
 func (e *Evaluator) evalLogicalAndNode(node ast.LogicalAndNode) (Object, error) {
@@ -258,15 +275,20 @@ func (e *Evaluator) evalBinaryOpNode(node ast.BinaryOpNode) (Object, error) {
 
 	switch node.Op.Type {
 	case lex.TT_PLUS:
-		return Add(left, right)
+		o, err := Add(left, right)
+		return e.wrapResult(node, o, err)
 	case lex.TT_MINUS:
-		return Subtract(left, right)
+		o, err := Subtract(left, right)
+		return e.wrapResult(node, o, err)
 	case lex.TT_DIVIDE:
-		return Divide(left, right)
+		o, err := Divide(left, right)
+		return e.wrapResult(node, o, err)
 	case lex.TT_MULTIPLY:
-		return Multiply(left, right)
+		o, err := Multiply(left, right)
+		return e.wrapResult(node, o, err)
 	case lex.TT_MODULO:
-		return Modulo(left, right)
+		o, err := Modulo(left, right)
+		return e.wrapResult(node, o, err)
 	case lex.TT_EQ:
 		return EqualTo(left, right), nil
 	case lex.TT_NEQ:
@@ -295,17 +317,18 @@ func (e *Evaluator) evalUnaryOpNode(node ast.UnaryOpNode) (Object, error) {
 		return Not(val)
 	}
 
-	return NIL, fmt.Errorf("invalid unary op: %s", node.Op.Type)
+	return e.wrapResult(node, NIL, fmt.Errorf("invalid unary op: %s", node.Op.Type))
 }
 
 func (e *Evaluator) evalIdentifierNode(node ast.IdentifierNode) (Object, error) {
-	return e.env.Get(node.Token.Literal)
+	o, err := e.env.Get(node.Token.Literal)
+	return e.wrapResult(node, o, err)
 }
 
 func (e *Evaluator) evalNumberNode(node ast.NumberNode) (Object, error) {
 	val, err := strconv.ParseFloat(node.Token.Literal, 10)
 	if err != nil {
-		return NIL, err
+		return e.wrapResult(node, NIL, err)
 	}
 
 	return NewNumber(val), nil
@@ -314,7 +337,7 @@ func (e *Evaluator) evalNumberNode(node ast.NumberNode) (Object, error) {
 func (e *Evaluator) evalBooleanNode(node ast.BooleanNode) (Object, error) {
 	val, err := strconv.ParseBool(node.Token.Literal)
 	if err != nil {
-		return NIL, err
+		return e.wrapResult(node, NIL, err)
 	}
 
 	return NewBool(val), nil
@@ -349,7 +372,7 @@ func (e *Evaluator) evalMapNode(node ast.MapNode) (Object, error) {
 
 		m, err = m.Add(key, value)
 		if err != nil {
-			return NIL, err
+			return e.wrapResult(node, NIL, err)
 		}
 	}
 	return m, nil
@@ -369,21 +392,25 @@ func (e *Evaluator) evalCallNode(node ast.CallNode) (Object, error) {
 	if !ok { // If the callee node itself isn't callable, check if it's value is callable
 		calleeValue, err := e.env.Get(calleeNode.String())
 		if err != nil {
-			return NIL, fmt.Errorf("%s is not callable", calleeNode.Type())
+			return e.wrapResult(node, NIL, fmt.Errorf("%s is not callable", calleeNode.Type()))
 		}
 
 		callable, ok = calleeValue.(Callable)
 		if !ok {
-			return NIL, fmt.Errorf("%s is not callable", calleeValue.Type())
+			return e.wrapResult(node, NIL, fmt.Errorf("%s is not callable", calleeValue.Type()))
 		}
 	}
 
 	if !callable.Variadic() && callable.Arity() != len(node.Arguments) {
-		return NIL, fmt.Errorf(
-			"incorrect number of arguments to %s - %d expected %d provided",
-			callable,
-			callable.Arity(),
-			len(node.Arguments),
+		return e.wrapResult(
+			node,
+			NIL,
+			fmt.Errorf(
+				"incorrect number of arguments to %s - %d expected %d provided",
+				callable,
+				callable.Arity(),
+				len(node.Arguments),
+			),
 		)
 	}
 
@@ -406,7 +433,8 @@ func (e *Evaluator) evalIndexOfNode(node ast.IndexOfNode) (Object, error) {
 		return nil, err
 	}
 
-	return ItemAtIndex(seq, idx)
+	o, err := ItemAtIndex(seq, idx)
+	return e.wrapResult(node, o, err)
 }
 
 func (e *Evaluator) evalFunctionNode(node ast.FunctionNode) (Object, error) {

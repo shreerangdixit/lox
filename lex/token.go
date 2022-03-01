@@ -15,7 +15,7 @@ type Token struct {
 
 func (t Token) String() string {
 	if t.Type == TT_IDENTIFIER || t.Type == TT_NUMBER {
-		return fmt.Sprintf("%s:%s (%s - %s)", t.Type, t.Literal, t.BeginPosition, t.EndPosition)
+		return fmt.Sprintf("%s %s", t.Type, t.Literal)
 	}
-	return fmt.Sprintf("%s (%s - %s)", t.Literal, t.BeginPosition, t.EndPosition)
+	return t.Literal
 }

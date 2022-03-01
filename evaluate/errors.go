@@ -6,6 +6,22 @@ import (
 	"github.com/shreerangdixit/lox/ast"
 )
 
+type EvalError struct {
+	Node ast.Node
+	Err  error
+}
+
+func NewEvalError(node ast.Node, err error) EvalError {
+	return EvalError{
+		Node: node,
+		Err:  err,
+	}
+}
+
+func (e EvalError) Error() string {
+	return fmt.Sprintf("%v", e.Err)
+}
+
 // Loop control flow exit due to `break;`
 type BreakError struct{}
 

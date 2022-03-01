@@ -7,17 +7,17 @@ import (
 )
 
 type SyntaxError struct {
-	err string
-	tok lex.Token
+	Err   string
+	Token lex.Token
 }
 
 func NewSyntaxError(err string, tok lex.Token) SyntaxError {
 	return SyntaxError{
-		err: err,
-		tok: tok,
+		Err:   err,
+		Token: tok,
 	}
 }
 
 func (e SyntaxError) Error() string {
-	return fmt.Sprintf("%s: %s", e.err, e.tok)
+	return fmt.Sprintf("%s: %s", e.Err, e.Token)
 }

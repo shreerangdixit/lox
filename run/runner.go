@@ -27,14 +27,17 @@ func RunFile(file string) error {
 		return err
 	}
 
-	root, err := ast.New(lex.New(string(script))).RootNode()
+	scriptStr := string(script) + "\n"
+	root, err := ast.New(lex.New(scriptStr)).RootNode()
 	if err != nil {
+		HighlightError(err, scriptStr)
 		return err
 	}
 
 	e := evaluate.NewEvaluator()
 	_, err = e.Evaluate(root)
 	if err != nil {
+		HighlightError(err, scriptStr)
 		return err
 	}
 
