@@ -6,7 +6,7 @@
 	assert avg([1,2]) == 0.5
 	assert abs(-0.5) == 0.5
 	assert abs(-0.5) == 0.5
-    assert sqrt(12) == 3.4641016151377544
+	assert sqrt(12) == 3.4641016151377544
 
 	println("OK")
 }
