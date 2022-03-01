@@ -119,15 +119,8 @@ func (e *Evaluator) evalBlockNode(node ast.BlockNode) (Object, error) {
 
 func (e *Evaluator) evalBlockNodeWithEnv(node ast.BlockNode, env *Environment) (Object, error) {
 	prev := e.env
-	// Reset environment at the end of block scope and executed deferred calls
+	// Reset environment at the end of block scope
 	defer func() {
-		deferred := e.deferred
-		e.deferred = make([]ast.CallNode, 0, 20)
-
-		for _, call := range deferred {
-			_, _ = e.eval(call)
-		}
-
 		e.env = prev
 	}()
 
@@ -139,6 +132,20 @@ func (e *Evaluator) evalBlockNodeWithEnv(node ast.BlockNode, env *Environment) (
 			return NIL, err
 		}
 	}
+
+	return e.runDeferred()
+}
+
+func (e *Evaluator) runDeferred() (Object, error) {
+	deferred := e.deferred
+	e.deferred = make([]ast.CallNode, 0, 20)
+	for _, call := range deferred {
+		o, err := e.eval(call)
+		if err != nil {
+			return e.wrapResult(call, o, err)
+		}
+	}
+
 	return NIL, nil
 }
 
