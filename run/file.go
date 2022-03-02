@@ -25,7 +25,7 @@ func RunFile(file string) error {
 	if err != nil {
 		if formatter, ok := NewFormatter(err, ScriptSource(file), ScriptContents(string(script))); ok {
 			fmt.Fprintf(os.Stderr, "%s", formatter.Format())
-			return nil
+			os.Exit(1)
 		}
 		return err
 	}
@@ -35,7 +35,7 @@ func RunFile(file string) error {
 	if err != nil {
 		if formatter, ok := NewFormatter(err, ScriptSource(file), ScriptContents(string(script))); ok {
 			fmt.Fprintf(os.Stderr, "%s", formatter.Format())
-			return nil
+			os.Exit(1)
 		}
 		return err
 	}
