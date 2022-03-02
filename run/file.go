@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/shreerangdixit/lox/ast"
-	"github.com/shreerangdixit/lox/evaluate"
+	"github.com/shreerangdixit/lox/eval"
 	"github.com/shreerangdixit/lox/lex"
 )
 
@@ -30,7 +30,7 @@ func RunFile(file string) error {
 		return err
 	}
 
-	e := evaluate.NewEvaluator()
+	e := eval.NewEvaluator()
 	_, err = e.Evaluate(root)
 	if err != nil {
 		if formatter, ok := NewFormatter(err, ScriptSource(file), ScriptContents(string(script))); ok {

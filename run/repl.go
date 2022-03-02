@@ -7,7 +7,7 @@ import (
 
 	"github.com/shreerangdixit/lox/ast"
 	"github.com/shreerangdixit/lox/build"
-	"github.com/shreerangdixit/lox/evaluate"
+	"github.com/shreerangdixit/lox/eval"
 	"github.com/shreerangdixit/lox/lex"
 )
 
@@ -25,7 +25,7 @@ func StartREPL(in io.Reader, out io.Writer) {
 	fmt.Fprintf(out, "%s", build.Info)
 
 	scanner := bufio.NewScanner(in)
-	e := evaluate.NewEvaluator()
+	e := eval.NewEvaluator()
 	for {
 		fmt.Printf("lox >>> ")
 
@@ -44,7 +44,7 @@ func StartREPL(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		// If the input is a single expression, evaluate and print the result
+		// If the input is a single expression, eval and print the result
 		// Otherwise run statements
 		exp, ok := isSingleExpression(root)
 		if !ok {
@@ -64,7 +64,7 @@ func StartREPL(in io.Reader, out io.Writer) {
 					continue
 				}
 				fmt.Fprintf(out, "%s\n", err)
-			} else if val != evaluate.NIL {
+			} else if val != eval.NIL {
 				fmt.Fprintf(out, "%s\n", val)
 			}
 		}

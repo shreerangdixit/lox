@@ -1,4 +1,4 @@
-package evaluate
+package eval
 
 import (
 	"fmt"
@@ -99,6 +99,7 @@ var NativeFunctions = []*NativeFunction{
 	NewNativeFunction("println", 0, true, printlnHandler),
 	// Misc
 	NewNativeFunction("type", 1, false, typeHandler),
+	NewNativeFunction("zen", 0, false, zenHandler),
 }
 
 func sleepHandler(e *Evaluator, args []Object) (Object, error) {
@@ -221,5 +222,22 @@ func printHandler(e *Evaluator, args []Object) (Object, error) {
 func printlnHandler(e *Evaluator, args []Object) (Object, error) {
 	_, _ = printHandler(e, args)
 	fmt.Println()
+	return NIL, nil
+}
+
+func zenHandler(e *Evaluator, args []Object) (Object, error) {
+	fmt.Println(`
+				---------------
+				The Zen of Lox
+				---------------
+			 Donut is better than Bagel.
+			 Cat is better than Dog.
+			 Gin is better than Beer.
+			 Tarkovsky is better than Bergman.
+			 Golang is better than almost everything else.
+
+	Interpreters are slower than the time it takes to build them.
+	Although speed counts, the principles you learn building them are invaluable.
+	`)
 	return NIL, nil
 }
