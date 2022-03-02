@@ -231,13 +231,13 @@ func zenHandler(e *Evaluator, args []Object) (Object, error) {
 				The Zen of Lox
 				---------------
 			 Donut is better than Bagel.
-			 Cat is better than Dog.
-			 Gin is better than Beer.
-			 Tarkovsky is better than Bergman.
-			 Golang is better than almost everything else.
+			   Cat is better than Dog.
+			   Gin is better than Beer.
+			Tarkovsky is better than Bergman.
+		Golang is better than almost everything else.
 
-	Interpreters are slower than the time it takes to build them.
-	Although speed counts, the principles you learn building them are invaluable.
+	Although interpreters are slower than the time it takes to build them.
+	      The principles you learn building them are invaluable.
 	`)
 	return NIL, nil
 }
