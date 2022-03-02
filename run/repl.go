@@ -4,8 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"os"
-	"path/filepath"
 
 	"github.com/shreerangdixit/lox/ast"
 	"github.com/shreerangdixit/lox/build"
@@ -22,38 +20,7 @@ const Logo = `
         \/       \/      \_/
 `
 
-func RunFile(file string) error {
-	file, err := filepath.Abs(file)
-	if err != nil {
-		return err
-	}
-
-	script, err := os.ReadFile(file)
-	if err != nil {
-		return err
-	}
-
-	root, err := ast.New(lex.New(string(script))).RootNode()
-	if err != nil {
-		PrintError(err, file)
-		return err
-	}
-
-	e := evaluate.NewEvaluator()
-	_, err = e.Evaluate(root)
-	if err != nil {
-		PrintError(err, file)
-		return err
-	}
-
-	return nil
-}
-
-func StartREPL() {
-	startREPL(os.Stdin, os.Stdout)
-}
-
-func startREPL(in io.Reader, out io.Writer) {
+func StartREPL(in io.Reader, out io.Writer) {
 	fmt.Fprintf(out, "%s\n", Logo)
 	fmt.Fprintf(out, "%s", build.Info)
 
@@ -74,7 +41,6 @@ func startREPL(in io.Reader, out io.Writer) {
 
 		root, err := ast.New(lex.New(txt)).RootNode()
 		if err != nil {
-			fmt.Fprintf(out, "%s\n", err)
 			continue
 		}
 
@@ -84,11 +50,19 @@ func startREPL(in io.Reader, out io.Writer) {
 		if !ok {
 			_, err = e.Evaluate(root)
 			if err != nil {
+				if formatter, ok := NewFormatter(err, ScriptSource("<repl>"), ScriptContents(string(txt))); ok {
+					fmt.Fprintf(out, "%s", formatter.Format())
+					continue
+				}
 				fmt.Fprintf(out, "%s\n", err)
 			}
 		} else {
 			val, err := e.Evaluate(exp)
 			if err != nil {
+				if formatter, ok := NewFormatter(err, ScriptSource("<repl>"), ScriptContents(string(txt))); ok {
+					fmt.Fprintf(out, "%s", formatter.Format())
+					continue
+				}
 				fmt.Fprintf(out, "%s\n", err)
 			} else if val != evaluate.NIL {
 				fmt.Fprintf(out, "%s\n", val)
