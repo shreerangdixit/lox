@@ -21,6 +21,7 @@ build:
 
 fmt:
 	@go fmt ./...
+	@gofmt -s -w .
 
 test:
 	@go test -v ./...
