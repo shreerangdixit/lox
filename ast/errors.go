@@ -22,6 +22,10 @@ func (e SyntaxError) Error() string {
 	return fmt.Sprintf("%s: %s", e.Err, e.Token)
 }
 
+func (e SyntaxError) Inner() error {
+	return nil
+}
+
 func (e SyntaxError) ErrorType() string {
 	return "syntax"
 }

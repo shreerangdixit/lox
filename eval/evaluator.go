@@ -27,63 +27,92 @@ func (e *Evaluator) Evaluate(root ast.Node) (Object, error) {
 func (e *Evaluator) eval(node ast.Node) (Object, error) {
 	switch node := node.(type) {
 	case ast.ProgramNode:
-		return e.evalProgramNode(node)
+		obj, err := e.evalProgramNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.BlockNode:
-		return e.evalBlockNode(node)
+		obj, err := e.evalBlockNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.VarStmtNode:
-		return e.evalVarStmtNode(node)
+		obj, err := e.evalVarStmtNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.ExpStmtNode:
-		return e.evalExpStmtNode(node)
+		obj, err := e.evalExpStmtNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.IfStmtNode:
-		return e.evalIfStmtNode(node)
+		obj, err := e.evalIfStmtNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.WhileStmtNode:
-		return e.evalWhileStmtNode(node)
+		obj, err := e.evalWhileStmtNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.BreakStmtNode:
-		return e.evalBreakStmtNode(node)
+		obj, err := e.evalBreakStmtNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.ContinueStmtNode:
-		return e.evalContinueStmtNode(node)
+		obj, err := e.evalContinueStmtNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.ReturnStmtNode:
-		return e.evalReturnStmtNode(node)
+		obj, err := e.evalReturnStmtNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.AssignmentNode:
-		return e.evalAssignmentNode(node)
+		obj, err := e.evalAssignmentNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.LogicalAndNode:
-		return e.evalLogicalAndNode(node)
+		obj, err := e.evalLogicalAndNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.LogicalOrNode:
-		return e.evalLogicalOrNode(node)
+		obj, err := e.evalLogicalOrNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.ExpNode:
-		return e.eval(node.Exp)
+		obj, err := e.eval(node.Exp)
+		return e.wrapResult(node, obj, err)
 	case ast.TernaryOpNode:
-		return e.evalTernaryOpNode(node)
+		obj, err := e.evalTernaryOpNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.BinaryOpNode:
-		return e.evalBinaryOpNode(node)
+		obj, err := e.evalBinaryOpNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.UnaryOpNode:
-		return e.evalUnaryOpNode(node)
+		obj, err := e.evalUnaryOpNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.IdentifierNode:
-		return e.evalIdentifierNode(node)
+		obj, err := e.evalIdentifierNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.NumberNode:
-		return e.evalNumberNode(node)
+		obj, err := e.evalNumberNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.BooleanNode:
-		return e.evalBooleanNode(node)
+		obj, err := e.evalBooleanNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.StringNode:
-		return e.evalStringNode(node)
+		obj, err := e.evalStringNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.ListNode:
-		return e.evalListNode(node)
+		obj, err := e.evalListNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.MapNode:
-		return e.evalMapNode(node)
+		obj, err := e.evalMapNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.NilNode:
-		return e.evalNilNode(node)
+		obj, err := e.evalNilNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.CallNode:
-		return e.evalCallNode(node)
+		obj, err := e.evalCallNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.IndexOfNode:
-		return e.evalIndexOfNode(node)
+		obj, err := e.evalIndexOfNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.FunctionNode:
-		return e.evalFunctionNode(node)
+		obj, err := e.evalFunctionNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.DeferStmtNode:
-		return e.evalDeferStmtNode(node)
+		obj, err := e.evalDeferStmtNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.AssertStmtNode:
-		return e.evalAssertStmtNode(node)
+		obj, err := e.evalAssertStmtNode(node)
+		return e.wrapResult(node, obj, err)
 	case ast.CommentNode:
-		return e.evalCommentNode(node)
+		obj, err := e.evalCommentNode(node)
+		return e.wrapResult(node, obj, err)
 	}
 	return NIL, fmt.Errorf("invalid node: %T", node)
 }
@@ -95,6 +124,8 @@ func (e *Evaluator) wrapResult(node ast.Node, obj Object, err error) (Object, er
 		case ContinueError:
 		case ReturnError:
 			return obj, err
+		case EvalError:
+			return obj, NewEvalError(node, err, WithInnerError(err))
 		default:
 			return obj, NewEvalError(node, err)
 		}
@@ -141,7 +172,7 @@ func (e *Evaluator) runDeferred() (Object, error) {
 	for _, call := range deferred {
 		o, err := e.eval(call)
 		if err != nil {
-			return e.wrapResult(call, o, err)
+			return o, err
 		}
 	}
 
@@ -155,7 +186,7 @@ func (e *Evaluator) evalVarStmtNode(node ast.VarStmtNode) (Object, error) {
 	}
 
 	if err := e.env.Declare(node.Identifier.Token.Literal, value); err != nil {
-		return e.wrapResult(node, NIL, err)
+		return NIL, err
 	}
 	return NIL, nil
 }
@@ -193,9 +224,9 @@ func (e *Evaluator) evalWhileStmtNode(node ast.WhileStmtNode) (Object, error) {
 		_, err = e.eval(node.Body)
 		if err != nil {
 			switch err := err.(type) {
-			case BreakError:
+			case *BreakError:
 				return NIL, nil
-			case ContinueError:
+			case *ContinueError:
 				continue
 			default:
 				return NIL, err
@@ -219,8 +250,7 @@ func (e *Evaluator) evalAssignmentNode(node ast.AssignmentNode) (Object, error) 
 		return NIL, err
 	}
 
-	err = e.env.Assign(node.Identifier.Token.Literal, value)
-	return e.wrapResult(node, NIL, err)
+	return NIL, e.env.Assign(node.Identifier.Token.Literal, value)
 }
 
 func (e *Evaluator) evalLogicalAndNode(node ast.LogicalAndNode) (Object, error) {
@@ -281,20 +311,15 @@ func (e *Evaluator) evalBinaryOpNode(node ast.BinaryOpNode) (Object, error) {
 
 	switch node.Op.Type {
 	case lex.TT_PLUS:
-		o, err := Add(left, right)
-		return e.wrapResult(node, o, err)
+		return Add(left, right)
 	case lex.TT_MINUS:
-		o, err := Subtract(left, right)
-		return e.wrapResult(node, o, err)
+		return Subtract(left, right)
 	case lex.TT_DIVIDE:
-		o, err := Divide(left, right)
-		return e.wrapResult(node, o, err)
+		return Divide(left, right)
 	case lex.TT_MULTIPLY:
-		o, err := Multiply(left, right)
-		return e.wrapResult(node, o, err)
+		return Multiply(left, right)
 	case lex.TT_MODULO:
-		o, err := Modulo(left, right)
-		return e.wrapResult(node, o, err)
+		return Modulo(left, right)
 	case lex.TT_EQ:
 		return EqualTo(left, right), nil
 	case lex.TT_NEQ:
@@ -308,7 +333,7 @@ func (e *Evaluator) evalBinaryOpNode(node ast.BinaryOpNode) (Object, error) {
 	case lex.TT_GTE:
 		return GreaterThanEq(left, right), nil
 	}
-	return e.wrapResult(node, NIL, fmt.Errorf("invalid binary op: %s", node.Op.Type))
+	return NIL, fmt.Errorf("invalid binary op: %s", node.Op.Type)
 }
 
 func (e *Evaluator) evalUnaryOpNode(node ast.UnaryOpNode) (Object, error) {
@@ -318,25 +343,22 @@ func (e *Evaluator) evalUnaryOpNode(node ast.UnaryOpNode) (Object, error) {
 	}
 
 	if node.Op.Type == lex.TT_MINUS {
-		o, err := Negate(val)
-		return e.wrapResult(node, o, err)
+		return Negate(val)
 	} else if node.Op.Type == lex.TT_NOT {
-		o, err := Not(val)
-		return e.wrapResult(node, o, err)
+		return Not(val)
 	}
 
-	return e.wrapResult(node, NIL, fmt.Errorf("invalid unary op: %s", node.Op.Type))
+	return NIL, fmt.Errorf("invalid unary op: %s", node.Op.Type)
 }
 
 func (e *Evaluator) evalIdentifierNode(node ast.IdentifierNode) (Object, error) {
-	o, err := e.env.Get(node.Token.Literal)
-	return e.wrapResult(node, o, err)
+	return e.env.Get(node.Token.Literal)
 }
 
 func (e *Evaluator) evalNumberNode(node ast.NumberNode) (Object, error) {
 	val, err := strconv.ParseFloat(node.Token.Literal, 10)
 	if err != nil {
-		return e.wrapResult(node, NIL, err)
+		return NIL, err
 	}
 
 	return NewNumber(val), nil
@@ -345,7 +367,7 @@ func (e *Evaluator) evalNumberNode(node ast.NumberNode) (Object, error) {
 func (e *Evaluator) evalBooleanNode(node ast.BooleanNode) (Object, error) {
 	val, err := strconv.ParseBool(node.Token.Literal)
 	if err != nil {
-		return e.wrapResult(node, NIL, err)
+		return NIL, err
 	}
 
 	return NewBool(val), nil
@@ -380,7 +402,7 @@ func (e *Evaluator) evalMapNode(node ast.MapNode) (Object, error) {
 
 		m, err = m.Add(key, value)
 		if err != nil {
-			return e.wrapResult(node, NIL, err)
+			return NIL, err
 		}
 	}
 	return m, nil
@@ -400,26 +422,17 @@ func (e *Evaluator) evalCallNode(node ast.CallNode) (Object, error) {
 	if !ok { // If the callee node itself isn't callable, check if it's value is callable
 		calleeValue, err := e.env.Get(calleeNode.String())
 		if err != nil {
-			return e.wrapResult(node, NIL, fmt.Errorf("%s is not callable", calleeNode.Type()))
+			return NIL, fmt.Errorf("%s is not callable", calleeNode.Type())
 		}
 
 		callable, ok = calleeValue.(Callable)
 		if !ok {
-			return e.wrapResult(node, NIL, fmt.Errorf("%s is not callable", calleeValue.Type()))
+			return NIL, fmt.Errorf("%s is not callable", calleeValue.Type())
 		}
 	}
 
 	if !callable.Variadic() && callable.Arity() != len(node.Arguments) {
-		return e.wrapResult(
-			node,
-			NIL,
-			fmt.Errorf(
-				"incorrect number of arguments to %s - %d expected %d provided",
-				callable,
-				callable.Arity(),
-				len(node.Arguments),
-			),
-		)
+		return NIL, fmt.Errorf("incorrect number of arguments to %s - %d expected %d provided", callable, callable.Arity(), len(node.Arguments))
 	}
 
 	argValues, err := e.evalNodes(node.Arguments)
@@ -427,8 +440,7 @@ func (e *Evaluator) evalCallNode(node ast.CallNode) (Object, error) {
 		return NIL, err
 	}
 
-	o, err := callable.Call(e, argValues)
-	return e.wrapResult(node, o, err)
+	return callable.Call(e, argValues)
 }
 
 func (e *Evaluator) evalIndexOfNode(node ast.IndexOfNode) (Object, error) {
@@ -442,14 +454,12 @@ func (e *Evaluator) evalIndexOfNode(node ast.IndexOfNode) (Object, error) {
 		return nil, err
 	}
 
-	o, err := ItemAtIndex(seq, idx)
-	return e.wrapResult(node, o, err)
+	return ItemAtIndex(seq, idx)
 }
 
 func (e *Evaluator) evalFunctionNode(node ast.FunctionNode) (Object, error) {
 	fun := NewUserFunction(node, e.env)
-	err := e.env.Declare(fun.Name(), fun)
-	return e.wrapResult(node, fun, err)
+	return fun, e.env.Declare(fun.Name(), fun)
 }
 
 func (e *Evaluator) evalReturnStmtNode(node ast.ReturnStmtNode) (Object, error) {
@@ -473,7 +483,7 @@ func (e *Evaluator) evalAssertStmtNode(node ast.AssertStmtNode) (Object, error) 
 	}
 
 	if !IsTruthy(exp) {
-		return e.wrapResult(node, NIL, NewAssertError(node.Exp))
+		return NIL, NewAssertError(node.Exp)
 	}
 	return NIL, nil
 }

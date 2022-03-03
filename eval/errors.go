@@ -7,20 +7,37 @@ import (
 	"github.com/shreerangdixit/lox/lex"
 )
 
-type EvalError struct {
-	Node ast.Node
-	Err  error
-}
+type Option func(e *EvalError)
 
-func NewEvalError(node ast.Node, err error) EvalError {
-	return EvalError{
-		Node: node,
-		Err:  err,
+func WithInnerError(inner error) Option {
+	return func(e *EvalError) {
+		e.inner = inner
 	}
 }
 
+type EvalError struct {
+	node  ast.Node
+	err   error
+	inner error
+}
+
+func NewEvalError(node ast.Node, err error, opts ...Option) EvalError {
+	e := EvalError{
+		node: node,
+		err:  err,
+	}
+	for _, opt := range opts {
+		opt(&e)
+	}
+	return e
+}
+
 func (e EvalError) Error() string {
-	return fmt.Sprintf("%v", e.Err)
+	return fmt.Sprintf("%v", e.err)
+}
+
+func (e EvalError) Inner() error {
+	return e.inner
 }
 
 func (e EvalError) ErrorType() string {
@@ -28,17 +45,17 @@ func (e EvalError) ErrorType() string {
 }
 
 func (e EvalError) Begin() lex.Position {
-	return e.Node.Begin()
+	return e.node.Begin()
 }
 
 func (e EvalError) End() lex.Position {
-	return e.Node.End()
+	return e.node.End()
 }
 
 // Loop control flow exit due to `break;`
 type BreakError struct{}
 
-func NewBreakError() error {
+func NewBreakError() BreakError {
 	return BreakError{}
 }
 
@@ -47,7 +64,7 @@ func (e BreakError) Error() string { return "break" }
 // Loop control continue
 type ContinueError struct{}
 
-func NewContinueError() error {
+func NewContinueError() ContinueError {
 	return ContinueError{}
 }
 
@@ -58,7 +75,7 @@ type ReturnError struct {
 	Value Object
 }
 
-func NewReturnError(value Object) error {
+func NewReturnError(value Object) ReturnError {
 	return ReturnError{
 		Value: value,
 	}
@@ -71,7 +88,7 @@ type AssertError struct {
 	Exp ast.Node
 }
 
-func NewAssertError(exp ast.Node) error {
+func NewAssertError(exp ast.Node) AssertError {
 	return AssertError{
 		Exp: exp,
 	}

@@ -15,6 +15,7 @@ type PositionError interface {
 	ErrorType() string
 	Begin() lex.Position
 	End() lex.Position
+	Inner() error
 }
 
 type Formatter struct {
@@ -25,6 +26,14 @@ type Formatter struct {
 
 func NewFormatter(err error, source ScriptSource, contents ScriptContents) (*Formatter, bool) {
 	if err, ok := err.(PositionError); ok {
+		// Unwind stack trace
+		for err.Inner() != nil {
+			var ok bool
+			if err, ok = err.Inner().(PositionError); ok {
+				continue
+			}
+			break
+		}
 		lines := strings.Split(string(contents), "\n")
 		lines = append(lines, "\n") // Hack to ensure we can highlight errors on the last line
 		return &Formatter{
