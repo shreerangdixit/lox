@@ -17,11 +17,12 @@ type Node interface {
 }
 
 type NilNode struct {
+	Token    lex.Token
 	BeginPos lex.Position
 	EndPos   lex.Position
 }
 
-func (n NilNode) String() string      { return "nil" }
+func (n NilNode) String() string      { return n.Token.Literal }
 func (n NilNode) Begin() lex.Position { return n.BeginPos }
 func (n NilNode) End() lex.Position   { return n.EndPos }
 

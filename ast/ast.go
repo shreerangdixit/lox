@@ -784,6 +784,7 @@ func (a *Ast) atom() (Node, error) {
 		}, nil
 	} else if a.consume(lex.TT_NIL) {
 		return NilNode{
+			Token:    a.curr,
 			BeginPos: a.curr.BeginPosition,
 			EndPos:   a.curr.EndPosition,
 		}, nil
