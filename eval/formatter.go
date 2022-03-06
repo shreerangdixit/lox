@@ -1,4 +1,4 @@
-package run
+package eval
 
 import (
 	"fmt"
@@ -6,9 +6,6 @@ import (
 
 	"github.com/shreerangdixit/redes/lex"
 )
-
-type Source string
-type Commands string
 
 type PositionError interface {
 	error
@@ -19,12 +16,12 @@ type PositionError interface {
 }
 
 type Formatter struct {
-	source Source
+	source ModuleSource
 	lines  []string
 	err    PositionError
 }
 
-func NewFormatter(err error, source Source, contents Commands) (*Formatter, bool) {
+func NewFormatter(err error, source ModuleSource, contents ModuleCommands) (*Formatter, bool) {
 	if err, ok := err.(PositionError); ok {
 		// Unwind stack trace
 		for err.Inner() != nil {

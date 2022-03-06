@@ -8,15 +8,19 @@ import (
 	"github.com/shreerangdixit/redes/lex"
 )
 
+type ImportHandler func(*Evaluator, Module) error
+
 type Evaluator struct {
 	env      *Environment
 	deferred []ast.CallNode
+	importer ImportHandler
 }
 
 func NewEvaluator() *Evaluator {
 	return &Evaluator{
 		env:      NewEnvironment(),
 		deferred: make([]ast.CallNode, 0, 20),
+		importer: Import,
 	}
 }
 

@@ -79,7 +79,7 @@ func (r *Repl) Start() {
 }
 
 func (r *Repl) printErr(cmd string, err error) {
-	if formatter, ok := NewFormatter(err, Source("<repl>"), Commands(cmd)); ok {
+	if formatter, ok := eval.NewFormatter(err, eval.ModuleSource("<repl>"), eval.ModuleCommands(cmd)); ok {
 		fmt.Fprintf(r.out, "%s", formatter.Format())
 		return
 	}
