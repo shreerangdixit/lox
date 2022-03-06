@@ -6,10 +6,11 @@ import (
 
 var globals map[string]Object = make(map[string]Object)
 
-func init() {
-	// Declare native functions
-	for _, f := range NativeFunctions {
-		globals[f.Name()] = f
+func RegisterGlobal(name string, obj Object) {
+	if _, ok := globals[name]; !ok {
+		globals[name] = obj
+	} else {
+		panic(fmt.Errorf("duplicate global symbol: %s", name))
 	}
 }
 

@@ -8,6 +8,34 @@ import (
 	"github.com/shreerangdixit/redes/ast"
 )
 
+var natives = []*NativeFunction{
+	// Time
+	NewNativeFunction("sleep", 1, false, sleepHandler),
+	NewNativeFunction("time", 0, false, timeHandler),
+	// Math
+	NewNativeFunction("abs", 1, false, absHandler),
+	NewNativeFunction("max", 2, false, maxHandler),
+	NewNativeFunction("min", 2, false, minHandler),
+	NewNativeFunction("avg", 1, false, avgHandler),
+	NewNativeFunction("sqrt", 1, false, sqrtHandler),
+	// Collections
+	NewNativeFunction("len", 1, false, lenHandler),
+	NewNativeFunction("append", 2, false, appendHandler),
+	// IO
+	NewNativeFunction("print", 0, true, printHandler),
+	NewNativeFunction("println", 0, true, printlnHandler),
+	// Misc
+	NewNativeFunction("type", 1, false, typeHandler),
+	NewNativeFunction("zen", 0, false, zenHandler),
+}
+
+func init() {
+	// Declare native functions
+	for _, f := range natives {
+		RegisterGlobal(f.Name(), f)
+	}
+}
+
 // ------------------------------------
 // User function
 // ------------------------------------
@@ -53,7 +81,7 @@ func (f *UserFunction) Call(e *Evaluator, args []Object) (Object, error) {
 }
 
 // ------------------------------------
-// Native (in-built) functions
+// Native function
 // ------------------------------------
 
 type NativeFunctionHandler func(e *Evaluator, args []Object) (Object, error)
@@ -81,26 +109,9 @@ func (f *NativeFunction) Arity() int                                       { ret
 func (f *NativeFunction) Variadic() bool                                   { return f.variadic }
 func (f *NativeFunction) Call(e *Evaluator, args []Object) (Object, error) { return f.handler(e, args) }
 
-var NativeFunctions = []*NativeFunction{
-	// Time
-	NewNativeFunction("sleep", 1, false, sleepHandler),
-	NewNativeFunction("time", 0, false, timeHandler),
-	// Math
-	NewNativeFunction("abs", 1, false, absHandler),
-	NewNativeFunction("max", 2, false, maxHandler),
-	NewNativeFunction("min", 2, false, minHandler),
-	NewNativeFunction("avg", 1, false, avgHandler),
-	NewNativeFunction("sqrt", 1, false, sqrtHandler),
-	// Collections
-	NewNativeFunction("len", 1, false, lenHandler),
-	NewNativeFunction("append", 2, false, appendHandler),
-	// IO
-	NewNativeFunction("print", 0, true, printHandler),
-	NewNativeFunction("println", 0, true, printlnHandler),
-	// Misc
-	NewNativeFunction("type", 1, false, typeHandler),
-	NewNativeFunction("zen", 0, false, zenHandler),
-}
+// ------------------------------------
+// Native declarations
+// ------------------------------------
 
 func sleepHandler(e *Evaluator, args []Object) (Object, error) {
 	arg, ok := args[0].(Number)
@@ -227,9 +238,9 @@ func printlnHandler(e *Evaluator, args []Object) (Object, error) {
 
 func zenHandler(e *Evaluator, args []Object) (Object, error) {
 	fmt.Println(`
-				---------------
-				The Zen of Lox
-				---------------
+				----------------
+				The Zen of Redes
+				----------------
 			 Donut is better than Bagel.
 			   Cat is better than Dog.
 			   Gin is better than Beer.

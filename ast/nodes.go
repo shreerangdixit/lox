@@ -17,6 +17,7 @@ type Node interface {
 }
 
 type NilNode struct {
+	Node
 	Token    lex.Token
 	BeginPos lex.Position
 	EndPos   lex.Position
@@ -27,6 +28,7 @@ func (n NilNode) Begin() lex.Position { return n.BeginPos }
 func (n NilNode) End() lex.Position   { return n.EndPos }
 
 type ProgramNode struct {
+	Node
 	Declarations []Node
 	BeginPos     lex.Position
 	EndPos       lex.Position
@@ -46,6 +48,7 @@ func (n ProgramNode) String() string {
 }
 
 type IdentifierNode struct {
+	Node
 	Token    lex.Token
 	BeginPos lex.Position
 	EndPos   lex.Position
@@ -56,6 +59,7 @@ func (n IdentifierNode) End() lex.Position   { return n.EndPos }
 func (n IdentifierNode) String() string      { return n.Token.Literal }
 
 type AssignmentNode struct {
+	Node
 	Identifier IdentifierNode
 	Value      Node
 	BeginPos   lex.Position
@@ -67,6 +71,7 @@ func (n AssignmentNode) End() lex.Position   { return n.EndPos }
 func (n AssignmentNode) String() string      { return fmt.Sprintf("%s=%s", n.Identifier, n.Value) }
 
 type VarStmtNode struct {
+	Node
 	Identifier IdentifierNode
 	Value      Node
 	BeginPos   lex.Position
@@ -78,6 +83,7 @@ func (n VarStmtNode) End() lex.Position   { return n.EndPos }
 func (n VarStmtNode) String() string      { return fmt.Sprintf("var %s=%s", n.Identifier, n.Value) }
 
 type ExpStmtNode struct {
+	Node
 	Exp      Node
 	BeginPos lex.Position
 	EndPos   lex.Position
@@ -88,6 +94,7 @@ func (n ExpStmtNode) End() lex.Position   { return n.EndPos }
 func (n ExpStmtNode) String() string      { return n.Exp.String() }
 
 type IfStmtNode struct {
+	Node
 	Exp       Node
 	TrueStmt  Node
 	FalseStmt Node
@@ -107,6 +114,7 @@ func (n IfStmtNode) String() string {
 }
 
 type WhileStmtNode struct {
+	Node
 	Condition Node
 	Body      Node
 	BeginPos  lex.Position
@@ -118,6 +126,7 @@ func (n WhileStmtNode) End() lex.Position   { return n.EndPos }
 func (n WhileStmtNode) String() string      { return fmt.Sprintf("while(%s)\n\t%s", n.Condition, n.Body) }
 
 type BreakStmtNode struct {
+	Node
 	Token    lex.Token
 	BeginPos lex.Position
 	EndPos   lex.Position
@@ -128,6 +137,7 @@ func (n BreakStmtNode) End() lex.Position   { return n.EndPos }
 func (n BreakStmtNode) String() string      { return n.Token.String() }
 
 type ContinueStmtNode struct {
+	Node
 	Token    lex.Token
 	BeginPos lex.Position
 	EndPos   lex.Position
@@ -138,6 +148,7 @@ func (n ContinueStmtNode) End() lex.Position   { return n.EndPos }
 func (n ContinueStmtNode) String() string      { return n.Token.String() }
 
 type ReturnStmtNode struct {
+	Node
 	Exp      Node
 	BeginPos lex.Position
 	EndPos   lex.Position
@@ -154,6 +165,7 @@ func (n ReturnStmtNode) String() string {
 }
 
 type DeferStmtNode struct {
+	Node
 	Call     CallNode
 	BeginPos lex.Position
 	EndPos   lex.Position
@@ -164,6 +176,7 @@ func (n DeferStmtNode) End() lex.Position   { return n.EndPos }
 func (n DeferStmtNode) String() string      { return fmt.Sprintf("defer %s", n.Call) }
 
 type AssertStmtNode struct {
+	Node
 	Exp      Node
 	BeginPos lex.Position
 	EndPos   lex.Position
@@ -174,6 +187,7 @@ func (n AssertStmtNode) End() lex.Position   { return n.EndPos }
 func (n AssertStmtNode) String() string      { return fmt.Sprintf("assert %s", n.Exp) }
 
 type BlockNode struct {
+	Node
 	Declarations []Node
 	BeginPos     lex.Position
 	EndPos       lex.Position
@@ -184,6 +198,7 @@ func (n BlockNode) End() lex.Position   { return n.EndPos }
 func (n BlockNode) String() string      { return fmt.Sprintf("{\n\t%s\n}", n.Declarations) }
 
 type ExpNode struct {
+	Node
 	Exp      Node
 	BeginPos lex.Position
 	EndPos   lex.Position
@@ -194,6 +209,7 @@ func (n ExpNode) End() lex.Position   { return n.EndPos }
 func (n ExpNode) String() string      { return n.Exp.String() }
 
 type TernaryOpNode struct {
+	Node
 	Exp      Node
 	TrueExp  Node
 	FalseExp Node
@@ -209,6 +225,7 @@ func (n TernaryOpNode) String() string {
 }
 
 type BinaryOpNode struct {
+	Node
 	LeftExp  Node
 	Op       lex.Token
 	RightExp Node
@@ -221,6 +238,7 @@ func (n BinaryOpNode) End() lex.Position   { return n.EndPos }
 func (n BinaryOpNode) String() string      { return fmt.Sprintf("%s %s %s", n.LeftExp, n.Op, n.RightExp) }
 
 type UnaryOpNode struct {
+	Node
 	Op       lex.Token
 	Operand  Node
 	BeginPos lex.Position
@@ -232,6 +250,7 @@ func (n UnaryOpNode) End() lex.Position   { return n.EndPos }
 func (n UnaryOpNode) String() string      { return fmt.Sprintf("%s%s", n.Op, n.Operand) }
 
 type LogicalAndNode struct {
+	Node
 	LHS      Node
 	RHS      Node
 	BeginPos lex.Position
@@ -243,6 +262,7 @@ func (n LogicalAndNode) End() lex.Position   { return n.EndPos }
 func (n LogicalAndNode) String() string      { return fmt.Sprintf("%s && %s", n.LHS, n.RHS) }
 
 type LogicalOrNode struct {
+	Node
 	LHS      Node
 	RHS      Node
 	BeginPos lex.Position
@@ -254,6 +274,7 @@ func (n LogicalOrNode) End() lex.Position   { return n.EndPos }
 func (n LogicalOrNode) String() string      { return fmt.Sprintf("%s || %s", n.LHS, n.RHS) }
 
 type BooleanNode struct {
+	Node
 	Token    lex.Token
 	BeginPos lex.Position
 	EndPos   lex.Position
@@ -264,6 +285,7 @@ func (n BooleanNode) End() lex.Position   { return n.EndPos }
 func (n BooleanNode) String() string      { return n.Token.String() }
 
 type NumberNode struct {
+	Node
 	Token    lex.Token
 	BeginPos lex.Position
 	EndPos   lex.Position
@@ -274,6 +296,7 @@ func (n NumberNode) End() lex.Position   { return n.EndPos }
 func (n NumberNode) String() string      { return n.Token.Literal }
 
 type StringNode struct {
+	Node
 	Token    lex.Token
 	BeginPos lex.Position
 	EndPos   lex.Position
@@ -284,6 +307,7 @@ func (n StringNode) End() lex.Position   { return n.EndPos }
 func (n StringNode) String() string      { return n.Token.Literal }
 
 type ListNode struct {
+	Node
 	Elements []Node
 	BeginPos lex.Position
 	EndPos   lex.Position
@@ -302,6 +326,7 @@ func (n ListNode) String() string {
 }
 
 type CallNode struct {
+	Node
 	Callee    Node
 	Arguments []Node
 	BeginPos  lex.Position
@@ -316,6 +341,7 @@ func (n CallNode) String() string {
 }
 
 type IndexOfNode struct {
+	Node
 	Sequence Node
 	Index    Node
 	BeginPos lex.Position
@@ -327,6 +353,7 @@ func (n IndexOfNode) End() lex.Position   { return n.EndPos }
 func (n IndexOfNode) String() string      { return fmt.Sprintf("%s[%s]", n.Sequence, n.Index) }
 
 type FunctionNode struct {
+	Node
 	Identifier IdentifierNode
 	Parameters []IdentifierNode
 	Body       BlockNode
@@ -342,6 +369,7 @@ func (n FunctionNode) String() string {
 }
 
 type KeyValueNode struct {
+	Node
 	Key      Node
 	Value    Node
 	BeginPos lex.Position
@@ -353,6 +381,7 @@ func (n KeyValueNode) End() lex.Position   { return n.EndPos }
 func (n KeyValueNode) String() string      { return fmt.Sprintf("%s:%s", n.Key.String(), n.Value.String()) }
 
 type MapNode struct {
+	Node
 	Elements []KeyValueNode
 	BeginPos lex.Position
 	EndPos   lex.Position
@@ -363,6 +392,7 @@ func (n MapNode) End() lex.Position   { return n.EndPos }
 func (n MapNode) String() string      { return fmt.Sprintf("{%s}", n.Elements) }
 
 type CommentNode struct {
+	Node
 	Token    lex.Token
 	BeginPos lex.Position
 	EndPos   lex.Position
