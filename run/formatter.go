@@ -7,8 +7,8 @@ import (
 	"github.com/shreerangdixit/redes/lex"
 )
 
-type ScriptSource string
-type ScriptContents string
+type Source string
+type Commands string
 
 type PositionError interface {
 	error
@@ -19,12 +19,12 @@ type PositionError interface {
 }
 
 type Formatter struct {
-	source ScriptSource
+	source Source
 	lines  []string
 	err    PositionError
 }
 
-func NewFormatter(err error, source ScriptSource, contents ScriptContents) (*Formatter, bool) {
+func NewFormatter(err error, source Source, contents Commands) (*Formatter, bool) {
 	if err, ok := err.(PositionError); ok {
 		// Unwind stack trace
 		for err.Inner() != nil {

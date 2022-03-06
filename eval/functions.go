@@ -3,6 +3,7 @@ package eval
 import (
 	"fmt"
 	"math"
+	"os"
 	"time"
 
 	"github.com/shreerangdixit/redes/ast"
@@ -27,6 +28,9 @@ var natives = []*NativeFunction{
 	// Misc
 	NewNativeFunction("type", 1, false, typeHandler),
 	NewNativeFunction("zen", 0, false, zenHandler),
+	// OS
+	NewNativeFunction("exit", 1, false, exitHandler),
+	NewNativeFunction("quit", 0, false, quitHandler),
 }
 
 func init() {
@@ -57,6 +61,7 @@ func (f *UserFunction) Name() string     { return f.node.Identifier.Token.Litera
 func (f *UserFunction) String() string   { return "<fun-" + f.Name() + ">" }
 func (f *UserFunction) Arity() int       { return len(f.node.Parameters) }
 func (f *UserFunction) Variadic() bool   { return false }
+
 func (f *UserFunction) Call(e *Evaluator, args []Object) (Object, error) {
 	// New environment for function call
 	env := NewEnvironment().WithEnclosing(f.closure)
@@ -250,5 +255,20 @@ func zenHandler(e *Evaluator, args []Object) (Object, error) {
 	Although interpreters are slower than the time it takes to build them.
 	      The principles you learn building them are invaluable.
 	`)
+	return NIL, nil
+}
+
+func exitHandler(e *Evaluator, args []Object) (Object, error) {
+	arg0 := args[0]
+	if code, ok := arg0.(Number); ok {
+		os.Exit(int(code.Value))
+		return NIL, nil
+	} else {
+		return NIL, fmt.Errorf("exit() expects a number")
+	}
+}
+
+func quitHandler(e *Evaluator, args []Object) (Object, error) {
+	os.Exit(0)
 	return NIL, nil
 }

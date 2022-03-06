@@ -51,4 +51,4 @@ ifndef GYCYCLO
 	@go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
 endif
 
-.PHONY: build fmt test test.redes lint lint.fix lint.deps
+.PHONY: build fmt test test.rds lint lint.fix lint.deps

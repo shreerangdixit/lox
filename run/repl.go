@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/shreerangdixit/redes/ast"
 	"github.com/shreerangdixit/redes/build"
@@ -20,27 +21,39 @@ _____  ______ _____  ______  _____
 |_|  \_\______|_____/|______|_____/
 `
 
-func StartREPL(in io.Reader, out io.Writer) {
-	fmt.Fprintf(out, "%s\n", Logo)
-	fmt.Fprintf(out, "%s", build.Info)
+type Repl struct {
+	in     io.Reader
+	out    io.Writer
+	errout io.Writer
+}
 
-	scanner := bufio.NewScanner(in)
+func NewRepl() *Repl {
+	return &Repl{
+		in:     os.Stdin,
+		out:    os.Stdout,
+		errout: os.Stderr,
+	}
+}
+
+func (r *Repl) Start() {
+	fmt.Fprintf(r.out, "%s\n", Logo)
+	fmt.Fprintf(r.out, "%s", build.Info)
+
+	scanner := bufio.NewScanner(r.in)
 	e := eval.NewEvaluator()
 	for {
-		fmt.Printf("redes >>> ")
+		fmt.Fprintf(r.out, "redes >>> ")
 
 		scanned := scanner.Scan()
 		if !scanned {
 			return
 		}
 
-		txt := scanner.Text()
-		if txt == "bye" || txt == "quit" {
-			break
-		}
+		cmd := scanner.Text()
 
-		root, err := ast.New(lex.New(txt)).RootNode()
+		root, err := ast.New(lex.New(cmd)).RootNode()
 		if err != nil {
+			r.printErr(cmd, err)
 			continue
 		}
 
@@ -50,25 +63,27 @@ func StartREPL(in io.Reader, out io.Writer) {
 		if !ok {
 			_, err = e.Evaluate(root)
 			if err != nil {
-				if formatter, ok := NewFormatter(err, ScriptSource("<repl>"), ScriptContents(string(txt))); ok {
-					fmt.Fprintf(out, "%s", formatter.Format())
-					continue
-				}
-				fmt.Fprintf(out, "%s\n", err)
+				r.printErr(cmd, err)
+				continue
 			}
 		} else {
 			val, err := e.Evaluate(exp)
 			if err != nil {
-				if formatter, ok := NewFormatter(err, ScriptSource("<repl>"), ScriptContents(string(txt))); ok {
-					fmt.Fprintf(out, "%s", formatter.Format())
-					continue
-				}
-				fmt.Fprintf(out, "%s\n", err)
+				r.printErr(cmd, err)
+				continue
 			} else if val != eval.NIL {
-				fmt.Fprintf(out, "%s\n", val)
+				fmt.Fprintf(r.out, "%s\n", val)
 			}
 		}
 	}
+}
+
+func (r *Repl) printErr(cmd string, err error) {
+	if formatter, ok := NewFormatter(err, Source("<repl>"), Commands(cmd)); ok {
+		fmt.Fprintf(r.out, "%s", formatter.Format())
+		return
+	}
+	fmt.Fprintf(r.out, "%s\n", err)
 }
 
 func isSingleExpression(node ast.Node) (ast.Node, bool) {

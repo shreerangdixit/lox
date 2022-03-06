@@ -27,6 +27,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "%s\n", err)
 		}
 	} else {
-		run.StartREPL(os.Stdin, os.Stdout)
+		r := run.NewRepl()
+		r.Start()
 	}
 }

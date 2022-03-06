@@ -23,7 +23,7 @@ func RunFile(file string) error {
 
 	root, err := ast.New(lex.New(string(script))).RootNode()
 	if err != nil {
-		if formatter, ok := NewFormatter(err, ScriptSource(file), ScriptContents(string(script))); ok {
+		if formatter, ok := NewFormatter(err, Source(file), Commands(string(script))); ok {
 			fmt.Fprintf(os.Stderr, "%s", formatter.Format())
 			os.Exit(1)
 		}
@@ -33,7 +33,7 @@ func RunFile(file string) error {
 	e := eval.NewEvaluator()
 	_, err = e.Evaluate(root)
 	if err != nil {
-		if formatter, ok := NewFormatter(err, ScriptSource(file), ScriptContents(string(script))); ok {
+		if formatter, ok := NewFormatter(err, Source(file), Commands(string(script))); ok {
 			fmt.Fprintf(os.Stderr, "%s", formatter.Format())
 			os.Exit(1)
 		}
