@@ -1,5 +1,9 @@
 import "testlib/fib"
+import "testlib/collatz"
 
 print("TEST IMPORTS...")
+
 assert fibonacci_of(10) == 55
+assert collatz_steps_from(100) == 25
+
 println("OK")
