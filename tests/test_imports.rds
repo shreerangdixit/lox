@@ -1,0 +1,3 @@
+import "testlib/fib"
+
+println(fibonacci_of(10))

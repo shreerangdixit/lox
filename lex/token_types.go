@@ -60,6 +60,7 @@ const (
 	TT_NIL
 	TT_DEFER
 	TT_ASSERT
+	TT_IMPORT
 
 	// Misc
 	TT_COMMENT
@@ -153,6 +154,8 @@ func (t TokenType) String() string {
 		return "defer"
 	case TT_ASSERT:
 		return "assert"
+	case TT_IMPORT:
+		return "import"
 	default:
 		return "<UNKNOWN>"
 	}

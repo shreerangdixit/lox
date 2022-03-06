@@ -256,6 +256,8 @@ func (a *Ast) statement() (Node, error) {
 		return a.deferStatement()
 	} else if a.consume(lex.TT_ASSERT) {
 		return a.assertStatement()
+	} else if a.consume(lex.TT_IMPORT) {
+		return a.importStatement()
 	} else if a.consume(lex.TT_LBRACE) {
 		return a.block()
 	} else {
@@ -437,6 +439,28 @@ func (a *Ast) assertStatement() (Node, error) {
 		BeginPos: begin,
 		EndPos:   end,
 	}, nil
+}
+
+// importStatement -> "import" STRING ;
+func (a *Ast) importStatement() (Node, error) {
+	begin := a.curr.BeginPosition
+
+	atom, err := a.atom()
+	if err != nil {
+		return nil, err
+	}
+
+	end := a.curr.EndPosition
+
+	if str, ok := atom.(StringNode); ok {
+		return ImportStmtNode{
+			Name:     str,
+			BeginPos: begin,
+			EndPos:   end,
+		}, nil
+	} else {
+		return nil, NewSyntaxError("module name must be a string", a.curr)
+	}
 }
 
 // block -> "{" declaration* "}" ;

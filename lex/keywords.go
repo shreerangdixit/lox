@@ -14,4 +14,5 @@ var Keywords = map[string]TokenType{
 	"continue": TT_CONTINUE,
 	"defer":    TT_DEFER,
 	"assert":   TT_ASSERT,
+	"import":   TT_IMPORT,
 }

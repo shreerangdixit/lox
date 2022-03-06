@@ -117,6 +117,9 @@ func (e *Evaluator) eval(node ast.Node) (Object, error) {
 	case ast.CommentNode:
 		obj, err := e.evalCommentNode(node)
 		return e.wrapResult(node, obj, err)
+	case ast.ImportStmtNode:
+		obj, err := e.evalImportNode(node)
+		return e.wrapResult(node, obj, err)
 	}
 	return NIL, fmt.Errorf("invalid node: %T", node)
 }
@@ -490,6 +493,11 @@ func (e *Evaluator) evalAssertStmtNode(node ast.AssertStmtNode) (Object, error) 
 		return NIL, NewAssertError(node.Exp)
 	}
 	return NIL, nil
+}
+
+func (e *Evaluator) evalImportNode(node ast.ImportStmtNode) (Object, error) {
+	m := Module(node.Name.Token.Literal)
+	return NIL, e.importer(e, m)
 }
 
 func (e *Evaluator) evalCommentNode(node ast.CommentNode) (Object, error) {

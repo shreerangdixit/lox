@@ -186,6 +186,17 @@ func (n AssertStmtNode) Begin() lex.Position { return n.BeginPos }
 func (n AssertStmtNode) End() lex.Position   { return n.EndPos }
 func (n AssertStmtNode) String() string      { return fmt.Sprintf("assert %s", n.Exp) }
 
+type ImportStmtNode struct {
+	Node
+	Name     StringNode
+	BeginPos lex.Position
+	EndPos   lex.Position
+}
+
+func (n ImportStmtNode) Begin() lex.Position { return n.BeginPos }
+func (n ImportStmtNode) End() lex.Position   { return n.EndPos }
+func (n ImportStmtNode) String() string      { return fmt.Sprintf("import %s", n.Name) }
+
 type BlockNode struct {
 	Node
 	Declarations []Node
