@@ -1,0 +1,11 @@
+{
+	print("TEST BUILTINS...")
+
+	assert min(1,2) == 1
+	assert max(1,2) == 2
+	assert avg([1,2]) == 1.5
+	assert abs(-0.5) == 0.5
+	assert sqrt(12) == 3.4641016151377544
+
+	println("OK")
+}

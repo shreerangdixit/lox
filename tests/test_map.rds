@@ -1,0 +1,62 @@
+// Maps
+{
+    print("TEST MAP...")
+
+    var e = {}
+    assert len(e) == 0
+
+    var m = {"foo": 1, "bar": "baz", 42: "Life universe and everything"}
+
+    assert len(m) == 3
+    assert m["unknown"] ==  nil
+    assert m["foo"] ==  1
+    assert m["bar"] ==  "baz"
+    assert m[42] ==  "Life universe and everything"
+    assert m[40+2] ==  "Life universe and everything"
+
+    println("OK")
+}
+
+// List of map elements
+{
+    print("TEST LIST OF MAPS...")
+
+    var m = []
+    assert len(m) == 0
+
+    m = append(m, {"name":"bozo"})
+    assert len(m) == 1
+    assert m == [{"name":"bozo"}]
+    assert m[0] == {"name":"bozo"}
+    assert m[0]["name"] == "bozo"
+
+    println("OK")
+}
+
+
+// Map comparison
+{
+    print("TEST MAP COMPARE...")
+
+    var m1 = {}
+    var m2 = {}
+    assert m1 == m2
+
+    m1 = {"foo": 1, "bar": true, "baz": "bozo"}
+    m2 = {"foo": 1, "bar": true, "baz": "bozo"}
+    assert m1 == m2
+
+    m1 = {"foo": 1, "bar": true, "baz": "bozo"}
+    m2 = {"foo": 2, "bar": true, "baz": "bozo"}
+    assert m1 != m2
+
+    m1 = {"foo": 1, "bar": true, "baz": "bozo"}
+    m2 = {"foo": "nope", "bar": true, "baz": "bozo"}
+    assert m1 != m2
+
+    m1 = {}
+    m2 = {"foo": "nope"}
+    assert m1 != m2
+
+    println("OK")
+}

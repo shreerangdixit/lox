@@ -1,0 +1,76 @@
+{
+    print("TEST LIST CONCAT...")
+    var l1 = [1, 2, 3]
+    var l2 = ["one", "two", "three"]
+    assert l1 + l2 == [1, 2, 3, "one", "two", "three"]
+    println("OK")
+}
+
+{
+    print("TEST LIST INDEX...")
+    var l = [1,2,3]
+    assert l[0] == 1
+    assert [1, 2, 3, true][3] == true
+
+    var ll = [[3, 4, 5, 6]]
+    assert ll[0] == [3, 4, 5, 6]
+    assert ll[0][0] == 3
+    assert ll[0][1] == 4
+    assert ll[0][2] == 5
+    assert ll[0][3] == 6
+    println("OK")
+}
+
+{
+    print("TEST LIST append()...")
+
+    var l = []
+
+    assert len(l) == 0
+
+    l = append(l, 1)
+    assert len(l) == 1
+    assert l == [1]
+
+    l = append(l, [2, 3, 4, "YO"])
+    assert len(l) == 5
+    assert l == [1, 2, 3, 4, "YO"]
+
+    l = append(l, "foo")
+    assert len(l) == 6
+    assert l == [1, 2, 3, 4, "YO", "foo"]
+
+    l = append(l, ["bar", "baz"])
+
+    assert len(l) == 8
+    assert l == [1, 2, 3, 4, "YO", "foo", "bar", "baz"]
+
+    println("OK")
+}
+
+// List comparison
+{
+    print("TEST LIST COMPARE...")
+
+    var l1 = []
+    var l2 = []
+    assert l1 == l2
+
+    l1 = [1, 2, 3, 4]
+    l2 = [1, 2, 3, 4]
+    assert l1 == l2
+
+    l1 = [1, 2, 3, 4]
+    l2 = [1, 2, 3, "foo"]
+    assert l1 != l2
+
+    l1 = [1, 2, 3, 4]
+    l2 = [1, 2, 3, 5]
+    assert l1 != l2
+
+    l1 = [1, 2, 3, 4]
+    l2 = [1, 2, 3]
+    assert l1 != l2
+
+    println("OK")
+}

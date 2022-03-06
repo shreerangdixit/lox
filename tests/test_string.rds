@@ -1,0 +1,26 @@
+
+// Append string
+{
+    print("TEST STRING append()...")
+
+    var s = ""
+    assert len(s) == 0
+
+    s = append(s, "foo")
+    assert len(s) == 3
+    assert s == "foo"
+
+    s = append(s, ["bar", "baz"])
+    assert len(s) == 9
+    assert s == "foobarbaz"
+
+    println("OK")
+}
+
+{
+    print("TEST STRING INDEX...")
+    assert "hello world"[3] == "l"
+    var s = "hello world"
+    assert s[4] == "o"
+    println("OK")
+}

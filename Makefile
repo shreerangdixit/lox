@@ -26,7 +26,7 @@ fmt:
 test:
 	@go test -v ./...
 
-test.redes:
+test.rds:
 	@make
 	@for file in $(REDES_TEST_FILES); do \
 		set -e ; \
