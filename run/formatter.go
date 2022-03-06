@@ -47,7 +47,11 @@ func NewFormatter(err error, source Source, contents Commands) (*Formatter, bool
 
 func (f *Formatter) Format() string {
 	str := fmt.Sprintf("\n%s:%d:%d %s error: %v\n", f.source, f.err.End().Line, f.err.End().Column, f.err.ErrorType(), f.err)
-	str += fmt.Sprintf("%s\n", f.lines[f.err.End().Line-1])
+	endline := f.err.End().Line - 1
+	if endline < 0 {
+		endline = 0
+	}
+	str += fmt.Sprintf("%s\n", f.lines[endline])
 	str += fmt.Sprintf("%s\n", f.arrows())
 	return str
 }
