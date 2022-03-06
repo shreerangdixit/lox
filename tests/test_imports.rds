@@ -1,3 +1,5 @@
 import "testlib/fib"
 
-println(fibonacci_of(10))
+print("TEST IMPORTS...")
+assert fibonacci_of(10) == 55
+println("OK")
