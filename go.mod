@@ -1,4 +1,4 @@
-module github.com/shreerangdixit/lox
+module github.com/shreerangdixit/redes
 
 go 1.16
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/shreerangdixit/lox/lex"
+	"github.com/shreerangdixit/redes/lex"
 )
 
 type ScriptSource string

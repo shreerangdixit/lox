@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/shreerangdixit/lox/ast"
-	"github.com/shreerangdixit/lox/eval"
-	"github.com/shreerangdixit/lox/lex"
+	"github.com/shreerangdixit/redes/ast"
+	"github.com/shreerangdixit/redes/eval"
+	"github.com/shreerangdixit/redes/lex"
 )
 
 func RunFile(file string) error {

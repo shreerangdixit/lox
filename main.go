@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/shreerangdixit/lox/build"
-	"github.com/shreerangdixit/lox/run"
+	"github.com/shreerangdixit/redes/build"
+	"github.com/shreerangdixit/redes/run"
 )
 
 var flagVer bool

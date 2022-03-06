@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/shreerangdixit/lox/ast"
-	"github.com/shreerangdixit/lox/lex"
+	"github.com/shreerangdixit/redes/ast"
+	"github.com/shreerangdixit/redes/lex"
 )
 
 type Evaluator struct {

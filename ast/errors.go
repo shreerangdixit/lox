@@ -3,7 +3,7 @@ package ast
 import (
 	"fmt"
 
-	"github.com/shreerangdixit/lox/lex"
+	"github.com/shreerangdixit/redes/lex"
 )
 
 type SyntaxError struct {

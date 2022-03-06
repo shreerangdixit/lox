@@ -6,13 +6,13 @@ BUILD_OS := $(shell uname -s)
 BUILD_HOST := $(shell uname -n)
 BUILD_ARCH := $(shell uname -mp)
 BUILD_KERNEL_VERSION := $(shell uname -r)
-BUILD_FLAGS := "-X 'github.com/shreerangdixit/lox/build.version=$(VERSION)' \
-	            -X 'github.com/shreerangdixit/lox/build.date=$(BUILD_DATE)' \
-	            -X 'github.com/shreerangdixit/lox/build.os=$(BUILD_OS)' \
-	            -X 'github.com/shreerangdixit/lox/build.host=$(BUILD_HOST)' \
-	            -X 'github.com/shreerangdixit/lox/build.arch=$(BUILD_ARCH)' \
-	            -X 'github.com/shreerangdixit/lox/build.kernelVersion=$(BUILD_KERNEL_VERSION)'"
-LOX_TEST_FILES := $(sort $(shell find ./tests -type f -name '*.lox' -print))
+BUILD_FLAGS := "-X 'github.com/shreerangdixit/redes/build.version=$(VERSION)' \
+	            -X 'github.com/shreerangdixit/redes/build.date=$(BUILD_DATE)' \
+	            -X 'github.com/shreerangdixit/redes/build.os=$(BUILD_OS)' \
+	            -X 'github.com/shreerangdixit/redes/build.host=$(BUILD_HOST)' \
+	            -X 'github.com/shreerangdixit/redes/build.arch=$(BUILD_ARCH)' \
+	            -X 'github.com/shreerangdixit/redes/build.kernelVersion=$(BUILD_KERNEL_VERSION)'"
+REDES_TEST_FILES := $(sort $(shell find ./tests -type f -name '*.rds' -print))
 
 default: build
 
@@ -26,11 +26,11 @@ fmt:
 test:
 	@go test -v ./...
 
-test.lox:
+test.redes:
 	@make
-	@for file in $(LOX_TEST_FILES); do \
+	@for file in $(REDES_TEST_FILES); do \
 		set -e ; \
-		./lox $$file; \
+		./redes $$file; \
 	done
 
 lint: lint.deps
@@ -51,4 +51,4 @@ ifndef GYCYCLO
 	@go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
 endif
 
-.PHONY: build fmt test test.lox lint lint.fix lint.deps
+.PHONY: build fmt test test.redes lint lint.fix lint.deps

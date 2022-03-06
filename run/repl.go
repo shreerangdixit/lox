@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/shreerangdixit/lox/ast"
-	"github.com/shreerangdixit/lox/build"
-	"github.com/shreerangdixit/lox/eval"
-	"github.com/shreerangdixit/lox/lex"
+	"github.com/shreerangdixit/redes/ast"
+	"github.com/shreerangdixit/redes/build"
+	"github.com/shreerangdixit/redes/eval"
+	"github.com/shreerangdixit/redes/lex"
 )
 
 const Logo = `
@@ -27,7 +27,7 @@ func StartREPL(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 	e := eval.NewEvaluator()
 	for {
-		fmt.Printf("lox >>> ")
+		fmt.Printf("redes >>> ")
 
 		scanned := scanner.Scan()
 		if !scanned {

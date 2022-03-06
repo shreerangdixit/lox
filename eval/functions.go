@@ -5,7 +5,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/shreerangdixit/lox/ast"
+	"github.com/shreerangdixit/redes/ast"
 )
 
 // ------------------------------------
