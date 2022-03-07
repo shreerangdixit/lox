@@ -8,20 +8,20 @@ import (
 	"github.com/shreerangdixit/redes/lex"
 )
 
-type ImportHandler func(*Evaluator, Module) error
-
 type Evaluator struct {
+	Importer *Importer
+
 	env      *Environment
 	deferred []ast.CallNode
-	importer ImportHandler
 }
 
 func NewEvaluator() *Evaluator {
-	return &Evaluator{
+	e := Evaluator{
 		env:      NewEnvironment(),
 		deferred: make([]ast.CallNode, 0, 20),
-		importer: Import,
 	}
+	e.Importer = NewImporter(&e)
+	return &e
 }
 
 func (e *Evaluator) Evaluate(root ast.Node) (Object, error) {
@@ -496,8 +496,8 @@ func (e *Evaluator) evalAssertStmtNode(node ast.AssertStmtNode) (Object, error) 
 }
 
 func (e *Evaluator) evalImportNode(node ast.ImportStmtNode) (Object, error) {
-	m := Module(node.Name.Token.Literal)
-	return NIL, e.importer(e, m)
+	m := NewModule(node.Name.Token.Literal)
+	return NIL, e.Importer.Import(m)
 }
 
 func (e *Evaluator) evalCommentNode(node ast.CommentNode) (Object, error) {

@@ -79,11 +79,11 @@ func (r *Repl) Start() {
 }
 
 func (r *Repl) printErr(cmd string, err error) {
-	if formatter, ok := eval.NewFormatter(err, eval.ModuleSource("<repl>"), eval.ModuleCommands(cmd)); ok {
-		fmt.Fprintf(r.out, "%s", formatter.Format())
-		return
-	}
-	fmt.Fprintf(r.out, "%s\n", err)
+	// if formatter, ok := eval.NewFormatter(err, eval.ModuleSource("<repl>"), eval.ModuleCommands(cmd)); ok {
+	// 	fmt.Fprintf(r.out, "%s", formatter.Format())
+	// 	return
+	// }
+	// fmt.Fprintf(r.out, "%s\n", err)
 }
 
 func isSingleExpression(node ast.Node) (ast.Node, bool) {

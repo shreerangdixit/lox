@@ -1,40 +1,48 @@
 package eval
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-type Module string
-type ModuleCommands string
-type ModuleSource string
-
-func ModuleFromFile(path string) Module {
-	return Module(strings.TrimSuffix(path, filepath.Ext(path)))
+type Module struct {
+	Path   string
+	Name   string
+	Parent string
 }
 
-func (m Module) Source() ModuleSource {
-	curr, err := os.Getwd()
-	if err != nil {
-		panic(err)
+func NewModule(path string) *Module {
+	if !filepath.IsAbs(path) {
+		cwd, err := os.Getwd()
+		if err != nil {
+			panic(err)
+		}
+
+		path, err = filepath.Abs(filepath.Join(cwd, path))
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	return ModuleSource(filepath.Join(curr, fmt.Sprintf("%s.rds", string(m))))
+	pathWithoutExt := strings.TrimSuffix(path, filepath.Ext(path))
+	name := filepath.Base(pathWithoutExt)
+	parent := strings.TrimSuffix(path, filepath.Base(path))
+	if !strings.HasSuffix(path, ".rds") {
+		path += ".rds"
+	}
+	return &Module{
+		Path:   path,
+		Name:   name,
+		Parent: parent,
+	}
 }
 
-func (m Module) Commands() (ModuleCommands, error) {
-	modulePath := fmt.Sprintf("%s.rds", string(m))
-	file, err := filepath.Abs(modulePath)
+func (m *Module) Data() (string, error) {
+	data, err := os.ReadFile(m.Path)
 	if err != nil {
 		return "", err
 	}
 
-	cmds, err := os.ReadFile(file)
-	if err != nil {
-		return "", err
-	}
-
-	return ModuleCommands(cmds), nil
+	return string(data), nil
 }

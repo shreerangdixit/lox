@@ -19,5 +19,6 @@ func RunFile(file string) error {
 		panic(err)
 	}
 
-	return eval.Import(eval.NewEvaluator(), eval.ModuleFromFile(abspath))
+	e := eval.NewEvaluator()
+	return e.Importer.Import(eval.NewModule(abspath))
 }
