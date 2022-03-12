@@ -7,22 +7,22 @@ import (
 	"github.com/shreerangdixit/redes/lex"
 )
 
-type Option func(e *EvalError)
+type Option func(e *EvaluateError)
 
 func WithInnerError(inner error) Option {
-	return func(e *EvalError) {
+	return func(e *EvaluateError) {
 		e.inner = inner
 	}
 }
 
-type EvalError struct {
+type EvaluateError struct {
 	node  ast.Node
 	err   error
 	inner error
 }
 
-func NewEvalError(node ast.Node, err error, opts ...Option) EvalError {
-	e := EvalError{
+func NewEvaluateError(node ast.Node, err error, opts ...Option) EvaluateError {
+	e := EvaluateError{
 		node: node,
 		err:  err,
 	}
@@ -32,23 +32,23 @@ func NewEvalError(node ast.Node, err error, opts ...Option) EvalError {
 	return e
 }
 
-func (e EvalError) Error() string {
+func (e EvaluateError) Error() string {
 	return fmt.Sprintf("%v", e.err)
 }
 
-func (e EvalError) Inner() error {
+func (e EvaluateError) Inner() error {
 	return e.inner
 }
 
-func (e EvalError) ErrorType() string {
+func (e EvaluateError) ErrorType() string {
 	return "runtime"
 }
 
-func (e EvalError) Begin() lex.Position {
+func (e EvaluateError) Begin() lex.Position {
 	return e.node.Begin()
 }
 
-func (e EvalError) End() lex.Position {
+func (e EvaluateError) End() lex.Position {
 	return e.node.End()
 }
 

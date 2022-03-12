@@ -21,13 +21,13 @@ type Module interface {
 	Path() string
 }
 
-type Formatter struct {
+type ErrorFormatter struct {
 	mod   Module
 	lines []string
 	err   PositionError
 }
 
-func NewFormatter(err error, mod Module) (*Formatter, bool) {
+func NewErrorFormatter(err error, mod Module) (*ErrorFormatter, bool) {
 	if err, ok := err.(PositionError); ok {
 		// Unwind stack trace
 		for err.Inner() != nil {
@@ -40,7 +40,7 @@ func NewFormatter(err error, mod Module) (*Formatter, bool) {
 		if data, e := mod.Data(); e == nil {
 			lines := strings.Split(data, "\n")
 			lines = append(lines, "\n") // Hack to ensure we can highlight errors on the last line
-			return &Formatter{
+			return &ErrorFormatter{
 				mod:   mod,
 				lines: lines,
 				err:   err,
@@ -52,7 +52,7 @@ func NewFormatter(err error, mod Module) (*Formatter, bool) {
 	return nil, false
 }
 
-func (f *Formatter) Format() string {
+func (f *ErrorFormatter) Format() string {
 	str := fmt.Sprintf("\n%s:%d:%d %s error: %v\n", f.mod.Path(), f.err.End().Line, f.err.End().Column, f.err.ErrorType(), f.err)
 	endLine := f.err.End().Line - 1
 	if endLine < 0 {
@@ -63,7 +63,7 @@ func (f *Formatter) Format() string {
 	return str
 }
 
-func (f *Formatter) arrows() string {
+func (f *ErrorFormatter) arrows() string {
 	str := ""
 	beginCol := f.err.Begin().Column
 	endCol := f.err.End().Column

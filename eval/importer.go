@@ -35,7 +35,7 @@ func (i *Importer) Import(m *FileModule) error {
 
 	root, err := ast.New(lex.New(string(cmds))).RootNode()
 	if err != nil {
-		if formatter, ok := NewFormatter(err, m); ok {
+		if formatter, ok := NewErrorFormatter(err, m); ok {
 			fmt.Fprintf(os.Stderr, "%s", formatter.Format())
 			os.Exit(1)
 		}
@@ -46,7 +46,7 @@ func (i *Importer) Import(m *FileModule) error {
 	i.importSet[*m] = struct{}{}
 	_, err = i.eval.Evaluate(root)
 	if err != nil {
-		if formatter, ok := NewFormatter(err, i.latest); ok {
+		if formatter, ok := NewErrorFormatter(err, i.latest); ok {
 			fmt.Fprintf(os.Stderr, "%s", formatter.Format())
 			os.Exit(1)
 		}

@@ -131,10 +131,10 @@ func (e *Evaluator) wrapResult(node ast.Node, obj Object, err error) (Object, er
 		case ContinueError:
 		case ReturnError:
 			return obj, err
-		case EvalError:
-			return obj, NewEvalError(node, err, WithInnerError(err))
+		case EvaluateError:
+			return obj, NewEvaluateError(node, err, WithInnerError(err))
 		default:
-			return obj, NewEvalError(node, err)
+			return obj, NewEvaluateError(node, err)
 		}
 	}
 	return obj, err
