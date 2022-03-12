@@ -496,7 +496,7 @@ func (e *Evaluator) evalAssertStmtNode(node ast.AssertStmtNode) (Object, error) 
 }
 
 func (e *Evaluator) evalImportNode(node ast.ImportStmtNode) (Object, error) {
-	m := NewModule(node.Name.Token.Literal)
+	m := NewFileModule(node.Name.Token.Literal)
 	return NIL, e.Importer.Import(m)
 }
 

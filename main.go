@@ -19,15 +19,14 @@ func main() {
 	flag.Parse()
 
 	if flagVer {
-		fmt.Fprint(os.Stdout, build.Info)
+		fmt.Println(build.Info)
 		os.Exit(0)
 	} else if len(os.Args) > 1 {
-		err := run.RunFile(os.Args[1])
+		err := run.File(os.Args[1])
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%s\n", err)
 		}
 	} else {
-		r := run.NewRepl()
-		r.Start()
+		run.REPL()
 	}
 }

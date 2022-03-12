@@ -21,21 +21,26 @@ _____  ______ _____  ______  _____
 |_|  \_\______|_____/|______|_____/
 `
 
-type Repl struct {
+func REPL() {
+	r := newRepl()
+	r.Start()
+}
+
+type repl struct {
 	in     io.Reader
 	out    io.Writer
 	errout io.Writer
 }
 
-func NewRepl() *Repl {
-	return &Repl{
+func newRepl() *repl {
+	return &repl{
 		in:     os.Stdin,
 		out:    os.Stdout,
 		errout: os.Stderr,
 	}
 }
 
-func (r *Repl) Start() {
+func (r *repl) Start() {
 	fmt.Fprintf(r.out, "%s\n", Logo)
 	fmt.Fprintf(r.out, "%s", build.Info)
 
@@ -78,12 +83,12 @@ func (r *Repl) Start() {
 	}
 }
 
-func (r *Repl) printErr(cmd string, err error) {
-	// if formatter, ok := eval.NewFormatter(err, eval.ModuleSource("<repl>"), eval.ModuleCommands(cmd)); ok {
-	// 	fmt.Fprintf(r.out, "%s", formatter.Format())
-	// 	return
-	// }
-	// fmt.Fprintf(r.out, "%s\n", err)
+func (r *repl) printErr(cmd string, err error) {
+	if formatter, ok := eval.NewFormatter(err, eval.NewInMemoryModule("<repl>", "<repl>", cmd)); ok {
+		fmt.Fprintf(r.out, "%s", formatter.Format())
+		return
+	}
+	fmt.Fprintf(r.out, "%s\n", err)
 }
 
 func isSingleExpression(node ast.Node) (ast.Node, bool) {

@@ -15,13 +15,19 @@ type PositionError interface {
 	Inner() error
 }
 
+type Module interface {
+	Data() (string, error)
+	Name() string
+	Path() string
+}
+
 type Formatter struct {
-	mod   *Module
+	mod   Module
 	lines []string
 	err   PositionError
 }
 
-func NewFormatter(err error, mod *Module) (*Formatter, bool) {
+func NewFormatter(err error, mod Module) (*Formatter, bool) {
 	if err, ok := err.(PositionError); ok {
 		// Unwind stack trace
 		for err.Inner() != nil {
@@ -47,12 +53,12 @@ func NewFormatter(err error, mod *Module) (*Formatter, bool) {
 }
 
 func (f *Formatter) Format() string {
-	str := fmt.Sprintf("\n%s:%d:%d %s error: %v\n", f.mod.Path, f.err.End().Line, f.err.End().Column, f.err.ErrorType(), f.err)
-	endline := f.err.End().Line - 1
-	if endline < 0 {
-		endline = 0
+	str := fmt.Sprintf("\n%s:%d:%d %s error: %v\n", f.mod.Path(), f.err.End().Line, f.err.End().Column, f.err.ErrorType(), f.err)
+	endLine := f.err.End().Line - 1
+	if endLine < 0 {
+		endLine = 0
 	}
-	str += fmt.Sprintf("%s\n", f.lines[endline])
+	str += fmt.Sprintf("%s\n", f.lines[endLine])
 	str += fmt.Sprintf("%s\n", f.arrows())
 	return str
 }

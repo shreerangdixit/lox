@@ -8,17 +8,17 @@ import (
 	"github.com/shreerangdixit/redes/eval"
 )
 
-func RunFile(file string) error {
-	abspath, err := filepath.Abs(file)
+func File(file string) error {
+	absPath, err := filepath.Abs(file)
 	if err != nil {
 		panic(err)
 	}
 
-	basedir := strings.TrimSuffix(abspath, filepath.Base(abspath))
+	basedir := strings.TrimSuffix(absPath, filepath.Base(absPath))
 	if err := os.Chdir(basedir); err != nil {
 		panic(err)
 	}
 
 	e := eval.NewEvaluator()
-	return e.Importer.Import(eval.NewModule(abspath))
+	return e.Importer.Import(eval.NewFileModule(absPath))
 }
