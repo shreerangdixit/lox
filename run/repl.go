@@ -56,6 +56,10 @@ func (r *repl) Start() {
 
 		cmd := scanner.Text()
 
+		if len(cmd) == 0 {
+			continue
+		}
+
 		root, err := ast.New(lex.New(cmd)).RootNode()
 		if err != nil {
 			r.printErr(cmd, err)
