@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/shreerangdixit/redes/eval"
+	"github.com/shreerangdixit/yeti/eval"
 )
 
 func File(file string) error {

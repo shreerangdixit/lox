@@ -3,7 +3,7 @@ package ast
 import (
 	"fmt"
 
-	"github.com/shreerangdixit/redes/lex"
+	"github.com/shreerangdixit/yeti/lex"
 )
 
 type ProductionRuleHandler func() (Node, error)

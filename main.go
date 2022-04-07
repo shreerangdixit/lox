@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/shreerangdixit/redes/build"
-	"github.com/shreerangdixit/redes/run"
+	"github.com/shreerangdixit/yeti/build"
+	"github.com/shreerangdixit/yeti/run"
 )
 
 var flagVer bool

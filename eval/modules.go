@@ -26,8 +26,8 @@ func NewFileModule(path string) *FileModule {
 
 	pathWithoutExt := strings.TrimSuffix(path, filepath.Ext(path))
 	name := filepath.Base(pathWithoutExt)
-	if !strings.HasSuffix(path, ".rds") {
-		path += ".rds"
+	if !strings.HasSuffix(path, ".yt") {
+		path += ".yt"
 	}
 	return &FileModule{
 		path: path,

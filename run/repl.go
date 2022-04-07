@@ -6,19 +6,19 @@ import (
 	"io"
 	"os"
 
-	"github.com/shreerangdixit/redes/ast"
-	"github.com/shreerangdixit/redes/build"
-	"github.com/shreerangdixit/redes/eval"
-	"github.com/shreerangdixit/redes/lex"
+	"github.com/shreerangdixit/yeti/ast"
+	"github.com/shreerangdixit/yeti/build"
+	"github.com/shreerangdixit/yeti/eval"
+	"github.com/shreerangdixit/yeti/lex"
 )
 
 const Logo = `
-_____  ______ _____  ______  _____
-|  __ \|  ____|  __ \|  ____|/ ____|
-| |__) | |__  | |  | | |__  | (___
-|  _  /|  __| | |  | |  __|  \___ \
-| | \ \| |____| |__| | |____ ____) |
-|_|  \_\______|_____/|______|_____/
+ __     ________ _______ _____
+ \ \   / /  ____|__   __|_   _|
+  \ \_/ /| |__     | |    | |
+   \   / |  __|    | |    | |
+    | |  | |____   | |   _| |_
+    |_|  |______|  |_|  |_____|
 `
 
 func REPL() {
@@ -47,7 +47,7 @@ func (r *repl) Start() {
 	scanner := bufio.NewScanner(r.in)
 	e := eval.NewEvaluator()
 	for {
-		fmt.Fprintf(r.out, "redes >>> ")
+		fmt.Fprintf(r.out, "yeti >>> ")
 
 		scanned := scanner.Scan()
 		if !scanned {

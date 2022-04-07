@@ -3,8 +3,8 @@ package eval
 import (
 	"fmt"
 
-	"github.com/shreerangdixit/redes/ast"
-	"github.com/shreerangdixit/redes/lex"
+	"github.com/shreerangdixit/yeti/ast"
+	"github.com/shreerangdixit/yeti/lex"
 )
 
 type Option func(e *EvaluateError)

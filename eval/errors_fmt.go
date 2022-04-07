@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/shreerangdixit/redes/lex"
+	"github.com/shreerangdixit/yeti/lex"
 )
 
 type PositionError interface {

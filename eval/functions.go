@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/shreerangdixit/redes/ast"
+	"github.com/shreerangdixit/yeti/ast"
 )
 
 var natives = []*NativeFunction{
@@ -244,7 +244,7 @@ func printlnHandler(e *Evaluator, args []Object) (Object, error) {
 func zenHandler(e *Evaluator, args []Object) (Object, error) {
 	fmt.Println(`
 				----------------
-				The Zen of Redes
+				The Zen of Yeti
 				----------------
 			 Donut is better than Bagel.
 			   Cat is better than Dog.

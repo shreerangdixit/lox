@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/shreerangdixit/redes/ast"
-	"github.com/shreerangdixit/redes/lex"
+	"github.com/shreerangdixit/yeti/ast"
+	"github.com/shreerangdixit/yeti/lex"
 )
 
 type Importer struct {

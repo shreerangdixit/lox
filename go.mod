@@ -1,4 +1,4 @@
-module github.com/shreerangdixit/redes
+module github.com/shreerangdixit/yeti
 
 go 1.16
 
